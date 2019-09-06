@@ -14,7 +14,7 @@ probe() {
 
 elevate() {
     if [ "$(id -u)" != 0 ]; then
-        if [ "$opm_sudo" -ne 0 ]; then
+        if [ "$(probe sudo)" -ne 0 ]; then
             if silence sudo -n -v; then
                 sudo "$@"
             else
