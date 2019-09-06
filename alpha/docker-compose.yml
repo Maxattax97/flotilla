@@ -1,0 +1,92 @@
+---
+version: "3.7"
+  # TODO: qbittorrent with VPN inside of container and search functionality.
+services:
+  heimdall:
+    image: linuxserver/heimdall
+    container_name: heimdall
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+    volumes:
+      - /opt/flotilla/config/heimdall:/config
+    ports:
+      - 1080:80
+      - 1443:443
+    restart: unless-stopped
+  #letsencrypt:
+    #image: linuxserver/letsencrypt
+    #container_name: letsencrypt
+    #cap_add:
+      #- NET_ADMIN
+    #environment:
+      #- PUID=1000
+      #- PGID=1000
+      #- TZ=America/Indianapolis
+      #- URL=maxocull.com
+      #- SUBDOMAINS=www,cdn,cloud,alan
+      #- VALIDATION=http # DNS? so can use wildcards
+      ##- DNSPLUGIN=cloudflare #optional
+      ##- DUCKDNSTOKEN=<token> #optional
+      #- EMAIL=max.ocull@protonmail.com #optional
+      #- DHLEVEL=4096 #optional
+      #- ONLY_SUBDOMAINS=false #optional
+      ##- EXTRA_DOMAINS=<extradomains> #optional
+      #- STAGING=false
+    #volumes:
+      #- /opt/flotilla/config/letsencrypt:/config
+    #ports:
+      #- 443:443
+    #ports:
+      #- 80:80
+    #restart: unless-stopped
+  #nextcloud:
+    #image: linuxserver/nextcloud
+    #container_name: nextcloud
+    #environment:
+      #- PUID=1000
+      #- PGID=1000
+      #- TZ=America/Indianapolis
+    #volumes:
+      #- /opt/flotilla/config/nextcloud:/config
+      #- /opt/flotilla/data/nextcloud:/data
+    #ports:
+      #- 3443:443
+    #restart: unless-stopped
+  #openvpn-as:
+    #image: linuxserver/openvpn-as
+    #container_name: openvpn-as
+    #cap_add:
+      #- NET_ADMIN
+    #environment:
+      #- PUID=1000
+      #- PGID=1000
+      #- TZ=America/Indianapolis
+      #- INTERFACE=eth0 #optional
+    #volumes:
+      #- /opt/flotilla/config/openvpn-as:/config
+    #ports:
+      #- 4943:943
+      #- 49443:9443
+      #- 1194:1194/udp
+    #restart: unless-stopped
+  #jellyfin:
+    #image: linuxserver/jellyfin
+    #container_name: jellyfin
+    #environment:
+      #- PUID=1000
+      #- PGID=1000
+      #- TZ=America/Indianapolis
+      #- UMASK_SET=<022> #optional
+    #volumes:
+      #- /opt/flotilla/config/jellyfin:/config
+      #- /opt/flotilla/data/jellyfin/tvshows:/data/tvshows
+      #- /opt/flotilla/data/jellyfin/movies:/data/movies
+      #- /opt/flotilla/data/jellyfin/transcode:/transcode #optional
+    #ports:
+      #- 8096:8096
+      ##- 8920:8920 #optional, https
+    #devices:
+      ##- /dev/dri:/dev/dri #optional, for Intel video HW acceleration
+    #restart: unless-stopped
