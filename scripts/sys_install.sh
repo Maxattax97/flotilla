@@ -16,12 +16,13 @@ elevated_link_source "${GITROOT}/helm" "/usr/local/bin/helm"
 if [[ "$(probe dnf)" -eq 1 ]]; then
     elevate dnf upgrade -y
     elevate dnf install -y \
-        docker docker-compose tmux neovim nodejs
+        docker docker-compose tmux neovim nodejs rsync
 elif [[ "$(probe apt)" -eq 1 ]]; then
     elevate apt update
     elevate apt upgrade -y
+    # TODO: docker-compose nodejs
     elevate apt install -y \
-        docker tmux neovim
+        docker tmux neovim rsync
 fi
 
 elevate mkdir -p /opt/flotilla/data
@@ -47,4 +48,4 @@ elevated_link_source "${GITROOT}/alpha/docker-compose.yml" "/opt/flotilla/docker
 
 # Allow permission to write to volumes in SE Linux.
 elevate chcon -RLt svirt_sandbox_file_t /opt/flotilla
-elevate chown -RLf nobody:nobody /opt/flotilla # "${USER}:${USER}" /opt/flotilla
+elevate chown -RLf "$USER:$USER" /opt/flotilla
