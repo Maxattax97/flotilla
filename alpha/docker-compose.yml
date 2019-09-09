@@ -6,8 +6,8 @@ services:
     image: linuxserver/heimdall
     container_name: heimdall
     environment:
-      - PUID=1000
-      - PGID=1000
+      #- PUID=1000
+      #- PGID=1000
       - TZ=America/Indianapolis
     volumes:
       - /opt/flotilla/config/heimdall:/config

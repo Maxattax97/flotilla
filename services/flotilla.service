@@ -1,5 +1,5 @@
 [Unit]
-Description=Flotilla of docker containers controlled by a docker-compose
+Description=Flotilla
 Requires=docker.service
 After=docker.service
 

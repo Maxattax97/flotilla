@@ -1,0 +1,36 @@
+#!/bin/bash
+
+SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+GITROOT="${SCRIPTPATH}"
+
+if [ -s "${GITROOT}/scripts/sys_lib.sh" ]; then
+    SCRIPTS="${GITROOT}/scripts"
+else
+    SCRIPTS="/usr/local/lib/helm/scripts"
+fi
+
+source "${SCRIPTS}/sys_lib.sh"
+
+case "$1" in
+    "install" | "in" | "i")
+        "${SCRIPTS}/sys_install.sh"
+        ;;
+    "update" | "up" | "u")
+        "${SCRIPTS}/sys_update.sh"
+        ;;
+    "start")
+        elevate systemctl start flotilla.service
+        ;;
+    "status" | "stat")
+        elevate systemctl status flotilla.service
+        ;;
+    "follow" | "f")
+        elevate journalctl -f -u flotilla.service
+        ;;
+    "stop")
+        elevate systemctl stop flotilla.service
+        ;;
+    *)
+        echo "Invalid command"
+        ;;
+esac
