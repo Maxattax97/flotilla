@@ -30,7 +30,30 @@ case "$1" in
     "stop")
         elevate systemctl stop flotilla.service
         ;;
+    "ovpn")
+        # NOTE: OpenVPN must be running?
+        case "$2" in
+            "gen")
+                elevate docker run -v /opt/flotilla/config/openvpn:/etc/openvpn --log-driver=none \
+                    --rm -it kylemanna/openvpn easyrsa build-client-full \
+                    "$3" nopass
+                elevate docker run -v /opt/flotilla/config/openvpn:/etc/openvpn --log-driver=none --rm kylemanna/openvpn ovpn_getclient "$3" > "$3.ovpn"
+                ;;
+            "get")
+                elevate docker run -v /opt/flotilla/config/openvpn:/etc/openvpn --log-driver=none --rm kylemanna/openvpn ovpn_getclient "$3" > "$3.ovpn"
+                ;;
+            "revoke")
+                elevate docker run -v /opt/flotilla/config/openvpn:/etc/openvpn --rm kylemanna/openvpn ovpn_revokeclient "$3"
+                ;;
+            "remove")
+                elevate docker run -v /opt/flotilla/config/openvpn:/etc/openvpn --rm kylemanna/openvpn ovpn_revokeclient "$3" remove
+                ;;
+            *)
+                echo "Usage: helm gen <gen | get>"
+                ;;
+        esac
+        ;;
     *)
-        echo "Invalid command"
+        echo "Usage: helm <install | update | start | status | follow | stop | ovpn>"
         ;;
 esac
