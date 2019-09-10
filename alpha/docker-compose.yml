@@ -88,7 +88,8 @@ services:
   openvpn:
     image: kylemanna/openvpn
     container_name: openvpn
-    user: root
+    privileged: true # necessary for sysctl net settings
+    #user: root
     cap_add:
       - NET_ADMIN
     volumes:

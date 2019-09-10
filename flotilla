@@ -36,26 +36,18 @@ case "$1" in
     "ovpn")
         # NOTE: OpenVPN must be running?
         case "$2" in
-            "gen")
+            "generate")
                 docker-compose --file "${COMPOSE_FILE}" run --rm openvpn easyrsa build-client-full $3 nopass
                 docker-compose --file "${COMPOSE_FILE}" run --rm openvpn ovpn_getclient "$3" > "$3.ovpn"
-
-                #elevate docker run -v /opt/flotilla/config/openvpn:/etc/openvpn --log-driver=none \
-                    #--rm -it kylemanna/openvpn easyrsa build-client-full \
-                    #"$3" nopass
-                #elevate docker run -v /opt/flotilla/config/openvpn:/etc/openvpn --log-driver=none --rm kylemanna/openvpn ovpn_getclient "$3" > "$3.ovpn"
                 ;;
             "get")
                 docker-compose --file "${COMPOSE_FILE}" run --rm openvpn ovpn_getclient "$3" > "$3.ovpn"
-                #elevate docker run -v /opt/flotilla/config/openvpn:/etc/openvpn --log-driver=none --rm kylemanna/openvpn ovpn_getclient "$3" > "$3.ovpn"
                 ;;
             "revoke")
                 docker-compose --file "${COMPOSE_FILE}" run --rm openvpn ovpn_revokeclient "$3"
-                #elevate docker run -v /opt/flotilla/config/openvpn:/etc/openvpn --rm kylemanna/openvpn ovpn_revokeclient "$3"
                 ;;
             "remove")
                 docker-compose --file "${COMPOSE_FILE}" run --rm openvpn ovpn_revokeclient "$3" remove
-                #elevate docker run -v /opt/flotilla/config/openvpn:/etc/openvpn --rm kylemanna/openvpn ovpn_revokeclient "$3" remove
                 ;;
             "list")
                 docker-compose --file "${COMPOSE_FILE}" run --rm openvpn ovpn_listclients
@@ -64,7 +56,7 @@ case "$1" in
                 #docker-compose --file "${COMPOSE_FILE}" run --rm openvpn tar -cvf - -C /etc openvpn | xz > openvpn-backup.tar.xz
                 #;;
             *)
-                echo "Usage: flotilla gen <gen | get>"
+                echo "Usage: flotilla <generate | get | revoke | remove | list>"
                 ;;
         esac
         ;;

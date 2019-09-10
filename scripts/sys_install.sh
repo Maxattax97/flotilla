@@ -3,6 +3,7 @@
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 GITROOT="$(dirname "${SCRIPTPATH}")"
 COMPOSE_FILE=/opt/flotilla/docker-compose.yml
+BASE=/opt/flotilla
 
 if [ -s "${SCRIPTPATH}/sys_lib.sh" ]; then
     source "${SCRIPTPATH}/sys_lib.sh"
@@ -37,17 +38,14 @@ if [[ "$(probe gotop)" -eq 0 ]]; then
 fi
 
 # Create Flotilla directories.
-elevate mkdir -p /opt/flotilla/data
-elevate mkdir -p /opt/flotilla/config
+elevate mkdir -p "${BASE}/data"
+elevate mkdir -p "${BASE}/config"
 
 # Setup configuration directories.
 for module in $GITROOT/config/*/; do
-    dest="/opt/flotilla/config/$(basename "$module")"
+    dest="${BASE}/config/$(basename "$module")"
     elevated_link_source $module $dest
 done
-
-# FIX: OpenVPN config directory. Symlink files into this dir?
-#rm -rf /opt/flotilla/config/openvpn
 
 # Install services.
 for service in $GITROOT/services/*; do
@@ -72,12 +70,12 @@ elevated_link_source "${GITROOT}/alpha/docker-compose.yml" "${COMPOSE_FILE}"
 
 # Allow permission to write to volumes in SE Linux.
 if [[ "$(probe chcon)" -eq 1 ]]; then
-    elevate chcon -RLt svirt_sandbox_file_t /opt/flotilla
+    elevate chcon -RLt svirt_sandbox_file_t "${BASE}"
 fi
-elevate chown -RLf "$USER:$USER" /opt/flotilla
+elevate chown -RLf "$USER:$USER" "${BASE}"
 
 # Setup OpenVPN configuration.
-if [[ ! -d /opt/flotilla/config/openvpn ]] || [[ ! -d /opt/flotilla/config/openvpn/backup ]]; then
+if [[ ! -e "${BASE}/config/openvpn ]] || [[ ! -s "${BASE}/config/openvpn/crl.pem ]]; then
     if [[ "$(probe chcon)" -eq 1 ]]; then
         # SELinux needs some allowances.
         wget https://raw.githubusercontent.com/kylemanna/docker-openvpn/master/docs/docker-openvpn.te -O /tmp/docker-openvpn.te
@@ -89,14 +87,18 @@ if [[ ! -d /opt/flotilla/config/openvpn ]] || [[ ! -d /opt/flotilla/config/openv
 
     # TODO: Might break if included:
     # -T 'TLS-DHE-RSA-WITH-AES-256-GCM-SHA384:TLS-DHE-RSA-WITH-AES-128-GCM-SHA256:TLS-DHE-RSA-WITH-AES-256-CBC-SHA256:TLS-DHE-RSA-WITH-AES-128-CBC-SHA256:TLS-DHE-RSA-WITH-CAMELLIA-256-CBC-SHA:TLS-DHE-RSA-WITH-AES-256-CBC-SHA'
-    docker-compose --file "${COMPOSE_FILE}" run --rm openvpn ovpn_genconfig -u udp://vpn.maxocull.com -C 'AES-256-CBC' -a 'SHA384'
+    # -C 'AES-256-CBC'
+    # -a 'SHA384'
+    docker-compose --file "${COMPOSE_FILE}" run --rm openvpn ovpn_genconfig -u udp://vpn.maxocull.com
     docker-compose --file "${COMPOSE_FILE}" run --rm openvpn ovpn_initpki
-    #elevate docker run -v /opt/flotilla/config/openpvn:/etc/openvpn --log-driver=none --rm kylemanna/openvpn ovpn_genconfig -u udp://vpn.maxocull.com
-    #elevate docker run -v /opt/flotilla/config/openpvn:/etc/openvpn --log-driver=none --rm -it kylemanna/openvpn ovpn_initpki
+
+    # Replace the original openvpn config file, if it was destroyed.
+    mv "${BASE}/config/openvpn/openvpn.conf.*" "${BASE}/config/openvpn/openvpn.conf"
+
 fi
 
 # Reset the permissions for any previously ran elevated commands.
 if [[ "$(probe chcon)" -eq 1 ]]; then
-    elevate chcon -RLt svirt_sandbox_file_t /opt/flotilla
+    elevate chcon -RLt svirt_sandbox_file_t "${BASE}"
 fi
-elevate chown -RLf "$USER:$USER" /opt/flotilla
+elevate chown -RLf "$USER:$USER" "${BASE}"
