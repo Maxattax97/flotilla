@@ -1,0 +1,74 @@
+#!/bin/bash
+
+SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+GITROOT="${SCRIPTPATH}"
+COMPOSE_FILE=/opt/flotilla/docker-compose.yml
+
+if [ -s "${GITROOT}/scripts/sys_lib.sh" ]; then
+    SCRIPTS="${GITROOT}/scripts"
+else
+    SCRIPTS="/usr/local/lib/flotilla/scripts"
+fi
+
+source "${SCRIPTS}/sys_lib.sh"
+
+
+case "$1" in
+    "install" | "in" | "i")
+        "${SCRIPTS}/sys_install.sh"
+        ;;
+    "update" | "up" | "u")
+        "${SCRIPTS}/sys_update.sh"
+        ;;
+    "start")
+        elevate systemctl start flotilla.service
+        ;;
+    "status" | "stat")
+        elevate systemctl status flotilla.service
+        ;;
+    "follow" | "f")
+        #elevate journalctl -f -u flotilla.service
+        docker-compose --file "${COMPOSE_FILE}" logs --follow
+        ;;
+    "stop")
+        elevate systemctl stop flotilla.service
+        ;;
+    "ovpn")
+        # NOTE: OpenVPN must be running?
+        case "$2" in
+            "gen")
+                docker-compose --file "${COMPOSE_FILE}" run --rm openvpn easyrsa build-client-full $3 nopass
+                docker-compose --file "${COMPOSE_FILE}" run --rm openvpn ovpn_getclient "$3" > "$3.ovpn"
+
+                #elevate docker run -v /opt/flotilla/config/openvpn:/etc/openvpn --log-driver=none \
+                    #--rm -it kylemanna/openvpn easyrsa build-client-full \
+                    #"$3" nopass
+                #elevate docker run -v /opt/flotilla/config/openvpn:/etc/openvpn --log-driver=none --rm kylemanna/openvpn ovpn_getclient "$3" > "$3.ovpn"
+                ;;
+            "get")
+                docker-compose --file "${COMPOSE_FILE}" run --rm openvpn ovpn_getclient "$3" > "$3.ovpn"
+                #elevate docker run -v /opt/flotilla/config/openvpn:/etc/openvpn --log-driver=none --rm kylemanna/openvpn ovpn_getclient "$3" > "$3.ovpn"
+                ;;
+            "revoke")
+                docker-compose --file "${COMPOSE_FILE}" run --rm openvpn ovpn_revokeclient "$3"
+                #elevate docker run -v /opt/flotilla/config/openvpn:/etc/openvpn --rm kylemanna/openvpn ovpn_revokeclient "$3"
+                ;;
+            "remove")
+                docker-compose --file "${COMPOSE_FILE}" run --rm openvpn ovpn_revokeclient "$3" remove
+                #elevate docker run -v /opt/flotilla/config/openvpn:/etc/openvpn --rm kylemanna/openvpn ovpn_revokeclient "$3" remove
+                ;;
+            "list")
+                docker-compose --file "${COMPOSE_FILE}" run --rm openvpn ovpn_listclients
+                ;;
+            #"backup")
+                #docker-compose --file "${COMPOSE_FILE}" run --rm openvpn tar -cvf - -C /etc openvpn | xz > openvpn-backup.tar.xz
+                #;;
+            *)
+                echo "Usage: flotilla gen <gen | get>"
+                ;;
+        esac
+        ;;
+    *)
+        echo "Usage: flotilla <install | update | start | status | follow | stop | ovpn>"
+        ;;
+esac

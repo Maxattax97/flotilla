@@ -1,27 +1,51 @@
 ---
 version: "3.7"
   # TODO: qbittorrent with VPN inside of container and search functionality.
+  # Nextcloud
+  # Gitlab
+  # Jenkins
+  # Blog
+  # Jackett
+  ## Sonarr
+  ## ...
+  # Jellyfin
+  # Mayan
+  # Email server
+  # LibreOffice Online / Collabora
+  # PiHole or other DNS
+  # Joplin
+  # Searx
+  # PrivateBin
+  # Syncthing?
+  # EteSync?
+  # Bitwarden?
+  # Mining operation?
+  # Squid Proxy? Or other proxy
+  # IRC
+  # TOR Node, hidden service
+  # i2p
+  # KVM?
 services:
-  heimdall:
-    image: linuxserver/heimdall
-    container_name: heimdall
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Indianapolis
-    volumes:
-      - /opt/flotilla/config/heimdall:/config
-    ports:
-      - 1080:80
-      - 1443:443
-    restart: unless-stopped
-  postgres:
-    image: postgres
-    container_name: postgres
-    environment:
-      - POSTGRES_PASSWORD=pronetochange
-    volumes:
-      - /opt/flotilla/data/postgres:/var/lib/postgres/data
+  #heimdall:
+    #image: linuxserver/heimdall
+    #container_name: heimdall
+    #environment:
+      #- PUID=1000
+      #- PGID=1000
+      #- TZ=America/Indianapolis
+    #volumes:
+      #- /opt/flotilla/config/heimdall:/config
+    #ports:
+      #- 1080:80
+      #- 1443:443
+    #restart: unless-stopped
+  #postgres:
+    #image: postgres
+    #container_name: postgres
+    #environment:
+      #- POSTGRES_PASSWORD=pronetochange
+    #volumes:
+      #- /opt/flotilla/data/postgres:/var/lib/postgres/data
   #letsencrypt:
     #image: linuxserver/letsencrypt
     #container_name: letsencrypt
@@ -64,15 +88,13 @@ services:
   openvpn:
     image: kylemanna/openvpn
     container_name: openvpn
+    user: root
     cap_add:
       - NET_ADMIN
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Indianapolis
-      - INTERFACE=eth0 #optional
     volumes:
       - /opt/flotilla/config/openvpn:/etc/openvpn
+    environment:
+      - EASYRSA_KEY_SIZE=4096
     ports:
       - 1194:1194/udp
     restart: unless-stopped

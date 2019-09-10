@@ -1,1 +1,7 @@
-config/**
+!config/
+
+config/*
+!config/openvpn/
+
+config/openvpn/*
+!config/openvpn/openvpn.conf
