@@ -68,33 +68,37 @@ fi
 # Install the docker compose file.
 elevated_link_source "${GITROOT}/alpha/docker-compose.yml" "${COMPOSE_FILE}"
 
-# Allow permission to write to volumes in SE Linux.
+# Allow permissions in SE Linux.
 if [[ "$(probe chcon)" -eq 1 ]]; then
+    # For volumes.
     elevate chcon -RLt svirt_sandbox_file_t "${BASE}"
+
+    # For network tunneling.
+    wget https://raw.githubusercontent.com/kylemanna/docker-openvpn/master/docs/docker-openvpn.te -O /tmp/docker-openvpn.te
+    checkmodule -M -m -o /tmp/docker-openvpn.mod /tmp/docker-openvpn.te
+    semodule_package -o /tmp/docker-openvpn.pp -m /tmp/docker-openvpn.mod
+    elevate semodule -i /tmp/docker-openvpn.pp
+    elevate modprobe tun
+
+    # For Docker sockets.
+    wget https://raw.githubusercontent.com/dpw/selinux-dockersock/master/dockersock.te -O /tmp/dockersock.te
+    checkmodule -M -m -o /tmp/dockersock.mod /tmp/dockersock.te
+    semodule_package -o /tmp/dockersock.pp -m /tmp/dockersock.mod
+    elevate semodule -i /tmp/dockersock.pp
+
+    rm -rf /tmp/*.{te,mod,pp}
 fi
 elevate chown -RLf "$USER:$USER" "${BASE}"
 
 # Setup OpenVPN configuration.
 if [[ ! -e "${BASE}/config/openvpn ]] || [[ ! -s "${BASE}/config/openvpn/crl.pem ]]; then
-    if [[ "$(probe chcon)" -eq 1 ]]; then
-        # SELinux needs some allowances.
-        wget https://raw.githubusercontent.com/kylemanna/docker-openvpn/master/docs/docker-openvpn.te -O /tmp/docker-openvpn.te
-        checkmodule -M -m -o /tmp/docker-openvpn.mod /tmp/docker-openvpn.te
-        semodule_package -o /tmp/docker-openvpn.pp -m /tmp/docker-openvpn.mod
-        elevate semodule -i /tmp/docker-openvpn.pp
-        elevate modprobe tun
-    fi
-
-    # TODO: Might break if included:
-    # -T 'TLS-DHE-RSA-WITH-AES-256-GCM-SHA384:TLS-DHE-RSA-WITH-AES-128-GCM-SHA256:TLS-DHE-RSA-WITH-AES-256-CBC-SHA256:TLS-DHE-RSA-WITH-AES-128-CBC-SHA256:TLS-DHE-RSA-WITH-CAMELLIA-256-CBC-SHA:TLS-DHE-RSA-WITH-AES-256-CBC-SHA'
-    # -C 'AES-256-CBC'
-    # -a 'SHA384'
     docker-compose --file "${COMPOSE_FILE}" run --rm openvpn ovpn_genconfig -u udp://vpn.maxocull.com
     docker-compose --file "${COMPOSE_FILE}" run --rm openvpn ovpn_initpki
 
     # Replace the original openvpn config file, if it was destroyed.
-    mv "${BASE}/config/openvpn/openvpn.conf.*" "${BASE}/config/openvpn/openvpn.conf"
-
+    mv ${BASE}/config/openvpn/openvpn.conf.* "${BASE}/config/openvpn/openvpn.conf"
+else
+    echo "Skipping OpenVPN as it already has keys."
 fi
 
 # Reset the permissions for any previously ran elevated commands.

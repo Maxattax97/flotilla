@@ -23,15 +23,19 @@ case "$1" in
     "start")
         elevate systemctl start flotilla.service
         ;;
+    "stop")
+        elevate systemctl stop flotilla.service
+        ;;
+    "restart")
+        flotilla stop
+        flotilla start
+        ;;
     "status" | "stat")
         elevate systemctl status flotilla.service
         ;;
     "follow" | "f")
         #elevate journalctl -f -u flotilla.service
         docker-compose --file "${COMPOSE_FILE}" logs --follow
-        ;;
-    "stop")
-        elevate systemctl stop flotilla.service
         ;;
     "ovpn")
         # NOTE: OpenVPN must be running?
@@ -61,6 +65,6 @@ case "$1" in
         esac
         ;;
     *)
-        echo "Usage: flotilla <install | update | start | status | follow | stop | ovpn>"
+        echo "Usage: flotilla <install | update | start | stop | restart | status | follow | ovpn>"
         ;;
 esac

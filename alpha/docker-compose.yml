@@ -1,7 +1,9 @@
 ---
 version: "3.7"
   # TODO: qbittorrent with VPN inside of container and search functionality.
+  # Traefik
   # Nextcloud
+  # Rancher?
   # Gitlab
   # Jenkins
   # Blog
@@ -26,6 +28,23 @@ version: "3.7"
   # i2p
   # KVM?
 services:
+  traefik:
+    image: traefik
+    container_name: traefik
+    #privileged: true # Necessary for docker access.
+    command: --api --docker
+    ports:
+      - 80:80
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+  #rancher:
+    #image: rancher/rancher
+    #container_name: rancher
+    #restart: unless-stopped
+    #ports:
+      #- 1040:80
   #heimdall:
     #image: linuxserver/heimdall
     #container_name: heimdall
@@ -88,8 +107,7 @@ services:
   openvpn:
     image: kylemanna/openvpn
     container_name: openvpn
-    privileged: true # necessary for sysctl net settings
-    #user: root
+    privileged: true # Necessary for sysctl net settings.
     cap_add:
       - NET_ADMIN
     volumes:
