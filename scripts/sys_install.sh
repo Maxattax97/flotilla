@@ -91,14 +91,28 @@ fi
 elevate chown -RLf "$USER:$USER" "${BASE}"
 
 # Setup OpenVPN configuration.
-if [[ ! -e "${BASE}/config/openvpn ]] || [[ ! -s "${BASE}/config/openvpn/crl.pem ]]; then
+if [[ ! -s "${BASE}/config/openvpn/crl.pem" ]]; then
     docker-compose --file "${COMPOSE_FILE}" run --rm openvpn ovpn_genconfig -u udp://vpn.maxocull.com
     docker-compose --file "${COMPOSE_FILE}" run --rm openvpn ovpn_initpki
 
     # Replace the original openvpn config file, if it was destroyed.
-    mv ${BASE}/config/openvpn/openvpn.conf.* "${BASE}/config/openvpn/openvpn.conf"
+    mv -f ${BASE}/config/openvpn/openvpn.conf.* "${BASE}/config/openvpn/openvpn.conf"
 else
     echo "Skipping OpenVPN as it already has keys."
+fi
+
+# Setup the cleanroom VPN.
+# Prefer a VPN which: supports P2P, not thirteen eyes, ...
+preferred_nord_vpn="ee22"
+if [[ ! -e "${BASE}/config/cleanroom/openvpn/${preferred_nord_vpn}.nordvpn.com.udp.ovpn" ]]; then
+    # Reference the server types here:
+    # https://api.nordvpn.com/server
+    wget https://downloads.nordcdn.com/configs/archives/servers/ovpn.zip -O /tmp/nordvpn.zip
+    unzip /tmp/nordvpn.zip -d /tmp/nordvpn
+    mkdir -p "${BASE}/config/cleanroom/openvpn/"
+    cp "/tmp/nordvpn/ovpn_udp/${preferred_nord_vpn}.nordvpn.com.udp.ovpn" "${BASE}/config/cleanroom/openvpn/"
+
+    rm -rf /tmp/nordvp*
 fi
 
 # Reset the permissions for any previously ran elevated commands.

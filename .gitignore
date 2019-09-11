@@ -2,6 +2,15 @@
 
 config/*
 !config/openvpn/
+!config/heimdall/
 
 config/openvpn/*
 !config/openvpn/openvpn.conf
+
+config/heimdall/*
+!config/heimdall/php/
+!config/heimdall/www/
+config/heimdall/php/*
+!config/heimdall/php/php-local.ini
+config/heimdall/www/*
+!config/heimdall/www/backgrounds/

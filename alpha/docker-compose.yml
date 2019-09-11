@@ -39,25 +39,93 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
+  watchtower:
+    # TODO: Not recommended by LinuxServer.io
+    image: containrrr/watchtower
+    container_name: watchtower
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      #- WATCHTOWER_SCHEDULE='0 0 4 * * *' # Every night at 04:00.
+      # TODO: Email notifications (requires SMTP).
+      # https://containrrr.github.io/watchtower/notifications/
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      #- /opt/flotilla/config/watchtower/config.json:/config.json
+  openvpn:
+    image: kylemanna/openvpn
+    container_name: openvpn
+    privileged: true # Necessary for sysctl net settings.
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - /opt/flotilla/config/openvpn:/etc/openvpn
+    environment:
+      - EASYRSA_KEY_SIZE=4096
+    ports:
+      - 1194:1194/udp
+    restart: unless-stopped
+  jackett:
+    image: linuxserver/jackett
+    container_name: jackett
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - RUN_OPTS="--ProxyConnection=cleanroom:8118"
+    volumes:
+      - /opt/flotilla/config/jackett:/config
+      - /opt/flotilla/data/jackett:/downloads
+    ports:
+      - 9117:9117
+    restart: unless-stopped
+  cleanroom:
+    image: binhex/arch-qbittorrentvpn
+    container_name: cleanroom
+    privileged: true # Necessary for iptables killswitch.
+    cap_add:
+      - NET_ADMIN
+    env_file:
+      - /opt/flotilla/secrets.env
+    environment:
+      - WEBUI_PORT=8800
+      - PUID=1000
+      - PGID=1000
+      - UMASK=000
+      - DEBUG=false
+      - NAME_SERVERS=128.52.130.209,169.239.202.202,84.200.69.80,84.200.70.40,91.239.100.100,89.233.43.71,37.235.1.174,37.235.1.177,1.1.1.1,1.0.0.1
+      - LAN_NETWORK=192.168.0.0/16
+      - ENABLE_PRIVOXY=yes
+      - VPN_ENABLED=yes
+      - VPN_PROV=nordvpn # This is a custom VPN.
+    volumes:
+      - /opt/flotilla/config/cleanroom:/config
+      - /opt/flotilla/data/cleanroom:/data
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 6881:6881
+      - 6881:6881/udp
+      - 8800:8800
+      - 8118:8118
+    restart: unless-stopped
+  heimdall:
+    image: linuxserver/heimdall
+    container_name: heimdall
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+    volumes:
+      - /opt/flotilla/config/heimdall:/config
+    ports:
+      - 1080:80
+      - 1443:443
+    restart: unless-stopped
   #rancher:
     #image: rancher/rancher
     #container_name: rancher
     #restart: unless-stopped
     #ports:
       #- 1040:80
-  #heimdall:
-    #image: linuxserver/heimdall
-    #container_name: heimdall
-    #environment:
-      #- PUID=1000
-      #- PGID=1000
-      #- TZ=America/Indianapolis
-    #volumes:
-      #- /opt/flotilla/config/heimdall:/config
-    #ports:
-      #- 1080:80
-      #- 1443:443
-    #restart: unless-stopped
   #postgres:
     #image: postgres
     #container_name: postgres
@@ -104,19 +172,6 @@ services:
     #ports:
       #- 3443:443
     #restart: unless-stopped
-  openvpn:
-    image: kylemanna/openvpn
-    container_name: openvpn
-    privileged: true # Necessary for sysctl net settings.
-    cap_add:
-      - NET_ADMIN
-    volumes:
-      - /opt/flotilla/config/openvpn:/etc/openvpn
-    environment:
-      - EASYRSA_KEY_SIZE=4096
-    ports:
-      - 1194:1194/udp
-    restart: unless-stopped
   #jellyfin:
     #image: linuxserver/jellyfin
     #container_name: jellyfin
