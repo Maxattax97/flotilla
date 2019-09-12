@@ -32,6 +32,7 @@ case "$1" in
         ;;
     "status" | "stat")
         elevate systemctl status flotilla.service
+        elevate journalctl -f -u flotilla.service
         ;;
     "follow" | "f")
         #elevate journalctl -f -u flotilla.service

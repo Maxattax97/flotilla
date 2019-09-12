@@ -130,7 +130,7 @@ services:
     volumes:
       - /opt/flotilla/config/sonarr:/config
       - /opt/flotilla/data/all/tvshows:/tv
-      - /opt/flotilla/data/cleanroom:/downloads
+      - /opt/flotilla/data/cleanroom:/data
     ports:
       - 8989:8989
     restart: unless-stopped
@@ -145,7 +145,7 @@ services:
     volumes:
       - /opt/flotilla/config/radarr:/config
       - /opt/flotilla/data/all/movies:/movies
-      - /opt/flotilla/data/cleanroom:/downloads
+      - /opt/flotilla/data/cleanroom:/data
     ports:
       - 7878:7878
     restart: unless-stopped
@@ -160,9 +160,9 @@ services:
     volumes:
       - /opt/flotilla/config/lidarr:/config
       - /opt/flotilla/data/all/music:/music
-      - /opt/flotilla/data/cleanroom:/downloads
+      - /opt/flotilla/data/cleanroom:/data
     ports:
-      - 7878:7878
+      - 8686:8686
     restart: unless-stopped
   jellyfin:
     image: linuxserver/jellyfin

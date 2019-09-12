@@ -13,7 +13,7 @@ feature recently added in Docker.
 
 ## Sonarr, Radarr, Lidarr
 
-Enable *Advanced Settings*, then under *Settings > Indexers* add an entry with
+Enable *Advanced Settings*, then under *Settings > Indexers* add a *Torznab* entry with
 at least these settings:
 
 ```

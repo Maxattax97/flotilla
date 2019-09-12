@@ -22,4 +22,3 @@ config/jackett/*
 config/jackett/Jackett/*
 !config/jackett/Jackett/Indexers/
 config/jackett/Jackett/Indexers/*.bak
-!config/jackett/Jackett/Indexers/*.json
