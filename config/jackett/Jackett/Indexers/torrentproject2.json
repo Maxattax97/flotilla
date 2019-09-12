@@ -1,0 +1,32 @@
+[
+  {
+    "id": "sitelink",
+    "type": "inputstring",
+    "name": "Site Link",
+    "value": "https://torrentproject2.se/"
+  },
+  {
+    "id": "cookieheader",
+    "type": "hiddendata",
+    "name": "CookieHeader",
+    "value": "__cfduid=d109ae30b3dec004299091fe2eb147a871568248996"
+  },
+  {
+    "id": "lasterror",
+    "type": "hiddendata",
+    "name": "LastError",
+    "value": null
+  },
+  {
+    "id": "onlyincludeverifedcontentinresults",
+    "type": "inputbool",
+    "name": "Only include verifed content in results",
+    "value": false
+  },
+  {
+    "id": "anoteabouttp2",
+    "type": "displayinfo",
+    "name": "A note about TP2",
+    "value": "TP2 does not display categories in its search results page. To add to Sonarr or Radarr replace all categories with 7000."
+  }
+]

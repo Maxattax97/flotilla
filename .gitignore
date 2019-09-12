@@ -3,6 +3,7 @@
 config/*
 !config/openvpn/
 !config/heimdall/
+!config/jackett/
 
 config/openvpn/*
 !config/openvpn/openvpn.conf
@@ -14,3 +15,9 @@ config/heimdall/php/*
 !config/heimdall/php/php-local.ini
 config/heimdall/www/*
 !config/heimdall/www/backgrounds/
+
+config/jackett/*
+!config/jackett/Jackett/
+config/jackett/Jackett/*
+!config/jackett/Jackett/Indexers/
+!config/jackett/Jackett/Indexers/*

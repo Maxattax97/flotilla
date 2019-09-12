@@ -36,6 +36,10 @@ services:
     ports:
       - 80:80
       - 8080:8080
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
@@ -44,6 +48,9 @@ services:
     image: containrrr/watchtower
     container_name: watchtower
     environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
       - WATCHTOWER_CLEANUP=true
       #- WATCHTOWER_SCHEDULE='0 0 4 * * *' # Every night at 04:00.
       # TODO: Email notifications (requires SMTP).
@@ -61,6 +68,9 @@ services:
       - /opt/flotilla/config/openvpn:/etc/openvpn
     environment:
       - EASYRSA_KEY_SIZE=4096
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
     ports:
       - 1194:1194/udp
     restart: unless-stopped
@@ -74,7 +84,7 @@ services:
       - RUN_OPTS="--ProxyConnection=cleanroom:8118"
     volumes:
       - /opt/flotilla/config/jackett:/config
-      - /opt/flotilla/data/jackett:/downloads
+      - /opt/flotilla/data/all/torrents:/downloads
     ports:
       - 9117:9117
     restart: unless-stopped
@@ -90,6 +100,7 @@ services:
       - WEBUI_PORT=8800
       - PUID=1000
       - PGID=1000
+      - TZ=America/Indianapolis
       - UMASK=000
       - DEBUG=false
       - NAME_SERVERS=128.52.130.209,169.239.202.202,84.200.69.80,84.200.70.40,91.239.100.100,89.233.43.71,37.235.1.174,37.235.1.177,1.1.1.1,1.0.0.1
@@ -99,13 +110,14 @@ services:
       - VPN_PROV=nordvpn # This is a custom VPN.
     volumes:
       - /opt/flotilla/config/cleanroom:/config
-      - /opt/flotilla/data/cleanroom:/config/qBittorrent/downloads # was /data
+      - /opt/flotilla/data/all/torrents:/torrents
+      - /opt/flotilla/data/cleanroom:/data
       - /etc/localtime:/etc/localtime:ro
     ports:
       - 6881:6881
       - 6881:6881/udp
-      - 8800:8800
-      - 8118:8118
+      - 8800:8800 # Change the WEBUI_PORT environment variable as well!
+      - 8118:8118 # Change the proxy port for Jackett as well!
     restart: unless-stopped
   sonarr:
     image: linuxserver/sonarr
@@ -117,10 +129,62 @@ services:
       - UMASK=022
     volumes:
       - /opt/flotilla/config/sonarr:/config
-      - /opt/flotilla/data/sonarr:/tv
+      - /opt/flotilla/data/all/tvshows:/tv
       - /opt/flotilla/data/cleanroom:/downloads
     ports:
       - 8989:8989
+    restart: unless-stopped
+  radarr:
+    image: linuxserver/radarr
+    container_name: radarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - UMASK=022
+    volumes:
+      - /opt/flotilla/config/radarr:/config
+      - /opt/flotilla/data/all/movies:/movies
+      - /opt/flotilla/data/cleanroom:/downloads
+    ports:
+      - 7878:7878
+    restart: unless-stopped
+  lidarr:
+    image: linuxserver/lidarr
+    container_name: lidarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - UMASK=022
+    volumes:
+      - /opt/flotilla/config/lidarr:/config
+      - /opt/flotilla/data/all/music:/music
+      - /opt/flotilla/data/cleanroom:/downloads
+    ports:
+      - 7878:7878
+    restart: unless-stopped
+  jellyfin:
+    image: linuxserver/jellyfin
+    container_name: jellyfin
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - UMASK_SET=<022> #optional
+    volumes:
+      - /opt/flotilla/config/jellyfin:/config
+      - /opt/flotilla/data/all/tvshows:/data/tvshows
+      - /opt/flotilla/data/all/movies:/data/movies
+      - /opt/flotilla/data/all/music:/data/music
+      - /opt/flotilla/data/all/books:/data/books
+      - /opt/flotilla/data/all/photos:/data/photos
+      - /opt/flotilla/data/jellyfin/transcode:/transcode #optional
+    ports:
+      - 8096:8096
+      #- 8920:8920 #optional, https
+    devices:
+      - /dev/dri:/dev/dri #optional, for video HW acceleration
     restart: unless-stopped
   heimdall:
     image: linuxserver/heimdall
@@ -138,6 +202,10 @@ services:
   portainer:
     image: portainer/portainer
     container_name: portainer
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /opt/flotilla/data/portainer:/data
@@ -196,23 +264,4 @@ services:
       #- /opt/flotilla/data/nextcloud:/data
     #ports:
       #- 3443:443
-    #restart: unless-stopped
-  #jellyfin:
-    #image: linuxserver/jellyfin
-    #container_name: jellyfin
-    #environment:
-      #- PUID=1000
-      #- PGID=1000
-      #- TZ=America/Indianapolis
-      #- UMASK_SET=<022> #optional
-    #volumes:
-      #- /opt/flotilla/config/jellyfin:/config
-      #- /opt/flotilla/data/jellyfin/tvshows:/data/tvshows
-      #- /opt/flotilla/data/jellyfin/movies:/data/movies
-      #- /opt/flotilla/data/jellyfin/transcode:/transcode #optional
-    #ports:
-      #- 8096:8096
-      ##- 8920:8920 #optional, https
-    #devices:
-      ##- /dev/dri:/dev/dri #optional, for Intel video HW acceleration
     #restart: unless-stopped

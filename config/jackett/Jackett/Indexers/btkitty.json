@@ -1,0 +1,26 @@
+[
+  {
+    "id": "sitelink",
+    "type": "inputstring",
+    "name": "Site Link",
+    "value": "https://btkittys.co/"
+  },
+  {
+    "id": "cookieheader",
+    "type": "hiddendata",
+    "name": "CookieHeader",
+    "value": "__cfduid=d4f4b1fdf70c7b172d5a8a7d5a29dd3fe1568171637"
+  },
+  {
+    "id": "lasterror",
+    "type": "hiddendata",
+    "name": "LastError",
+    "value": null
+  },
+  {
+    "id": "info",
+    "type": "displayinfo",
+    "name": "info",
+    "value": "BTKitty does not use categories. In your software Indexer settings, set the category to 100001."
+  }
+]
