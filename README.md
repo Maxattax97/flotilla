@@ -13,7 +13,7 @@ feature recently added in Docker.
 
 ## Sonarr, Radarr, Lidarr
 
-Enable *Advanced Settings*, then under *Settings > Indexers* add a *Torznab* entry with
+Enable **Advanced Settings**, then under **Settings > Indexers** add a **Torznab** entry with
 at least these settings:
 
 ```
@@ -27,7 +27,7 @@ API Key: Get this from the Jackett web terminal
 
 This should track all available indexes in Jackett.
 
-Then under *Settings > Download Client*, add an entry with at least these
+Then under **Settings > Download Client**, add an entry with at least these
 settings:
 
 ```
@@ -49,3 +49,21 @@ Add Libraries for the following internal, shared volumes:
  - `/data/music` as Music from Lidarr
  - `/data/books` as Books from Calibre?
  - `/data/photos` as Photos from various uploads
+
+## Gitlab
+
+Create a database for Gitlab inside of Postgres:
+
+```sql
+CREATE ROLE gitlab with LOGIN CREATEDB PASSWORD 'password';
+CREATE DATABASE gitlabhq_production;
+GRANT ALL PRIVILEGES ON DATABASE gitlabhq_production to gitlab;
+```
+
+`password` should match the one provided for `POSTGRES_PASSWORD` in
+`secrets.env`.
+
+Afterward, create the `pg_trgm` extension on the database with the superuser
+(who should be `postgres`).
+
+**TODO**: Automate this procedure.

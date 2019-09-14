@@ -15,6 +15,7 @@ version: "3.7"
   # Email server
   # LibreOffice Online / Collabora
   # PiHole or other DNS
+  # Snort or other IDS
   # Joplin
   # Searx
   # PrivateBin
@@ -27,6 +28,7 @@ version: "3.7"
   # TOR Node, hidden service
   # i2p
   # KVM?
+  # LDAP?
 services:
   traefik:
     image: traefik
@@ -43,21 +45,21 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
-  watchtower:
-    # TODO: Not recommended by LinuxServer.io
-    image: containrrr/watchtower
-    container_name: watchtower
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Indianapolis
-      - WATCHTOWER_CLEANUP=true
-      #- WATCHTOWER_SCHEDULE='0 0 4 * * *' # Every night at 04:00.
-      # TODO: Email notifications (requires SMTP).
-      # https://containrrr.github.io/watchtower/notifications/
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      #- /opt/flotilla/config/watchtower/config.json:/config.json
+  #watchtower:
+    ## TODO: Not recommended by LinuxServer.io
+    #image: containrrr/watchtower
+    #container_name: watchtower
+    #environment:
+      #- PUID=1000
+      #- PGID=1000
+      #- TZ=America/Indianapolis
+      #- WATCHTOWER_CLEANUP=true
+      ##- WATCHTOWER_SCHEDULE='0 0 4 * * *' # Every night at 04:00.
+      ## TODO: Email notifications (requires SMTP).
+      ## https://containrrr.github.io/watchtower/notifications/
+    #volumes:
+      #- /var/run/docker.sock:/var/run/docker.sock
+      ##- /opt/flotilla/config/watchtower/config.json:/config.json
   openvpn:
     image: kylemanna/openvpn
     container_name: openvpn
@@ -186,6 +188,97 @@ services:
     devices:
       - /dev/dri:/dev/dri #optional, for video HW acceleration
     restart: unless-stopped
+  postgres:
+    image: postgres
+    container_name: postgres
+    env_file:
+      - /opt/flotilla/secrets.env
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      #- POSTGRES_USER=harbor # Use the default "postgres" user.
+    ports:
+      - 5432:5432
+    volumes:
+      - /opt/flotilla/data/postgres:/var/lib/postgresql/data
+    restart: unless-stopped
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    env_file:
+      - /opt/flotilla/secrets.env
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - PGADMIN_DEFAULT_EMAIL=postgres@maxocull.com
+    ports:
+      - 5480:80
+    volumes:
+      #- /opt/flotilla/config/pgadmin:/pgadmin4
+      - /opt/flotilla/data/pgadmin:/var/lib/pgadmin
+    restart: unless-stopped
+  redis:
+    # TODO: Resolve some kernel settings to clear up the logs.
+    image: redis
+    container_name: redis
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+    ports:
+      - 6379:6379
+    volumes:
+      - /opt/flotilla/data/redis:/data # Remove this line if not persistent.
+    restart: unless-stopped
+  gitlab:
+    image: sameersbn/gitlab
+    container_name: gitlab
+    env_file:
+      - /opt/flotilla/secrets.env
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - DB_HOST=postgres
+      - DB_NAME=gitlabhq_production
+      - DB_USER=gitlab
+      - DB_EXTENSION=pg_trgm
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - SMTP_ENABLED=false # Flip on after the mail server is setup.
+      - IMAP_ENABLED=false # Flip on after the mail server is setup.
+      - IMAP_USER=gitlab@maxocull.com
+      - IMAP_DOMAIN=www.maxocull.com
+      - IMAP_HOST=mail.maxocull.com
+      - IMAP_PORT=993
+      #- PIWIK_URL=
+      #- PIWIK_SITE_ID=
+    depends_on:
+      - redis
+      - postgres
+    volumes:
+      - /opt/flotilla/data/gitlab:/home/git/data
+    ports:
+      # Keep this as a string because I guess docker-compose (Python) has a bug?
+      - "4080:80"
+      - "4022:22"
+    restart: unless-stopped
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+    volumes:
+      - /opt/flotilla/data/jenkins:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 7080:8080
+      - 50000:50000
+    restart: unless-stopped
   heimdall:
     image: linuxserver/heimdall
     container_name: heimdall
@@ -213,19 +306,6 @@ services:
       - 9000:9000
       - 9001:9001
     restart: unless-stopped
-  #rancher:
-    #image: rancher/rancher
-    #container_name: rancher
-    #restart: unless-stopped
-    #ports:
-      #- 1040:80
-  #postgres:
-    #image: postgres
-    #container_name: postgres
-    #environment:
-      #- POSTGRES_PASSWORD=pronetochange
-    #volumes:
-      #- /opt/flotilla/data/postgres:/var/lib/postgres/data
   #letsencrypt:
     #image: linuxserver/letsencrypt
     #container_name: letsencrypt

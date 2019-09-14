@@ -21,11 +21,11 @@ elevated_link_source "${GITROOT}/flotilla" "/usr/local/bin/flotilla"
 if [[ "$(probe dnf)" -eq 1 ]]; then
     elevate dnf upgrade -y
     elevate dnf install -y \
-        docker docker-compose tmux neovim nodejs rsync htop git
+        docker docker-compose tmux neovim nodejs rsync htop git postgresql
 elif [[ "$(probe apt)" -eq 1 ]]; then
     elevate apt update
     elevate apt upgrade -y
-    # TODO: docker-compose nodejs
+    # TODO: docker-compose nodejs postgresql
     elevate apt install -y \
         docker tmux neovim rsync htop
 fi
@@ -46,6 +46,8 @@ for module in $GITROOT/config/*/; do
     dest="${BASE}/config/$(basename "$module")"
     elevated_link_source $module $dest
 done
+
+# TODO: Make sure all config AND data folders are created so permissions may be set.
 
 # Install services.
 for service in $GITROOT/services/*; do
@@ -113,6 +115,16 @@ if [[ ! -e "${BASE}/config/cleanroom/openvpn/${preferred_nord_vpn}.nordvpn.com.u
     cp "/tmp/nordvpn/ovpn_udp/${preferred_nord_vpn}.nordvpn.com.udp.ovpn" "${BASE}/config/cleanroom/openvpn/"
 
     rm -rf /tmp/nordvp*
+fi
+
+# Setup Gitlab database in Postgres.
+if [[ ! -d "${BASE}/data/postgres" ]]; then
+    #docker-compose --file "${COMPOSE_FILE}" up -d postgres
+    # TODO: Needs a delay here.
+    # TODO: Needs to dynamically retrieve the password from the secrets.env file.
+    # TODO: Needs to not overwrite and existing database.
+    echo "Please initialize the Gitlab database manually."
+    #docker-compose --file "${COMPOSE_FILE}" stop postgres
 fi
 
 # Reset the permissions for any previously ran elevated commands.
