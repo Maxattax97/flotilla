@@ -21,11 +21,11 @@ elevated_link_source "${GITROOT}/flotilla" "/usr/local/bin/flotilla"
 if [[ "$(probe dnf)" -eq 1 ]]; then
     elevate dnf upgrade -y
     elevate dnf install -y \
-        docker docker-compose tmux neovim nodejs rsync htop git postgresql
+        docker docker-compose tmux neovim nodejs rsync htop git postgresql pwgen
 elif [[ "$(probe apt)" -eq 1 ]]; then
     elevate apt update
     elevate apt upgrade -y
-    # TODO: docker-compose nodejs postgresql
+    # TODO: docker-compose nodejs postgresql pwgen
     elevate apt install -y \
         docker tmux neovim rsync htop
 fi

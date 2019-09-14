@@ -4,13 +4,8 @@ version: "3.7"
   # Traefik
   # Nextcloud
   # Rancher?
-  # Gitlab
   # Jenkins
   # Blog
-  # Jackett
-  ## Sonarr
-  ## ...
-  # Jellyfin
   # Mayan
   # Email server
   # LibreOffice Online / Collabora
@@ -232,6 +227,36 @@ services:
     volumes:
       - /opt/flotilla/data/redis:/data # Remove this line if not persistent.
     restart: unless-stopped
+  nextcloud:
+    # TODO: Switch to FPM after reverse proxy is set up.
+    image: nextcloud
+    container_name: nextcloud
+    depends_on:
+      - redis
+      - postgres
+    env_file:
+      - /opt/flotilla/secrets.env
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+      - POSTGRES_HOST=postgres
+      - NEXTCLOUD_ADMIN_USER=harbor
+      - REDIS_HOST=redis
+      #- SMTP_HOST=
+      #- SMTP_SECURE=ssl
+      #- SMTP_PORT=465
+      #- SMTP_NAME=nextcloud
+      #- MAIL_FROM_ADDRESS=nextcloud
+      #- MAIL_DOMAIN=mail.maxocull.com
+    volumes:
+      - /opt/flotilla/config/nextcloud:/var/www/html/config
+      - /opt/flotilla/data/nextcloud:/var/www/html
+    ports:
+      - 3080:80
+    restart: unless-stopped
   gitlab:
     image: sameersbn/gitlab
     container_name: gitlab
@@ -331,17 +356,4 @@ services:
       #- 443:443
     #ports:
       #- 80:80
-    #restart: unless-stopped
-  #nextcloud:
-    #image: linuxserver/nextcloud
-    #container_name: nextcloud
-    #environment:
-      #- PUID=1000
-      #- PGID=1000
-      #- TZ=America/Indianapolis
-    #volumes:
-      #- /opt/flotilla/config/nextcloud:/config
-      #- /opt/flotilla/data/nextcloud:/data
-    #ports:
-      #- 3443:443
     #restart: unless-stopped
