@@ -1,0 +1,10 @@
+[Unit]
+Description=Run daily and after reboot (to refresh Suricata's rulesets)
+
+[Timer]
+OnCalendar=daily
+OnBootSec=30min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

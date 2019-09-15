@@ -1,0 +1,12 @@
+[Unit]
+Description=Suricata update
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+ExecStart=/usr/bin/suricata-update
+ExecPost=
+
+[Install]
+WantedBy=multi-user.target

@@ -5,6 +5,7 @@ config/*
 !config/openvpn/
 !config/heimdall/
 !config/jackett/
+!config/suricata/
 
 config/openvpn/*
 !config/openvpn/openvpn.conf

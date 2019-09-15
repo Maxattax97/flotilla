@@ -11,6 +11,19 @@ root of this repository. Fill it out so that docker containers may read them.
 Unfortunately many containers have yet to accept the standard _Secrets_
 feature recently added in Docker.
 
+## Suricata
+
+The entire swarm is defended by Suricata, an Intrusion Protection System (IPS)
+which runs on the host and intercepts malicious packets before they make
+contact with containers (or any other service on the host). Suricata
+automatically updates rules using a cron job which is performed daily.
+
+Suricata requires some IPTables rules to intercept these packets, so be warned
+that while these rules are enabled, Suricata must also be online; otherwise, no
+data will pass, and any connections (e.g., SSH) will be terminated.
+
+The IDS may be handled via the `flotilla ids` subcommands.
+
 ## Sonarr, Radarr, Lidarr
 
 Enable **Advanced Settings**, then under **Settings > Indexers** add a **Torznab** entry with

@@ -61,7 +61,44 @@ case "$1" in
                 #docker-compose --file "${COMPOSE_FILE}" run --rm openvpn tar -cvf - -C /etc openvpn | xz > openvpn-backup.tar.xz
                 #;;
             *)
-                echo "Usage: flotilla <generate | get | revoke | remove | list>"
+                echo "Usage: flotilla ovpn <generate | get | revoke | remove | list>"
+                ;;
+        esac
+        ;;
+    "ids")
+        case "$2" in
+            "test")
+                elevate suricata -T -c /etc/suricata/suricata.yaml
+                if [[ "$?" -ne 0 ]]; then
+                    exit 1
+                fi
+                ;;
+            "up")
+                flotilla ids test
+                if [[ "$?" -ne 0 ]]; then
+                    exit 1
+                fi
+
+                elevate systemctl start suricata.service
+
+                # NOTE: Dangerous! Can disrupt the SSH connection if Suricata fails.
+                elevate iptables -A INPUT -j NFQUEUE
+                elevate iptables -A OUTPUT -j NFQUEUE
+                ;;
+            "down")
+                elevate iptables -D INPUT -j NFQUEUE
+                elevate iptables -D OUTPUT -j NFQUEUE
+                elevate systemctl stop suricata.service
+                ;;
+            "update")
+                elevate suricata-update
+                ;;
+            "status")
+                elevate systemctl status suricata.service
+                elevate journalctl -f -u suricata.service
+                ;;
+            *)
+                echo "Usage: flotilla ids <test | up | down | update | status>"
                 ;;
         esac
         ;;

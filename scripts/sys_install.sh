@@ -21,11 +21,12 @@ elevated_link_source "${GITROOT}/flotilla" "/usr/local/bin/flotilla"
 if [[ "$(probe dnf)" -eq 1 ]]; then
     elevate dnf upgrade -y
     elevate dnf install -y \
-        docker docker-compose tmux neovim nodejs rsync htop git postgresql pwgen
+        docker docker-compose tmux neovim nodejs rsync htop git postgresql \
+        pwgen suricata pulledpork
 elif [[ "$(probe apt)" -eq 1 ]]; then
     elevate apt update
     elevate apt upgrade -y
-    # TODO: docker-compose nodejs postgresql pwgen
+    # TODO: docker-compose nodejs postgresql pwgen suricata pulledpork
     elevate apt install -y \
         docker tmux neovim rsync htop
 fi
@@ -36,6 +37,18 @@ if [[ "$(probe gotop)" -eq 0 ]]; then
     /tmp/gotop/scripts/download.sh
     elevate mv ./gotop /usr/local/bin/
 fi
+
+# Install pyyaml for Suricata.
+elevate pip2 install pyyaml
+# Install the default Suricata config tweaked for IPS instead of IDS settings.
+elevate cp "${GITROOT}/config/suricata/suricata.yaml" /etc/suricata/suricata.yaml
+# Setup Suricata to use the et/open set.
+## I decided to only do this one because it's generally agreed that it's the
+## best by far and catches the huge majority of threats. Also, performance
+## reasons.
+elevate suricata-update enable-source et/open
+# Update the threat DB.
+elevate suricata-update
 
 # Create Flotilla directories.
 elevate mkdir -p "${BASE}/data"
@@ -58,6 +71,11 @@ for service in $GITROOT/services/*; do
 done
 
 elevate systemctl daemon-reload
+
+# Enable Cockpit on Fedora systems.
+if [[ "$(probe dnf)" -eq 1 ]]; then
+    elevate systemctl enable --now cockpit.socket
+fi
 
 # Enable and start Docker for this host.
 elevate systemctl enable docker.service
