@@ -55,6 +55,48 @@ services:
     #volumes:
       #- /var/run/docker.sock:/var/run/docker.sock
       ##- /opt/flotilla/config/watchtower/config.json:/config.json
+  pihole:
+    image: pihole/pihole
+    container_name: pihole
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "67:67/udp"
+      - "1188:80/tcp"
+      - "1443:443/tcp"
+    env_file:
+      - /opt/flotilla/secrets.env
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - DNSSEC=True
+    volumes:
+      - /opt/flotilla/config/pihole/pihole:/etc/pihole:z
+      - /opt/flotilla/config/pihole/dnsmasq:/etc/dnsmasq.d:z
+    dns:
+      - 127.0.0.1
+      # DNS.WATCH servers, with DNSSEC enabled.
+      - 84.200.69.80
+      - 84.200.70.40
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=pihole"
+      - "traefik.port=80"
+      - "traefik.frontend.rule=HostRegexp:dns.maxocull.com,{catchall:.*}"
+      - "traefik.frontend.priority=1"
+      - traefik.frontend.headers.SSLRedirect=true
+      - traefik.frontend.headers.STSSeconds=315360000
+      - traefik.frontend.headers.browserXSSFilter=true
+      - traefik.frontend.headers.contentTypeNosniff=true
+      - traefik.frontend.headers.forceSTSHeader=true
+      - traefik.frontend.headers.SSLHost=maxocull.com
+      - traefik.frontend.headers.STSIncludeSubdomains=true
+      - traefik.frontend.headers.STSPreload=true
+      - traefik.frontend.headers.frameDeny=true
   openvpn:
     image: kylemanna/openvpn
     container_name: openvpn

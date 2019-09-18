@@ -40,13 +40,21 @@ fi
 
 # Install pyyaml for Suricata.
 elevate pip2 install pyyaml
+
 # Install the default Suricata config tweaked for IPS instead of IDS settings.
 elevate cp "${GITROOT}/config/suricata/suricata.yaml" /etc/suricata/suricata.yaml
+if [[ "$(probe dnf)" -eq 1 ]]; then
+    elevate echo "-q 0" > /etc/sysconfig/suricata
+elif [[ "$(probe apt)" -eq 1 ]]; then
+    elevate echo "-q 0" > /etc/default/suricata
+fi
+
 # Setup Suricata to use the et/open set.
 ## I decided to only do this one because it's generally agreed that it's the
 ## best by far and catches the huge majority of threats. Also, performance
 ## reasons.
 elevate suricata-update enable-source et/open
+
 # Update the threat DB.
 elevate suricata-update
 
