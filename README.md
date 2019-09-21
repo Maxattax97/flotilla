@@ -3,6 +3,16 @@
 An easily deployed server based on Docker compose, complete with privacy tools,
 a media center, cloud storage, and much more.
 
+## Installation
+
+There are a handful of different configurations available. `alpha` is the
+overarching one which contains nearly all services. `devops` is oriented for
+production of solely code. Others may be created at a later time.
+
+Simply run `./flotilla install [alpha | devops]` to install Flotilla. From now
+on you may access Flotilla's commands from all contexts (`flotilla status`, no
+more `./`)
+
 ## Credentials and Secrets
 
 Credentials are stored in `/opt/flotilla/secrets.env`, a template exists in the
@@ -11,7 +21,12 @@ root of this repository. Fill it out so that docker containers may read them.
 Unfortunately many containers have yet to accept the standard _Secrets_
 feature recently added in Docker.
 
-## Suricata
+## Services
+
+Some special manual actions are currently are necessary to get a handful of
+services running.
+
+### Suricata
 
 The entire swarm is defended by Suricata, an Intrusion Protection System (IPS)
 which runs on the host and intercepts malicious packets before they make
@@ -24,10 +39,10 @@ data will pass, and any connections (e.g., SSH) will be terminated.
 
 The IDS may be handled via the `flotilla ids` subcommands.
 
-## Sonarr, Radarr, Lidarr
+### Sonarr, Radarr, Lidarr
 
-Enable **Advanced Settings**, then under **Settings > Indexers** add a **Torznab** entry with
-at least these settings:
+Enable **Advanced Settings**, then under **Settings > Indexers** add a
+**Torznab** entry with at least these settings:
 
 ```
 Name: Jackett All
@@ -53,7 +68,7 @@ Password: adminadmin
 Use SSL: No
 ```
 
-## Jellyfin
+### Jellyfin
 
 Add Libraries for the following internal, shared volumes:
 
@@ -63,7 +78,7 @@ Add Libraries for the following internal, shared volumes:
  - `/data/books` as Books from Calibre?
  - `/data/photos` as Photos from various uploads
 
-## Gitlab
+### Gitlab
 
 Create a database for Gitlab inside of Postgres:
 

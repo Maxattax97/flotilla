@@ -25,6 +25,7 @@ version: "3.7"
   # KVM?
   # LDAP?
 services:
+
   traefik:
     image: traefik
     container_name: traefik
@@ -40,6 +41,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
+
   #watchtower:
     ## TODO: Not recommended by LinuxServer.io
     #image: containrrr/watchtower
@@ -54,7 +56,8 @@ services:
       ## https://containrrr.github.io/watchtower/notifications/
     #volumes:
       #- /var/run/docker.sock:/var/run/docker.sock
-      ##- /opt/flotilla/config/watchtower/config.json:/config.json
+      ##- /opt/flotilla/config/watchtower/config.json:/config.json:z
+
   pihole:
     image: pihole/pihole
     container_name: pihole
@@ -97,6 +100,7 @@ services:
       - traefik.frontend.headers.STSIncludeSubdomains=true
       - traefik.frontend.headers.STSPreload=true
       - traefik.frontend.headers.frameDeny=true
+
   openvpn:
     image: kylemanna/openvpn
     container_name: openvpn
@@ -110,7 +114,7 @@ services:
     cap_add:
       - NET_ADMIN
     volumes:
-      - /opt/flotilla/config/openvpn:/etc/openvpn
+      - /opt/flotilla/config/openvpn:/etc/openvpn:z
     environment:
       - EASYRSA_KEY_SIZE=4096
       - PUID=1000
@@ -119,6 +123,7 @@ services:
     ports:
       - "1194:1194/udp"
     restart: unless-stopped
+
   jackett:
     image: linuxserver/jackett
     container_name: jackett
@@ -128,11 +133,12 @@ services:
       - TZ=America/Indianapolis
       - RUN_OPTS="--ProxyConnection=cleanroom:8118"
     volumes:
-      - /opt/flotilla/config/jackett:/config
-      - /opt/flotilla/data/all/torrents:/downloads
+      - /opt/flotilla/config/jackett:/config:z
+      - /opt/flotilla/data/all/torrents:/downloads:Z
     ports:
       - "9117:9117"
     restart: unless-stopped
+
   cleanroom:
     image: binhex/arch-qbittorrentvpn
     container_name: cleanroom
@@ -154,9 +160,9 @@ services:
       - VPN_ENABLED=yes
       - VPN_PROV=nordvpn # This is a custom VPN.
     volumes:
-      - /opt/flotilla/config/cleanroom:/config
-      - /opt/flotilla/data/all/torrents:/torrents
-      - /opt/flotilla/data/cleanroom:/data
+      - /opt/flotilla/config/cleanroom:/config:z
+      - /opt/flotilla/data/all/torrents:/torrents:Z
+      - /opt/flotilla/data/cleanroom:/data:Z
       - /etc/localtime:/etc/localtime:ro
     ports:
       - "6881:6881"
@@ -164,6 +170,7 @@ services:
       - "8800:8800" # Change the WEBUI_PORT environment variable as well!
       - "8118:8118" # Change the proxy port for Jackett as well!
     restart: unless-stopped
+
   sonarr:
     image: linuxserver/sonarr
     container_name: sonarr
@@ -173,12 +180,13 @@ services:
       - TZ=America/Indianapolis
       - UMASK=022
     volumes:
-      - /opt/flotilla/config/sonarr:/config
-      - /opt/flotilla/data/all/tvshows:/tv
-      - /opt/flotilla/data/cleanroom:/data
+      - /opt/flotilla/config/sonarr:/config:z
+      - /opt/flotilla/data/all/tvshows:/tv:Z
+      - /opt/flotilla/data/cleanroom:/data:Z
     ports:
       - "8989:8989"
     restart: unless-stopped
+
   radarr:
     image: linuxserver/radarr
     container_name: radarr
@@ -188,12 +196,13 @@ services:
       - TZ=America/Indianapolis
       - UMASK=022
     volumes:
-      - /opt/flotilla/config/radarr:/config
-      - /opt/flotilla/data/all/movies:/movies
-      - /opt/flotilla/data/cleanroom:/data
+      - /opt/flotilla/config/radarr:/config:z
+      - /opt/flotilla/data/all/movies:/movies:Z
+      - /opt/flotilla/data/cleanroom:/data:Z
     ports:
       - "7878:7878"
     restart: unless-stopped
+
   lidarr:
     image: linuxserver/lidarr
     container_name: lidarr
@@ -203,12 +212,13 @@ services:
       - TZ=America/Indianapolis
       - UMASK=022
     volumes:
-      - /opt/flotilla/config/lidarr:/config
-      - /opt/flotilla/data/all/music:/music
-      - /opt/flotilla/data/cleanroom:/data
+      - /opt/flotilla/config/lidarr:/config:z
+      - /opt/flotilla/data/all/music:/music:Z
+      - /opt/flotilla/data/cleanroom:/data:Z
     ports:
       - "8686:8686"
     restart: unless-stopped
+
   jellyfin:
     image: linuxserver/jellyfin
     container_name: jellyfin
@@ -218,19 +228,20 @@ services:
       - TZ=America/Indianapolis
       - UMASK_SET=<022> #optional
     volumes:
-      - /opt/flotilla/config/jellyfin:/config
-      - /opt/flotilla/data/all/tvshows:/data/tvshows
-      - /opt/flotilla/data/all/movies:/data/movies
-      - /opt/flotilla/data/all/music:/data/music
-      - /opt/flotilla/data/all/books:/data/books
-      - /opt/flotilla/data/all/photos:/data/photos
-      - /opt/flotilla/data/jellyfin/transcode:/transcode #optional
+      - /opt/flotilla/config/jellyfin:/config:z
+      - /opt/flotilla/data/all/tvshows:/data/tvshows:Z
+      - /opt/flotilla/data/all/movies:/data/movies:Z
+      - /opt/flotilla/data/all/music:/data/music:Z
+      - /opt/flotilla/data/all/books:/data/books:Z
+      - /opt/flotilla/data/all/photos:/data/photos:Z
+      - /opt/flotilla/data/jellyfin/transcode:/transcode:Z #optional
     ports:
       - "8096:8096"
       #- "8920:8920" #optional, https
     devices:
       - /dev/dri:/dev/dri #optional, for video HW acceleration
     restart: unless-stopped
+
   postgres:
     image: postgres
     container_name: postgres
@@ -244,8 +255,9 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - /opt/flotilla/data/postgres:/var/lib/postgresql/data
+      - /opt/flotilla/data/postgres:/var/lib/postgresql/data:z
     restart: unless-stopped
+
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin
@@ -259,9 +271,10 @@ services:
     ports:
       - "5480:80"
     volumes:
-      #- /opt/flotilla/config/pgadmin:/pgadmin4
-      - /opt/flotilla/data/pgadmin:/var/lib/pgadmin
+      #- /opt/flotilla/config/pgadmin:/pgadmin4:z
+      - /opt/flotilla/data/pgadmin:/var/lib/pgadmin:z
     restart: unless-stopped
+
   redis:
     # TODO: Resolve some kernel settings to clear up the logs.
     image: redis
@@ -273,8 +286,9 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - /opt/flotilla/data/redis:/data # Remove this line if not persistent.
+      - /opt/flotilla/data/redis:/data:z # Remove this line if not persistent.
     restart: unless-stopped
+
   nextcloud:
     # TODO: Switch to FPM after reverse proxy is set up.
     image: nextcloud
@@ -300,11 +314,12 @@ services:
       #- MAIL_FROM_ADDRESS=nextcloud
       #- MAIL_DOMAIN=mail.maxocull.com
     volumes:
-      - /opt/flotilla/config/nextcloud:/var/www/html/config
-      - /opt/flotilla/data/nextcloud:/var/www/html
+      - /opt/flotilla/config/nextcloud:/var/www/html/config:z
+      - /opt/flotilla/data/nextcloud:/var/www/html:Z
     ports:
       - "3080:80"
     restart: unless-stopped
+
   gitlab:
     image: sameersbn/gitlab
     container_name: gitlab
@@ -332,12 +347,13 @@ services:
       - redis
       - postgres
     volumes:
-      - /opt/flotilla/data/gitlab:/home/git/data
+      - /opt/flotilla/data/gitlab:/home/git/data:z
     ports:
       # Keep this as a string because I guess docker-compose (Python) has a bug?
       - "4080:80"
       - "4022:22"
     restart: unless-stopped
+
   jenkins:
     image: jenkins/jenkins:lts
     container_name: jenkins
@@ -346,12 +362,29 @@ services:
       - PGID=1000
       - TZ=America/Indianapolis
     volumes:
-      - /opt/flotilla/data/jenkins:/var/jenkins_home
+      - /opt/flotilla/data/jenkins:/var/jenkins_home:z
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "7080:8080"
       - "50000:50000"
     restart: unless-stopped
+
+  postfix:
+    image: mailu/postfix
+    container_name: postfix
+    env_file:
+      - /opt/flotilla/mailu.env
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+    volumes:
+      - /opt/flotilla/data/postfix:/data:z
+      - /opt/flotilla/config/postfix:/overrides:z
+    ports:
+      - "25:25"
+      - "10025:10025"
+
   heimdall:
     image: linuxserver/heimdall
     container_name: heimdall
@@ -360,28 +393,59 @@ services:
       - PGID=1000
       - TZ=America/Indianapolis
     volumes:
-      - /opt/flotilla/config/heimdall:/config
+      - /opt/flotilla/config/heimdall:/config:z
     ports:
       - "1080:80"
       - "1443:443"
     restart: unless-stopped
+
   grafana:
     image: grafana/grafana
     container_name: grafana
     user: "1000"
+    env_file:
+      - /opt/flotilla/secrets.env
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
-      #- GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource,grafana-worldmap-panel,grafana-pie-chart-panel
     volumes:
       - /opt/flotilla/config/grafana:/etc/grafana:z
       - /opt/flotilla/data/grafana/data:/var/lib/grafana:z
-      - /opt/flotilla/data/grafana/home:/usr/share/grafana:z
+      #- /opt/flotilla/data/grafana/home:/usr/share/grafana:z
       - /opt/flotilla/data/grafana/logs:/var/log/grafana:z
     ports:
       - "3000:3000"
     restart: unless-stopped
+
+  loki:
+    image: grafana/loki
+    container_name: loki
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+    ports:
+      - "3100:3100"
+    #command:
+      #- '--config.file=/etc/loki/local-config.yml'
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail
+    container_name: promtail
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+    volumes:
+      - /opt/flotilla/data/all/logs:/var/log:Z
+    #command:
+      #- '--config.file=/etc/promtail/docker-config.yml'
+    restart: unless-stopped
+
   prometheus:
     image: prom/prometheus
     container_name: prometheus
@@ -397,8 +461,26 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
     ports:
-      - "9095:9090"
+      - "9095:9090" # conflicts with Fedora's Cockpit at 9090
     restart: unless-stopped
+
+  nodeexporter:
+    image: quay.io/prometheus/node-exporter
+    container_name: nodeexporter
+    cap_add:
+      - SYS_TIME
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+    volumes:
+      - /:/host:ro,rslave
+    command:
+      - '--path.rootfs=/host'
+    ports:
+      - "9100:9100"
+    restart: unless-stopped
+
   portainer:
     image: portainer/portainer
     container_name: portainer
@@ -408,11 +490,12 @@ services:
       - TZ=America/Indianapolis
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /opt/flotilla/data/portainer:/data
+      - /opt/flotilla/data/portainer:/data:z
     ports:
       - "9000:9000"
       - "9001:9001"
     restart: unless-stopped
+
   #letsencrypt:
     #image: linuxserver/letsencrypt
     #container_name: letsencrypt
@@ -433,7 +516,7 @@ services:
       ##- EXTRA_DOMAINS=<extradomains> #optional
       #- STAGING=false
     #volumes:
-      #- /opt/flotilla/config/letsencrypt:/config
+      #- /opt/flotilla/config/letsencrypt:/config:z
     #ports:
       #- "443:443"
     #ports:

@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 
+# Select which fleet you'd like to install, e.g. alpha, devops, etc.
+arg_fleet="${1:-alpha}"
+
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 GITROOT="$(dirname "${SCRIPTPATH}")"
-COMPOSE_FILE=/opt/flotilla/docker-compose.yml
 BASE=/opt/flotilla
+COMPOSE_FILE="${BASE}/docker-compose.yml"
 
 if [ -s "${SCRIPTPATH}/sys_lib.sh" ]; then
     source "${SCRIPTPATH}/sys_lib.sh"
@@ -94,7 +97,10 @@ if [[ "$?" -eq 3 ]]; then
 fi
 
 # Install the docker compose file.
-elevated_link_source "${GITROOT}/alpha/docker-compose.yml" "${COMPOSE_FILE}"
+elevated_link_source "${GITROOT}/${arg_fleet}/docker-compose.yml" "${COMPOSE_FILE}"
+
+# Install the (highly involved) mailu environment file.
+elevated_link_source "${GITROOT}/mailu/mailu.env" "${BASE}/mailu.env"
 
 # Allow permissions in SE Linux.
 if [[ "$(probe chcon)" -eq 1 ]]; then
