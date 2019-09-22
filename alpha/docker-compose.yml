@@ -1,6 +1,6 @@
 ---
 version: "3.7"
-  # TODO: qbittorrent with VPN inside of container and search functionality.
+# Services:
   # Traefik
   # Nextcloud
   # Rancher?
@@ -18,19 +18,68 @@ version: "3.7"
   # EteSync?
   # Bitwarden?
   # Mining operation?
-  # Squid Proxy? Or other proxy
+  # Squid Proxy? Shadowsocks? Or other proxy
   # IRC
   # TOR Node, hidden service
   # i2p
   # KVM?
   # LDAP?
+# Organization
+  # TODO: Apply consistent port assignment scheme.
+  # TODO: Segregate services into subnetworks.
+  # TODO: Make some services run on the host (performance, true IP visibility)
 services:
 
+  dockersocket:
+    # Limits access to the docker socket which is dangerous to expose to
+    # containers which see the internet; compromise of these external facing
+    # containers could mean granting root access to the entire host (and all
+    # other containers).
+    image: tecnativa/docker-socket-proxy
+    container_name: dockersocket
+    privileged: true # Necessary for docker access.
+    ports:
+      - "2375:2375"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      #- LOG_LEVEL=info
+      #- EVENTS=1
+      #- PING=1
+      #- VERSION=1
+      #- AUTH=0
+      #- SECRETS=0
+      #- POST=0
+      #- BUILD=1
+      #- COMMIT=1
+      #- CONFIGS=1
+      #- CONTAINERS=1
+      #- DISTRIBUTION=1
+      #- EXEC=1
+      #- IMAGES=1
+      #- INFO=1
+      - NETWORKS=1 # For Traefik
+      #- NODES=1
+      #- PLUGINS=1
+      - SERVICES=1 # For Traefik
+      #- SESSION=1
+      #- SWARM=1
+      #- SYSTEM=1
+      #- TASKS=1
+      #- VOLUMES=1
+      #- TASKS=1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - 'traefik.enable=false'
+
   traefik:
+    # Reverse proxy with auto-routing capabilities. Aimed at HTTP/S but works
+    # with TCP too.
     image: traefik
     container_name: traefik
-    #privileged: true # Necessary for docker access.
-    command: --api --docker
+    command: --configFile=/etc/traefik/traefik.toml # --api --docker
     ports:
       - "80:80"
       - "8080:8080"
@@ -39,7 +88,8 @@ services:
       - PGID=1000
       - TZ=America/Indianapolis
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/flotilla/config/traefik:/etc/traefik:z
+      - /opt/flotilla/data/all/logs/traefik:/var/log:Z
     restart: unless-stopped
 
   #watchtower:
@@ -363,7 +413,7 @@ services:
       - TZ=America/Indianapolis
     volumes:
       - /opt/flotilla/data/jenkins:/var/jenkins_home:z
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock # Behind a reverse proxy, it's okay.
     ports:
       - "7080:8080"
       - "50000:50000"
@@ -489,7 +539,7 @@ services:
       - PGID=1000
       - TZ=America/Indianapolis
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock # Behind a reverse proxy, it's okay.
       - /opt/flotilla/data/portainer:/data:z
     ports:
       - "9000:9000"

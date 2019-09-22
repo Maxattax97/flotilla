@@ -6,6 +6,9 @@ config/*
 !config/heimdall/
 !config/jackett/
 !config/suricata/
+!config/traefik/
+!config/prometheus/
+!config/grafana/
 
 config/openvpn/*
 !config/openvpn/openvpn.conf
