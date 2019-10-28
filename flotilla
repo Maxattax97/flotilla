@@ -103,6 +103,6 @@ case "$1" in
         esac
         ;;
     *)
-        echo "Usage: flotilla <install | update | start | stop | restart | status | follow | ovpn>"
+        echo "Usage: flotilla <install | update | start | stop | restart | status | follow | ovpn | ids>"
         ;;
 esac

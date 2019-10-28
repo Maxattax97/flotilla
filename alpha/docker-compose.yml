@@ -39,22 +39,23 @@ services:
     container_name: dockersocket
     privileged: true # Necessary for docker access.
     ports:
+      # TODO: Reduce this to 127.0.01:2375:2375.
       - "2375:2375"
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
-      #- LOG_LEVEL=info
+      - LOG_LEVEL=debug # info
       #- EVENTS=1
       #- PING=1
       #- VERSION=1
-      #- AUTH=0
-      #- SECRETS=0
-      #- POST=0
+      - AUTH=0 # Security critical
+      - SECRETS=0 # Security critical
+      - POST=0 # Security critical
       #- BUILD=1
       #- COMMIT=1
       #- CONFIGS=1
-      #- CONTAINERS=1
+      - CONTAINERS=1 # For Traefik
       #- DISTRIBUTION=1
       #- EXEC=1
       #- IMAGES=1
@@ -66,9 +67,8 @@ services:
       #- SESSION=1
       #- SWARM=1
       #- SYSTEM=1
-      #- TASKS=1
       #- VOLUMES=1
-      #- TASKS=1
+      - TASKS=1 # For Traefik
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     labels:
@@ -79,7 +79,18 @@ services:
     # with TCP too.
     image: traefik
     container_name: traefik
-    command: --configFile=/etc/traefik/traefik.toml # --api --docker
+    command:
+      #- "--configFile=/etc/traefik/traefik.toml"
+      - "--api.inseucre=true"
+      - "--ping"
+      - "--providers.docker=true"
+      - "--log.filePath=/var/log/traefik.log"
+      - "--metrics.prometheus"
+      - "--global.sendAnonymousUsage=false"
+      - "--global.checkNewVersion=true"
+      - "--entrypoints.http.address=:80"
+      - "--entrypoints.https.address=:443"
+      - "--entrypoints.traefik.address=:8080"
     ports:
       - "80:80"
       - "8080:8080"
@@ -87,10 +98,19 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
+      #- DOCKER_HOST=tcp://dockersocket
     volumes:
       - /opt/flotilla/config/traefik:/etc/traefik:z
       - /opt/flotilla/data/all/logs/traefik:/var/log:Z
     restart: unless-stopped
+
+  whoami:
+    image: containous/whoami
+    container_name: whoami
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=PathPrefix(`/whoami`)"
+      - "traefik.http.routers.whoami.entryPoints=http"
 
   #watchtower:
     ## TODO: Not recommended by LinuxServer.io
@@ -135,21 +155,21 @@ services:
     cap_add:
       - NET_ADMIN
     restart: unless-stopped
-    labels:
-      - "traefik.enable=true"
-      - "traefik.backend=pihole"
-      - "traefik.port=80"
-      - "traefik.frontend.rule=HostRegexp:dns.maxocull.com,{catchall:.*}"
-      - "traefik.frontend.priority=1"
-      - traefik.frontend.headers.SSLRedirect=true
-      - traefik.frontend.headers.STSSeconds=315360000
-      - traefik.frontend.headers.browserXSSFilter=true
-      - traefik.frontend.headers.contentTypeNosniff=true
-      - traefik.frontend.headers.forceSTSHeader=true
-      - traefik.frontend.headers.SSLHost=maxocull.com
-      - traefik.frontend.headers.STSIncludeSubdomains=true
-      - traefik.frontend.headers.STSPreload=true
-      - traefik.frontend.headers.frameDeny=true
+    #labels:
+      #- "traefik.enable=true"
+      #- "traefik.backend=pihole"
+      #- "traefik.port=80"
+      #- "traefik.frontend.rule=HostRegexp:dns.maxocull.com,{catchall:.*}"
+      #- "traefik.frontend.priority=1"
+      #- traefik.frontend.headers.SSLRedirect=true
+      #- traefik.frontend.headers.STSSeconds=315360000
+      #- traefik.frontend.headers.browserXSSFilter=true
+      #- traefik.frontend.headers.contentTypeNosniff=true
+      #- traefik.frontend.headers.forceSTSHeader=true
+      #- traefik.frontend.headers.SSLHost=maxocull.com
+      #- traefik.frontend.headers.STSIncludeSubdomains=true
+      #- traefik.frontend.headers.STSPreload=true
+      #- traefik.frontend.headers.frameDeny=true
 
   openvpn:
     image: kylemanna/openvpn
@@ -324,6 +344,12 @@ services:
       #- /opt/flotilla/config/pgadmin:/pgadmin4:z
       - /opt/flotilla/data/pgadmin:/var/lib/pgadmin:z
     restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pgadmin.rule=PathPrefix(`/pgadmin`)"
+      - "traefik.http.routers.pgadmin.entryPoints=http"
+      - "traefik.http.middlewares.strip-pgadmin.stripPrefix.prefixes=pgadmin"
+      - "traefik.http.routers.pgadmin.middlewares=strip-pgadmin"
 
   redis:
     # TODO: Resolve some kernel settings to clear up the logs.

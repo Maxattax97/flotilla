@@ -1,4 +1,4 @@
-#!/usr/bin/env/ bash
+#!/usr/bin/env bash
 
 # Update base system.
 if [[ "$(probe dnf)" -eq 1 ]]; then

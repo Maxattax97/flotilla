@@ -65,7 +65,8 @@
     # Optional
     # Default: "ERROR"
     #
-    level = "INFO"
+    # TODO: Set back to INFO
+    level = "DEBUG"
 
     # Sets the filepath for the traefik log. If not specified, stdout will be used.
     # Intermediate directories are created if necessary.
@@ -92,6 +93,17 @@
         service = "openvpn"
 
 [http.routers]
+    [http.routers.http-pgadmin]
+        entryPoints = ["http"]
+        rule = "PathPrefix(`/pgadmin`)"
+        service = "pgadmin"
+        #middlewares = ["limit-all", "strip-all"]
+    #[http.routers.https-pgadmin]
+        #entryPoints = ["https"]
+        #rule = "PathPrefix(`/pgadmin`)"
+        #service = "pgadmin"
+        #middlewares = ["limit-all", "local-only", "strip-all"]
+        #[http.routers.https-pgadmin.tls]
     [http.routers.http-grafana]
         entryPoints = ["http"]
         rule = "PathPrefix(`/grafana`)"
@@ -105,7 +117,7 @@
         [http.routers.https-grafana.tls]
 [http.middlewares]
     [http.middlewares.strip-all.stripPrefix]
-        prefiex = ["/grafana"]
+        prefix = ["/pgadmin"]
     [http.middlewares.local-only.ipWhiteList]
         sourceRange = ["127.0.0.1/32", "192.168.0.0/16", "172.16.0.0/16", "169.254.0.0/16", "10.0.0.0/8"]
     [http.middlewares.limit-all.rateLimit]
@@ -156,7 +168,13 @@
     # Optional
     # Default: true
     #
-    # dashboard = false
+    dashboard = true
+
+    debug = true
+
+    # TODO: Disable this.
+    insecure = true
+
 
 ################################################################
 # Ping configuration
@@ -190,11 +208,13 @@
     # Default: "Host(`{{ normalize .Name }}`)"
     #
     # defaultRule = "Host(`{{ normalize .Name }}.docker.localhost`)"
-    #defaultRule = "Host(`harbor`)"
+    defaultRule = "PathPrefix(`/{{ normalize .Name }}`)"
 
     # Expose containers by default in traefik
     #
     # Optional
     # Default: true
     #
-    # exposedByDefault = false
+    exposedByDefault = false
+
+    useBindPortIp=true
