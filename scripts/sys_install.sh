@@ -62,7 +62,13 @@ elevate suricata-update enable-source et/open
 elevate suricata-update
 
 # Create Flotilla directories.
-elevate mkdir -p "${BASE}/data"
+if [[ -d "/data/" ]]; then
+    # Use extended LVM RAID storage if available.
+    elevate mkdir -p "/data/flotilla"
+    elevated_link_source "/data/flotilla/" "${BASE}/data"
+else
+    elevate mkdir -p "${BASE}/data"
+fi
 elevate mkdir -p "${BASE}/config"
 
 # Setup configuration directories.

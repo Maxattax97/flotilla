@@ -12,7 +12,7 @@ version: "3.7"
   # PiHole or other DNS
   # Snort or other IDS
   # Joplin
-  # Searx
+  # Searx https://github.com/linuxserver/Heimdall/issues/307
   # PrivateBin
   # Syncthing?
   # EteSync?
@@ -81,16 +81,28 @@ services:
     container_name: traefik
     command:
       #- "--configFile=/etc/traefik/traefik.toml"
-      - "--api.inseucre=true"
+      - "--api.insecure=true" # TODO: Change this back.
       - "--ping"
       - "--providers.docker=true"
-      - "--log.filePath=/var/log/traefik.log"
+      - "--providers.docker.endpoint=tcp://dockersocket:2375"
+      - "--providers.docker.defaultRule=Host(`{{ normalize .Name }}.maxocull.net`)"
+      - "--providers.docker.exposedByDefault=true"
+      - "--providers.docker.useBindPortIp=false"
+      #- "--log.filePath=/var/log/traefik.log"
+      - "--log.level=DEBUG"
+      - "--accessLog.filePath=/var/log/access.log"
       - "--metrics.prometheus"
       - "--global.sendAnonymousUsage=false"
       - "--global.checkNewVersion=true"
       - "--entrypoints.http.address=:80"
       - "--entrypoints.https.address=:443"
       - "--entrypoints.traefik.address=:8080"
+      - "--certificatesResolvers.le-main.acme.email=max.ocull@protonmail.com"
+      - "--certificatesResolvers.le-main.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory" # Staging server for testing.
+      #- "--certificatesResolvers.le-main.acme.storage=/var/acme/acme.json"
+      - "--certificatesResolvers.le-main.acme.tlsChallenge=true"
+      #- "--certificatesResolvers.le-main.acme.httpChallenge=true"
+      #- "--certificatesResolvers.le-main.acme.httpChallenge.entryPoint=http"
     ports:
       - "80:80"
       - "8080:8080"
@@ -100,6 +112,7 @@ services:
       - TZ=America/Indianapolis
       #- DOCKER_HOST=tcp://dockersocket
     volumes:
+      - /opt/flotilla/data/traefik:/var/acme:z
       - /opt/flotilla/config/traefik:/etc/traefik:z
       - /opt/flotilla/data/all/logs/traefik:/var/log:Z
     restart: unless-stopped
@@ -107,10 +120,23 @@ services:
   whoami:
     image: containous/whoami
     container_name: whoami
+    ports:
+      - "8001:80"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      ##- DOCKER_HOST=tcp://dockersocket
+    restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=PathPrefix(`/whoami`)"
-      - "traefik.http.routers.whoami.entryPoints=http"
+      - "traefik.http.routers.http-whoami.rule=Host(`whoami.maxocull.net`)"
+      - "traefik.http.routers.http-whoami.entryPoints=http"
+      - "traefik.http.routers.https-whoami.rule=Host(`whoami.maxocull.net`)"
+      - "traefik.http.routers.https-whoami.entryPoints=https"
+      - "traefik.http.routers.https-whoami.tls=true"
+      - "traefik.http.routers.https-whoami.tls.certResolver=le-main"
+      #- "traefik.http.routers.https-whoami.tls.domains[0].main=whoami.maxocull.net"
 
   #watchtower:
     ## TODO: Not recommended by LinuxServer.io
@@ -337,6 +363,7 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
+      # The email below _is_ the username.
       - PGADMIN_DEFAULT_EMAIL=postgres@maxocull.com
     ports:
       - "5480:80"
@@ -430,20 +457,21 @@ services:
       - "4022:22"
     restart: unless-stopped
 
-  jenkins:
-    image: jenkins/jenkins:lts
-    container_name: jenkins
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Indianapolis
-    volumes:
-      - /opt/flotilla/data/jenkins:/var/jenkins_home:z
-      - /var/run/docker.sock:/var/run/docker.sock # Behind a reverse proxy, it's okay.
-    ports:
-      - "7080:8080"
-      - "50000:50000"
-    restart: unless-stopped
+  #jenkins:
+    # TODO: Opt for Gitlab CI?
+    #image: jenkins/jenkins:lts
+    #container_name: jenkins
+    #environment:
+      #- PUID=1000
+      #- PGID=1000
+      #- TZ=America/Indianapolis
+    #volumes:
+      #- /opt/flotilla/data/jenkins:/var/jenkins_home:z
+      #- /var/run/docker.sock:/var/run/docker.sock # Behind a reverse proxy, it's okay.
+    #ports:
+      #- "7080:8080"
+      #- "50000:50000"
+    #restart: unless-stopped
 
   postfix:
     image: mailu/postfix
@@ -474,6 +502,15 @@ services:
       - "1080:80"
       - "1443:443"
     restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.http-dash.rule=Host(`dash.maxocull.net`)"
+      - "traefik.http.routers.http-dash.entryPoints=http"
+      - "traefik.http.routers.https-dash.rule=Host(`dash.maxocull.net`)"
+      - "traefik.http.routers.https-dash.entryPoints=https"
+      - "traefik.http.routers.https-dash.tls=true"
+      - "traefik.http.routers.https-dash.tls.certResolver=le-main"
+      #- "traefik.http.routers.https-dash.tls.domains[0].main=dash.maxocull.net"
 
   grafana:
     image: grafana/grafana
@@ -485,8 +522,10 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource,grafana-worldmap-panel,grafana-pie-chart-panel
+      - "GF_SECURITY_ADMIN_USER=admin"
+      - "GF_SERVER_DOMAIN=grafana.maxocull.net"
+      - "GF_SERVER_ROOT_URL=https://grafana.maxocull.net"
+      #- GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource,grafana-worldmap-panel,grafana-pie-chart-panel
     volumes:
       - /opt/flotilla/config/grafana:/etc/grafana:z
       - /opt/flotilla/data/grafana/data:/var/lib/grafana:z
@@ -572,11 +611,9 @@ services:
       - "9001:9001"
     restart: unless-stopped
 
-  #letsencrypt:
-    #image: linuxserver/letsencrypt
-    #container_name: letsencrypt
-    #cap_add:
-      #- NET_ADMIN
+  #nginx:
+    #image: linuxserver/nginx
+    #container_name: nginx
     #environment:
       #- PUID=1000
       #- PGID=1000
@@ -592,9 +629,38 @@ services:
       ##- EXTRA_DOMAINS=<extradomains> #optional
       #- STAGING=false
     #volumes:
-      #- /opt/flotilla/config/letsencrypt:/config:z
-    #ports:
-      #- "443:443"
+      #- /opt/flotilla/config/nginx:/config:z
+      #- /opt/flotilla/data/all/logs/nginx:/config/log:Z
     #ports:
       #- "80:80"
+      #- "443:443"
     #restart: unless-stopped
+
+  letsencrypt:
+    image: linuxserver/letsencrypt
+    container_name: letsencrypt
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - URL=maxocull.net
+      - SUBDOMAINS=www,resolute,whoami,dash,cloud,git
+      - VALIDATION=http # DNS? so can use wildcards
+      #- DNSPLUGIN=cloudflare #optional
+      #- DUCKDNSTOKEN=<token> #optional
+      - EMAIL=max.ocull@protonmail.com
+      - DHLEVEL=2048
+      - ONLY_SUBDOMAINS=false
+      #- EXTRA_DOMAINS=<extradomains> #optional
+      - STAGING=true # TODO: Disable when done testing.
+    volumes:
+      - /opt/flotilla/data/letsencrypt/keys:/config/etc/letsencrypt:Z
+      - /opt/flotilla/data/letsencrypt/www:/config/www:Z
+      - /opt/flotilla/config/letsencrypt:/config:z
+      - /opt/flotilla/data/all/logs/letsencrypt:/config/log:Z
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: unless-stopped

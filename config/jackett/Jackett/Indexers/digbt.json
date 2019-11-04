@@ -15,6 +15,6 @@
     "id": "lasterror",
     "type": "hiddendata",
     "name": "LastError",
-    "value": null
+    "value": "Exception (digbt): Authentication failed because the remote party has closed the transport stream.: The SSL connection could not be established, see inner exception."
   }
 ]

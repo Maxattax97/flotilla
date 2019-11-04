@@ -9,7 +9,7 @@
     "id": "cookieheader",
     "type": "hiddendata",
     "name": "CookieHeader",
-    "value": ""
+    "value": "apbct_timestamp=1572816534; apbct_cookies_test=%7B%22cookies_names%22%3A%5B%22apbct_timestamp%22%5D%2C%22check_value%22%3A%22e17bff5466ee95d318d6ab9e8db5f2ee%22%7D"
   },
   {
     "id": "lasterror",

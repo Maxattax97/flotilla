@@ -15,6 +15,6 @@
     "id": "lasterror",
     "type": "hiddendata",
     "name": "LastError",
-    "value": null
+    "value": "Exception (extratorrent-ag): Request to https://extratorrent.ag/ failed (Error BadGateway) - The tracker seems to be down.: Request to https://extratorrent.ag/ failed (Error BadGateway) - The tracker seems to be down."
   }
 ]

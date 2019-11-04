@@ -15,6 +15,6 @@
     "id": "lasterror",
     "type": "hiddendata",
     "name": "LastError",
-    "value": null
+    "value": "Exception (aniRena): Request to https://www.anirena.com/ failed (Error 523) - The tracker seems to be down.: Request to https://www.anirena.com/ failed (Error 523) - The tracker seems to be down."
   }
 ]

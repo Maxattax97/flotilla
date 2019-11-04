@@ -51,6 +51,83 @@
         address = ":8080"
 
 ################################################################
+# Certificate configuration
+################################################################
+
+[tls.stores]
+    [tls.stores.default]
+
+[tls.options]
+    [tls.options.default]
+        minVersion = "VersionTLS12"
+        cipherSuites = [
+            "TLS_AES_256_GCM_SHA384",
+            "TLS_CHACHA20_POLY1305_SHA256",
+            "TLS_AES_128_GCM_SHA256",
+            "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384",
+            "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256",
+            "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+            "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+        ]
+        #sniStrict = true
+
+[certificatesResolvers.le-main.acme]
+    email = "max.ocull@protonmail.com"
+    storage = "acme.json"
+    [certificatesResolvers.le-main.acme.tlsChallenge]
+    #[certificatesResolvers.le-main.acme.httpChallenge]
+        #entryPoint = "http"
+
+################################################################
+# Routers
+################################################################
+
+#[tcp.routers]
+    #[tcp.routers.openvpn]
+        #entryPoints = ["vpnudp"]
+        #service = "openvpn"
+
+#[http.routers]
+    #[http.routers.https-whoami]
+        #entryPoints = ["http", "https"]
+        #service = "whoami-flotilla@docker"
+        #rule = "Host(`whoami.maxocull.net`)"
+        #[http.routers.https-whoami.tls]
+            #certResolver = "le-main"
+            #[[http.routers.https-whoami.tls.domains]]
+                #main = "whoami.maxocull.net"
+    #[http.routers.http-pgadmin]
+        #entryPoints = ["http"]
+        #rule = "PathPrefix(`/pgadmin`)"
+        #service = "pgadmin"
+        ##middlewares = ["limit-all", "strip-all"]
+    ##[http.routers.https-pgadmin]
+        ##entryPoints = ["https"]
+        ##rule = "PathPrefix(`/pgadmin`)"
+        ##service = "pgadmin"
+        ##middlewares = ["limit-all", "local-only", "strip-all"]
+        ##[http.routers.https-pgadmin.tls]
+    #[http.routers.http-grafana]
+        #entryPoints = ["http"]
+        #rule = "PathPrefix(`/grafana`)"
+        #service = "grafana"
+        #middlewares = ["limit-all", "local-only", "strip-all"]
+    #[http.routers.https-grafana]
+        #entryPoints = ["https"]
+        #rule = "PathPrefix(`/grafana`)"
+        #service = "grafana"
+        #middlewares = ["limit-all", "local-only", "strip-all"]
+        #[http.routers.https-grafana.tls]
+#[http.middlewares]
+    #[http.middlewares.strip-all.stripPrefix]
+        #prefix = ["/pgadmin"]
+    #[http.middlewares.local-only.ipWhiteList]
+        #sourceRange = ["127.0.0.1/32", "192.168.0.0/16", "172.16.0.0/16", "169.254.0.0/16", "10.0.0.0/8"]
+    #[http.middlewares.limit-all.rateLimit]
+        #average = 50
+        #burst = 20
+
+################################################################
 # Traefik logs configuration
 ################################################################
 
@@ -74,7 +151,8 @@
     # Optional
     # Default: os.Stdout
     #
-    filePath = "/var/log/traefik.log"
+    # TODO: Re-enable
+    #filePath = "/var/log/traefik.log"
 
     # Format is either "json" or "common".
     #
@@ -82,47 +160,6 @@
     # Default: "common"
     #
     # format = "json"
-
-################################################################
-# Routers
-################################################################
-
-[tcp.routers]
-    [tcp.routers.openvpn]
-        entryPoints = ["vpnudp"]
-        service = "openvpn"
-
-[http.routers]
-    [http.routers.http-pgadmin]
-        entryPoints = ["http"]
-        rule = "PathPrefix(`/pgadmin`)"
-        service = "pgadmin"
-        #middlewares = ["limit-all", "strip-all"]
-    #[http.routers.https-pgadmin]
-        #entryPoints = ["https"]
-        #rule = "PathPrefix(`/pgadmin`)"
-        #service = "pgadmin"
-        #middlewares = ["limit-all", "local-only", "strip-all"]
-        #[http.routers.https-pgadmin.tls]
-    [http.routers.http-grafana]
-        entryPoints = ["http"]
-        rule = "PathPrefix(`/grafana`)"
-        service = "grafana"
-        middlewares = ["limit-all", "local-only", "strip-all"]
-    [http.routers.https-grafana]
-        entryPoints = ["https"]
-        rule = "PathPrefix(`/grafana`)"
-        service = "grafana"
-        middlewares = ["limit-all", "local-only", "strip-all"]
-        [http.routers.https-grafana.tls]
-[http.middlewares]
-    [http.middlewares.strip-all.stripPrefix]
-        prefix = ["/pgadmin"]
-    [http.middlewares.local-only.ipWhiteList]
-        sourceRange = ["127.0.0.1/32", "192.168.0.0/16", "172.16.0.0/16", "169.254.0.0/16", "10.0.0.0/8"]
-    [http.middlewares.limit-all.rateLimit]
-        average = 50
-        burst = 20
 
 ################################################################
 # Access logs configuration
@@ -207,14 +244,14 @@
     # Optional
     # Default: "Host(`{{ normalize .Name }}`)"
     #
-    # defaultRule = "Host(`{{ normalize .Name }}.docker.localhost`)"
-    defaultRule = "PathPrefix(`/{{ normalize .Name }}`)"
+    defaultRule = "Host(`{{ normalize .Name }}.maxocull.net`)"
+    #defaultRule = "PathPrefix(`/{{ normalize .Name }}`)"
 
     # Expose containers by default in traefik
     #
     # Optional
     # Default: true
     #
-    exposedByDefault = false
+    exposedByDefault = true
 
     useBindPortIp=true

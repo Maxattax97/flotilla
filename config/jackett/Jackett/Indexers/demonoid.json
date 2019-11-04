@@ -15,6 +15,6 @@
     "id": "lasterror",
     "type": "hiddendata",
     "name": "LastError",
-    "value": null
+    "value": "Exception (demonoid): Got redirected to another domain. Try changing the indexer URL to https://www.demonoid.is/.: Parse error"
   }
 ]
