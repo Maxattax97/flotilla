@@ -9,6 +9,7 @@ config/*
 !config/traefik/
 !config/prometheus/
 !config/grafana/
+!config/letsencrypt/
 
 config/openvpn/*
 !config/openvpn/openvpn.conf
@@ -26,3 +27,10 @@ config/jackett/*
 config/jackett/Jackett/*
 !config/jackett/Jackett/Indexers/
 config/jackett/Jackett/Indexers/*.bak
+
+config/letsencrypt/*
+!config/letsencrypt/nginx/
+!config/letsencrypt/php/
+!config/letsencrypt/www/
+config/letsencrypt/nginx/dhparams.pem
+config/letsencrypt/nginx/.htpasswd
