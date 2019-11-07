@@ -30,6 +30,35 @@ version: "3.7"
   # TODO: Make some services run on the host (performance, true IP visibility)
 services:
 
+  letsencrypt:
+    image: linuxserver/letsencrypt
+    container_name: letsencrypt
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - URL=maxocull.net
+      - SUBDOMAINS=www,resolute,whoami,dash,cloud,git
+      - VALIDATION=http # DNS? so can use wildcards
+      #- DNSPLUGIN=cloudflare #optional
+      #- DUCKDNSTOKEN=<token> #optional
+      - EMAIL=max.ocull@protonmail.com
+      - DHLEVEL=2048
+      - ONLY_SUBDOMAINS=false
+      #- EXTRA_DOMAINS=<extradomains> #optional
+      - STAGING=true # TODO: Disable when done testing.
+    volumes:
+      - /opt/flotilla/data/letsencrypt/keys:/config/etc/letsencrypt:Z
+      - /opt/flotilla/data/letsencrypt/www:/config/www:Z
+      - /opt/flotilla/config/letsencrypt:/config:z
+      - /opt/flotilla/data/all/logs/letsencrypt:/config/log:Z
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: unless-stopped
+
   dockersocket:
     # Limits access to the docker socket which is dangerous to expose to
     # containers which see the internet; compromise of these external facing
@@ -73,6 +102,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     labels:
       - 'traefik.enable=false'
+    restart: unless-stopped
 
   traefik:
     # Reverse proxy with auto-routing capabilities. Aimed at HTTP/S but works
@@ -153,6 +183,7 @@ services:
     #volumes:
       #- /var/run/docker.sock:/var/run/docker.sock
       ##- /opt/flotilla/config/watchtower/config.json:/config.json:z
+    #restart: unless-stopped
 
   pihole:
     image: pihole/pihole
@@ -223,6 +254,8 @@ services:
   jackett:
     image: linuxserver/jackett
     container_name: jackett
+    depends_on:
+      - cleanroom
     environment:
       - PUID=1000
       - PGID=1000
@@ -270,6 +303,9 @@ services:
   sonarr:
     image: linuxserver/sonarr
     container_name: sonarr
+    depends_on:
+      - cleanroom
+      - jackett
     environment:
       - PUID=1000
       - PGID=1000
@@ -286,6 +322,9 @@ services:
   radarr:
     image: linuxserver/radarr
     container_name: radarr
+    depends_on:
+      - cleanroom
+      - jackett
     environment:
       - PUID=1000
       - PGID=1000
@@ -302,6 +341,9 @@ services:
   lidarr:
     image: linuxserver/lidarr
     container_name: lidarr
+    depends_on:
+      - cleanroom
+      - jackett
     environment:
       - PUID=1000
       - PGID=1000
@@ -359,6 +401,8 @@ services:
     container_name: pgadmin
     env_file:
       - /opt/flotilla/secrets.env
+    depends_on:
+      - postgres
     environment:
       - PUID=1000
       - PGID=1000
@@ -393,7 +437,7 @@ services:
     restart: unless-stopped
 
   nextcloud:
-    # TODO: Switch to FPM after reverse proxy is set up.
+    # Switch to FPM after reverse proxy is set up.
     image: nextcloud
     container_name: nextcloud
     depends_on:
@@ -408,7 +452,7 @@ services:
       - POSTGRES_DB=nextcloud
       - POSTGRES_USER=nextcloud
       - POSTGRES_HOST=postgres
-      - NEXTCLOUD_ADMIN_USER=harbor
+      - NEXTCLOUD_ADMIN_USER=entourage
       - REDIS_HOST=redis
       #- SMTP_HOST=
       #- SMTP_SECURE=ssl
@@ -421,6 +465,7 @@ services:
       - /opt/flotilla/data/nextcloud:/var/www/html:Z
     ports:
       - "3080:80"
+      #- "3090:9000" # for FPM
     restart: unless-stopped
 
   gitlab:
@@ -428,6 +473,10 @@ services:
     container_name: gitlab
     env_file:
       - /opt/flotilla/secrets.env
+    depends_on:
+      - postgres
+      - redis
+      - postfix
     environment:
       - PUID=1000
       - PGID=1000
@@ -518,14 +567,16 @@ services:
     user: "1000"
     env_file:
       - /opt/flotilla/secrets.env
+    depends_on:
+      - prometheus
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
-      - "GF_SECURITY_ADMIN_USER=admin"
+      - "GF_SECURITY_ADMIN_USER=entourage"
       - "GF_SERVER_DOMAIN=grafana.maxocull.net"
       - "GF_SERVER_ROOT_URL=https://grafana.maxocull.net"
-      #- GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource,grafana-worldmap-panel,grafana-pie-chart-panel
+      - "GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource,grafana-worldmap-panel,grafana-pie-chart-panel"
     volumes:
       - /opt/flotilla/config/grafana:/etc/grafana:z
       - /opt/flotilla/data/grafana/data:/var/lib/grafana:z
@@ -565,6 +616,8 @@ services:
     image: prom/prometheus
     container_name: prometheus
     user: "1000"
+    depends_on:
+      - nodeexporter
     environment:
       - PUID=1000
       - PGID=1000
@@ -636,31 +689,44 @@ services:
       #- "443:443"
     #restart: unless-stopped
 
-  letsencrypt:
-    image: linuxserver/letsencrypt
-    container_name: letsencrypt
-    cap_add:
-      - NET_ADMIN
+  morty:
+    image: dalf/morty
+    container_name: morty
+    cap_drop:
+      - ALL
+    env_file:
+      - /opt/flotilla/secrets.env
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
-      - URL=maxocull.net
-      - SUBDOMAINS=www,resolute,whoami,dash,cloud,git
-      - VALIDATION=http # DNS? so can use wildcards
-      #- DNSPLUGIN=cloudflare #optional
-      #- DUCKDNSTOKEN=<token> #optional
-      - EMAIL=max.ocull@protonmail.com
-      - DHLEVEL=2048
-      - ONLY_SUBDOMAINS=false
-      #- EXTRA_DOMAINS=<extradomains> #optional
-      - STAGING=true # TODO: Disable when done testing.
-    volumes:
-      - /opt/flotilla/data/letsencrypt/keys:/config/etc/letsencrypt:Z
-      - /opt/flotilla/data/letsencrypt/www:/config/www:Z
-      - /opt/flotilla/config/letsencrypt:/config:z
-      - /opt/flotilla/data/all/logs/letsencrypt:/config/log:Z
     ports:
-      - "80:80"
-      - "443:443"
+      - "4040:3000"
+    restart: unless-stopped
+
+  searx:
+    image: searx/searx
+    container_name: searx
+    privileged: true # Necessary for docker access.
+    cap_drop:
+      - ALL
+    cap_drop:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+    depends_on:
+      - morty
+    env_file:
+      - /opt/flotilla/secrets.env
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - BASE_URL=https://search.maxocull.net/
+      - MORTY_URL=http://morty/
+    volumes:
+      - /opt/flotilla/config/searx:/etc/searx:z
+    ports:
+      - "4050:8080"
     restart: unless-stopped
