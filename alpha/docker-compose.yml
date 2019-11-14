@@ -104,48 +104,48 @@ services:
       - 'traefik.enable=false'
     restart: unless-stopped
 
-  traefik:
-    # Reverse proxy with auto-routing capabilities. Aimed at HTTP/S but works
-    # with TCP too.
-    image: traefik
-    container_name: traefik
-    command:
-      #- "--configFile=/etc/traefik/traefik.toml"
-      - "--api.insecure=true" # TODO: Change this back.
-      - "--ping"
-      - "--providers.docker=true"
-      - "--providers.docker.endpoint=tcp://dockersocket:2375"
-      - "--providers.docker.defaultRule=Host(`{{ normalize .Name }}.maxocull.net`)"
-      - "--providers.docker.exposedByDefault=true"
-      - "--providers.docker.useBindPortIp=false"
-      #- "--log.filePath=/var/log/traefik.log"
-      - "--log.level=DEBUG"
-      - "--accessLog.filePath=/var/log/access.log"
-      - "--metrics.prometheus"
-      - "--global.sendAnonymousUsage=false"
-      - "--global.checkNewVersion=true"
-      - "--entrypoints.http.address=:80"
-      - "--entrypoints.https.address=:443"
-      - "--entrypoints.traefik.address=:8080"
-      - "--certificatesResolvers.le-main.acme.email=max.ocull@protonmail.com"
-      - "--certificatesResolvers.le-main.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory" # Staging server for testing.
-      #- "--certificatesResolvers.le-main.acme.storage=/var/acme/acme.json"
-      - "--certificatesResolvers.le-main.acme.tlsChallenge=true"
-      #- "--certificatesResolvers.le-main.acme.httpChallenge=true"
-      #- "--certificatesResolvers.le-main.acme.httpChallenge.entryPoint=http"
-    ports:
-      - "80:80"
-      - "8080:8080"
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Indianapolis
-      #- DOCKER_HOST=tcp://dockersocket
-    volumes:
-      - /opt/flotilla/data/traefik:/var/acme:z
-      - /opt/flotilla/config/traefik:/etc/traefik:z
-      - /opt/flotilla/data/all/logs/traefik:/var/log:Z
-    restart: unless-stopped
+  #traefik:
+    ## Reverse proxy with auto-routing capabilities. Aimed at HTTP/S but works
+    ## with TCP too.
+    #image: traefik
+    #container_name: traefik
+    #command:
+      ##- "--configFile=/etc/traefik/traefik.toml"
+      #- "--api.insecure=true" # TODO: Change this back.
+      #- "--ping"
+      #- "--providers.docker=true"
+      #- "--providers.docker.endpoint=tcp://dockersocket:2375"
+      #- "--providers.docker.defaultRule=Host(`{{ normalize .Name }}.maxocull.net`)"
+      #- "--providers.docker.exposedByDefault=true"
+      #- "--providers.docker.useBindPortIp=false"
+      ##- "--log.filePath=/var/log/traefik.log"
+      #- "--log.level=DEBUG"
+      #- "--accessLog.filePath=/var/log/access.log"
+      #- "--metrics.prometheus"
+      #- "--global.sendAnonymousUsage=false"
+      #- "--global.checkNewVersion=true"
+      #- "--entrypoints.http.address=:80"
+      #- "--entrypoints.https.address=:443"
+      #- "--entrypoints.traefik.address=:8080"
+      #- "--certificatesResolvers.le-main.acme.email=max.ocull@protonmail.com"
+      #- "--certificatesResolvers.le-main.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory" # Staging server for testing.
+      ##- "--certificatesResolvers.le-main.acme.storage=/var/acme/acme.json"
+      #- "--certificatesResolvers.le-main.acme.tlsChallenge=true"
+      ##- "--certificatesResolvers.le-main.acme.httpChallenge=true"
+      ##- "--certificatesResolvers.le-main.acme.httpChallenge.entryPoint=http"
+    #ports:
+      #- "80:80"
+      #- "8080:8080"
+    #environment:
+      #- PUID=1000
+      #- PGID=1000
+      #- TZ=America/Indianapolis
+      ##- DOCKER_HOST=tcp://dockersocket
+    #volumes:
+      #- /opt/flotilla/data/traefik:/var/acme:z
+      #- /opt/flotilla/config/traefik:/etc/traefik:z
+      #- /opt/flotilla/data/all/logs/traefik:/var/log:Z
+    #restart: unless-stopped
 
   whoami:
     image: containous/whoami

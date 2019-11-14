@@ -25,11 +25,11 @@ if [[ "$(probe dnf)" -eq 1 ]]; then
     elevate dnf upgrade -y
     elevate dnf install -y \
         docker docker-compose tmux neovim nodejs rsync htop git postgresql \
-        pwgen suricata pulledpork
+        pwgen suricata pulledpork fail2ban
 elif [[ "$(probe apt)" -eq 1 ]]; then
     elevate apt update
     elevate apt upgrade -y
-    # TODO: docker-compose nodejs postgresql pwgen suricata pulledpork
+    # TODO: docker-compose nodejs postgresql pwgen suricata pulledpork fail2ban
     elevate apt install -y \
         docker tmux neovim rsync htop
 fi
@@ -47,9 +47,9 @@ elevate pip2 install pyyaml
 # Install the default Suricata config tweaked for IPS instead of IDS settings.
 elevate cp "${GITROOT}/config/suricata/suricata.yaml" /etc/suricata/suricata.yaml
 if [[ "$(probe dnf)" -eq 1 ]]; then
-    elevate echo "-q 0" > /etc/sysconfig/suricata
+    elevate echo "OPTIONS=\"-q 0\"" > /etc/sysconfig/suricata
 elif [[ "$(probe apt)" -eq 1 ]]; then
-    elevate echo "-q 0" > /etc/default/suricata
+    elevate echo "OPTIONS=\"-q 0\"" > /etc/default/suricata
 fi
 
 # Setup Suricata to use the et/open set.
@@ -76,6 +76,11 @@ for module in $GITROOT/config/*/; do
     dest="${BASE}/config/$(basename "$module")"
     elevated_link_source $module $dest
 done
+
+# Link fail2ban ssh protection.
+elevated_link_source "/etc/fail2ban/jail.d/local.conf" "${BASE}/config/fail2ban/local.conf"
+elevate systemctl enable fail2ban.service
+elevate systemctl start fail2ban.service
 
 # TODO: Make sure all config AND data folders are created so permissions may be set.
 

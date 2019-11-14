@@ -65,7 +65,7 @@ case "$1" in
                 ;;
         esac
         ;;
-    "ids")
+    "ips")
         case "$2" in
             "test")
                 elevate suricata -T -c /etc/suricata/suricata.yaml
@@ -74,10 +74,10 @@ case "$1" in
                 fi
                 ;;
             "up")
-                flotilla ids test
-                if [[ "$?" -ne 0 ]]; then
-                    exit 1
-                fi
+                #flotilla ips test
+                #if [[ "$?" -ne 0 ]]; then
+                    #exit 1
+                #fi
 
                 elevate systemctl start suricata.service
 
@@ -98,11 +98,47 @@ case "$1" in
                 elevate journalctl -f -u suricata.service
                 ;;
             *)
-                echo "Usage: flotilla ids <test | up | down | update | status>"
+                echo "Usage: flotilla ips <test | up | down | update | status>"
+                ;;
+        esac
+        ;;
+    "fw")
+        case "$2" in
+            "status")
+                sudo ufw status verbose # numbered
+                ;;
+            "enable")
+                sudo ufw enable
+                ;;
+            "disable")
+                sudo ufw disable
+                ;;
+            "update")
+                sudo ufw reset
+                sudo ufw default allow outgoing
+                sudo ufw default deny incoming
+                sudo ufw default allow incoming from 192.168.0.0/16
+                sudo ufw default allow incoming from 172.16.0.0/12
+                sudo ufw default allow incoming from 10.0.0.0/8
+                sudo ufw logging on
+                sudo ufw allow 22/tcp       # SSH
+                sudo ufw limit 22/tcp
+                sudo ufw allow 25/tcp       # SMTP
+                sudo ufw allow 53           # DNS
+                sudo ufw allow 67/udp       # DHCP
+                sudo ufw allow 80           # HTTP
+                sudo ufw allow 443          # HTTPS
+                sudo ufw allow 1194/udp     # OpenVPN
+                sudo ufw allow 6881         # QBittorrent
+                sudo ufw allow 25565        # Minecraft
+                sudo ufw allow 27015        # Steam
+                ;;
+            *)
+                echo "Usage: flotilla fw <status | enable | disable | update>"
                 ;;
         esac
         ;;
     *)
-        echo "Usage: flotilla <install | update | start | stop | restart | status | follow | ovpn | ids>"
+        echo "Usage: flotilla <install | update | start | stop | restart | status | follow | ovpn | ips | fw>"
         ;;
 esac

@@ -43,7 +43,10 @@ Suricata requires some IPTables rules to intercept these packets, so be warned
 that while these rules are enabled, Suricata must also be online; otherwise, no
 data will pass, and any connections (e.g., SSH) will be terminated.
 
-The IDS may be handled via the `flotilla ids` subcommands.
+The IPS may be handled via the `flotilla ips` subcommands.
+
+If you have issues, check that `/etc/sysconfig/suricata` is using the `-q 0`
+option so that it can execute in inline (IPS) mode and intercept packets!
 
 ### Nginx & Let's Encrypt
 
