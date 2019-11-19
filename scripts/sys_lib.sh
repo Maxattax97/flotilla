@@ -33,7 +33,7 @@ elevate() {
 }
 
 # NOTE: The trailing slash MATTERS!
-# link_source "/home/max/config/i3/" "/home/max/.config/i3"
+# link_source "/home/max/src/config/i3/" "/home/max/.config/i3"
 link_source() {
     src="${1}"
     dest="${2}"

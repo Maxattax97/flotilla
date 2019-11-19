@@ -1,16 +1,10 @@
 ---
 version: "3.7"
 # Services:
-  # Traefik
-  # Nextcloud
-  # Rancher?
   # Jenkins
   # Blog
   # Mayan
   # Email server
-  # LibreOffice Online / Collabora
-  # PiHole or other DNS
-  # Snort or other IDS
   # Joplin
   # Searx https://github.com/linuxserver/Heimdall/issues/307
   # PrivateBin
@@ -24,13 +18,22 @@ version: "3.7"
   # i2p
   # KVM?
   # LDAP?
+  # Matomo
+  # GraphHopper
 # Organization
   # TODO: Apply consistent port assignment scheme.
   # TODO: Segregate services into subnetworks.
   # TODO: Make some services run on the host (performance, true IP visibility)
+  # TODO: Cap CPU and RAM usage per container.
+# Security
+  # :Z is private Docker share (guarded by SELinux); these files are for that
+  # container only.
+  # :z is public Docker share (guarded by SELinux); these files are for several
+  # containers to share.
 services:
 
   letsencrypt:
+    # TODO: map.
     image: linuxserver/letsencrypt
     container_name: letsencrypt
     cap_add:
@@ -39,21 +42,21 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
-      - URL=maxocull.net
-      - SUBDOMAINS=www,resolute,whoami,dash,cloud,git
+      - URL=maxocull.com
+      - SUBDOMAINS=www,resolute,whoami,dash,cloud,git,dns,office,lidarr,sonarr,radarr,media,torrent,jackett,ci,grafana,search
       - VALIDATION=http # DNS? so can use wildcards
       #- DNSPLUGIN=cloudflare #optional
       #- DUCKDNSTOKEN=<token> #optional
       - EMAIL=max.ocull@protonmail.com
       - DHLEVEL=2048
       - ONLY_SUBDOMAINS=false
-      #- EXTRA_DOMAINS=<extradomains> #optional
-      - STAGING=true # TODO: Disable when done testing.
+      - EXTRA_DOMAINS=maxocull.net,www.maxocull.net,resolute.maxocull.net,whoami.maxocull.net,dash.maxocull.net,cloud.maxocull.net,git.maxocull.net,dns.maxocull.net,office.maxocull.net,lidarr.maxocull.net,sonarr.maxocull.net,radarr.maxocull.net,media.maxocull.net,torrent.maxocull.net,jackett.maxocull.net,ci.maxocull.net,grafana.maxocull.net,search.maxocull.net
+      - STAGING=false # Enable when testing.
     volumes:
       - /opt/flotilla/data/letsencrypt/keys:/config/etc/letsencrypt:Z
       - /opt/flotilla/data/letsencrypt/www:/config/www:Z
       - /opt/flotilla/config/letsencrypt:/config:z
-      - /opt/flotilla/data/all/logs/letsencrypt:/config/log:Z
+      - /opt/flotilla/data/all/logs/letsencrypt:/config/log:z
     ports:
       - "80:80"
       - "443:443"
@@ -115,7 +118,7 @@ services:
       #- "--ping"
       #- "--providers.docker=true"
       #- "--providers.docker.endpoint=tcp://dockersocket:2375"
-      #- "--providers.docker.defaultRule=Host(`{{ normalize .Name }}.maxocull.net`)"
+      #- "--providers.docker.defaultRule=Host(`{{ normalize .Name }}.maxocull.com`)"
       #- "--providers.docker.exposedByDefault=true"
       #- "--providers.docker.useBindPortIp=false"
       ##- "--log.filePath=/var/log/traefik.log"
@@ -144,7 +147,7 @@ services:
     #volumes:
       #- /opt/flotilla/data/traefik:/var/acme:z
       #- /opt/flotilla/config/traefik:/etc/traefik:z
-      #- /opt/flotilla/data/all/logs/traefik:/var/log:Z
+      #- /opt/flotilla/data/all/logs/traefik:/var/log:z
     #restart: unless-stopped
 
   whoami:
@@ -160,13 +163,13 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.http-whoami.rule=Host(`whoami.maxocull.net`)"
+      - "traefik.http.routers.http-whoami.rule=Host(`whoami.maxocull.com`)"
       - "traefik.http.routers.http-whoami.entryPoints=http"
-      - "traefik.http.routers.https-whoami.rule=Host(`whoami.maxocull.net`)"
+      - "traefik.http.routers.https-whoami.rule=Host(`whoami.maxocull.com`)"
       - "traefik.http.routers.https-whoami.entryPoints=https"
       - "traefik.http.routers.https-whoami.tls=true"
       - "traefik.http.routers.https-whoami.tls.certResolver=le-main"
-      #- "traefik.http.routers.https-whoami.tls.domains[0].main=whoami.maxocull.net"
+      #- "traefik.http.routers.https-whoami.tls.domains[0].main=whoami.maxocull.com"
 
   #watchtower:
     ## TODO: Not recommended by LinuxServer.io
@@ -193,40 +196,26 @@ services:
       - "53:53/udp"
       - "67:67/udp"
       - "1188:80/tcp"
-      - "1443:443/tcp"
+      - "2443:443/tcp"
     env_file:
       - /opt/flotilla/secrets.env
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
-      - DNSSEC=True
+      - "DNS1=84.200.69.80"  # DNS.WATCH servers, with DNSSEC enabled.
+      - "DNS2=84.200.70.40"
+      - "DNSSEC=True"
+      #- "ServerIP=107.217.95.124" # Only required for DHCP.
     volumes:
       - /opt/flotilla/config/pihole/pihole:/etc/pihole:z
       - /opt/flotilla/config/pihole/dnsmasq:/etc/dnsmasq.d:z
     dns:
       - 127.0.0.1
-      # DNS.WATCH servers, with DNSSEC enabled.
       - 84.200.69.80
-      - 84.200.70.40
-    cap_add:
-      - NET_ADMIN
+    #cap_add: # DHCP only.
+      #- NET_ADMIN
     restart: unless-stopped
-    #labels:
-      #- "traefik.enable=true"
-      #- "traefik.backend=pihole"
-      #- "traefik.port=80"
-      #- "traefik.frontend.rule=HostRegexp:dns.maxocull.com,{catchall:.*}"
-      #- "traefik.frontend.priority=1"
-      #- traefik.frontend.headers.SSLRedirect=true
-      #- traefik.frontend.headers.STSSeconds=315360000
-      #- traefik.frontend.headers.browserXSSFilter=true
-      #- traefik.frontend.headers.contentTypeNosniff=true
-      #- traefik.frontend.headers.forceSTSHeader=true
-      #- traefik.frontend.headers.SSLHost=maxocull.com
-      #- traefik.frontend.headers.STSIncludeSubdomains=true
-      #- traefik.frontend.headers.STSPreload=true
-      #- traefik.frontend.headers.frameDeny=true
 
   openvpn:
     image: kylemanna/openvpn
@@ -263,7 +252,7 @@ services:
       - RUN_OPTS="--ProxyConnection=cleanroom:8118"
     volumes:
       - /opt/flotilla/config/jackett:/config:z
-      - /opt/flotilla/data/all/torrents:/downloads:Z
+      - /opt/flotilla/data/all/torrents:/downloads:z
     ports:
       - "9117:9117"
     restart: unless-stopped
@@ -290,8 +279,8 @@ services:
       - VPN_PROV=nordvpn # This is a custom VPN.
     volumes:
       - /opt/flotilla/config/cleanroom:/config:z
-      - /opt/flotilla/data/all/torrents:/torrents:Z
-      - /opt/flotilla/data/cleanroom:/data:Z
+      - /opt/flotilla/data/all/torrents:/torrents:z
+      - /opt/flotilla/data/cleanroom:/data:z
       - /etc/localtime:/etc/localtime:ro
     ports:
       - "6881:6881"
@@ -313,8 +302,8 @@ services:
       - UMASK=022
     volumes:
       - /opt/flotilla/config/sonarr:/config:z
-      - /opt/flotilla/data/all/tvshows:/tv:Z
-      - /opt/flotilla/data/cleanroom:/data:Z
+      - /opt/flotilla/data/all/tvshows:/tv:z
+      - /opt/flotilla/data/cleanroom:/data:z
     ports:
       - "8989:8989"
     restart: unless-stopped
@@ -332,8 +321,8 @@ services:
       - UMASK=022
     volumes:
       - /opt/flotilla/config/radarr:/config:z
-      - /opt/flotilla/data/all/movies:/movies:Z
-      - /opt/flotilla/data/cleanroom:/data:Z
+      - /opt/flotilla/data/all/movies:/movies:z
+      - /opt/flotilla/data/cleanroom:/data:z
     ports:
       - "7878:7878"
     restart: unless-stopped
@@ -351,8 +340,8 @@ services:
       - UMASK=022
     volumes:
       - /opt/flotilla/config/lidarr:/config:z
-      - /opt/flotilla/data/all/music:/music:Z
-      - /opt/flotilla/data/cleanroom:/data:Z
+      - /opt/flotilla/data/all/music:/music:z
+      - /opt/flotilla/data/cleanroom:/data:z
     ports:
       - "8686:8686"
     restart: unless-stopped
@@ -367,12 +356,12 @@ services:
       - UMASK_SET=<022> #optional
     volumes:
       - /opt/flotilla/config/jellyfin:/config:z
-      - /opt/flotilla/data/all/tvshows:/data/tvshows:Z
-      - /opt/flotilla/data/all/movies:/data/movies:Z
-      - /opt/flotilla/data/all/music:/data/music:Z
-      - /opt/flotilla/data/all/books:/data/books:Z
-      - /opt/flotilla/data/all/photos:/data/photos:Z
-      - /opt/flotilla/data/jellyfin/transcode:/transcode:Z #optional
+      - /opt/flotilla/data/all/tvshows:/data/tvshows:z
+      - /opt/flotilla/data/all/movies:/data/movies:z
+      - /opt/flotilla/data/all/music:/data/music:z
+      - /opt/flotilla/data/all/books:/data/books:z
+      - /opt/flotilla/data/all/photos:/data/photos:z
+      - /opt/flotilla/data/jellyfin/transcode:/transcode:z #optional
     ports:
       - "8096:8096"
       #- "8920:8920" #optional, https
@@ -438,11 +427,13 @@ services:
 
   nextcloud:
     # Switch to FPM after reverse proxy is set up.
+    # Or not because FPM requires hosting files on nginx (ick).
     image: nextcloud
     container_name: nextcloud
     depends_on:
       - redis
       - postgres
+      - nextcloud-cron
     env_file:
       - /opt/flotilla/secrets.env
     environment:
@@ -454,18 +445,50 @@ services:
       - POSTGRES_HOST=postgres
       - NEXTCLOUD_ADMIN_USER=entourage
       - REDIS_HOST=redis
-      #- SMTP_HOST=
-      #- SMTP_SECURE=ssl
-      #- SMTP_PORT=465
-      #- SMTP_NAME=nextcloud
-      #- MAIL_FROM_ADDRESS=nextcloud
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_SECURE=tls
+      - SMTP_PORT=465
+      - SMTP_NAME=maxocull.com
+      - MAIL_FROM_ADDRESS=maxocull.com@gmail.com
       #- MAIL_DOMAIN=mail.maxocull.com
     volumes:
       - /opt/flotilla/config/nextcloud:/var/www/html/config:z
-      - /opt/flotilla/data/nextcloud:/var/www/html:Z
+      - /opt/flotilla/data/nextcloud:/var/www/html:z # Share this folder with cron.
     ports:
       - "3080:80"
       #- "3090:9000" # for FPM
+    restart: unless-stopped
+
+  nextcloud-cron:
+    # https://github.com/nextcloud/docker/issues/134
+    image: nextcloud
+    container_name: nextcloud-cron
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+    entrypoint: /cron.sh
+    volumes:
+      - /opt/flotilla/config/nextcloud:/var/www/html/config:z
+      - /opt/flotilla/data/nextcloud:/var/www/html:z # Share this folder with cron.
+    restart: unless-stopped
+
+  collabora:
+    image: collabora/code
+    container_name: collabora
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - "domain=cloud\\.maxocull\\.com|cloud\\.maxocull\\.net"
+      - "dictionaries=en"
+    volumes:
+      - /opt/flotilla/config/nextcloud:/var/www/html/config:z
+      - /opt/flotilla/data/nextcloud:/var/www/html:z
+    ports:
+      - "9980:9980"
+    cap_add:
+      - MKNOD
     restart: unless-stopped
 
   gitlab:
@@ -476,7 +499,7 @@ services:
     depends_on:
       - postgres
       - redis
-      - postfix
+      #- postfix
     environment:
       - PUID=1000
       - PGID=1000
@@ -487,12 +510,13 @@ services:
       - DB_EXTENSION=pg_trgm
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - SMTP_ENABLED=false # Flip on after the mail server is setup.
-      - IMAP_ENABLED=false # Flip on after the mail server is setup.
-      - IMAP_USER=gitlab@maxocull.com
-      - IMAP_DOMAIN=www.maxocull.com
-      - IMAP_HOST=mail.maxocull.com
-      - IMAP_PORT=993
+      #- SMTP_ENABLED=true # Flip on after the mail server is setup.
+      - IMAP_ENABLED=true # Flip on after the mail server is setup.
+      - "IMAP_USER=maxocull.com@gmail.com"
+      - "GITLAB_INCOMING_EMAIL_ADDRESS=maxocull.com+%{key}@gmail.com"
+      #- IMAP_DOMAIN=www.maxocull.com
+      #- IMAP_HOST=mail.maxocull.com
+      #- IMAP_PORT=993
       #- PIWIK_URL=
       #- PIWIK_SITE_ID=
     depends_on:
@@ -522,21 +546,21 @@ services:
       #- "50000:50000"
     #restart: unless-stopped
 
-  postfix:
-    image: mailu/postfix
-    container_name: postfix
-    env_file:
-      - /opt/flotilla/mailu.env
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Indianapolis
-    volumes:
-      - /opt/flotilla/data/postfix:/data:z
-      - /opt/flotilla/config/postfix:/overrides:z
-    ports:
-      - "25:25"
-      - "10025:10025"
+  #postfix:
+    #image: mailu/postfix
+    #container_name: postfix
+    #env_file:
+      #- /opt/flotilla/mailu.env
+    #environment:
+      #- PUID=1000
+      #- PGID=1000
+      #- TZ=America/Indianapolis
+    #volumes:
+      #- /opt/flotilla/data/postfix:/data:z
+      #- /opt/flotilla/config/postfix:/overrides:z
+    #ports:
+      #- "25:25"
+      #- "10025:10025"
 
   heimdall:
     image: linuxserver/heimdall
@@ -553,13 +577,13 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.http-dash.rule=Host(`dash.maxocull.net`)"
+      - "traefik.http.routers.http-dash.rule=Host(`dash.maxocull.com`)"
       - "traefik.http.routers.http-dash.entryPoints=http"
-      - "traefik.http.routers.https-dash.rule=Host(`dash.maxocull.net`)"
+      - "traefik.http.routers.https-dash.rule=Host(`dash.maxocull.com`)"
       - "traefik.http.routers.https-dash.entryPoints=https"
       - "traefik.http.routers.https-dash.tls=true"
       - "traefik.http.routers.https-dash.tls.certResolver=le-main"
-      #- "traefik.http.routers.https-dash.tls.domains[0].main=dash.maxocull.net"
+      #- "traefik.http.routers.https-dash.tls.domains[0].main=dash.maxocull.com"
 
   grafana:
     image: grafana/grafana
@@ -574,8 +598,8 @@ services:
       - PGID=1000
       - TZ=America/Indianapolis
       - "GF_SECURITY_ADMIN_USER=entourage"
-      - "GF_SERVER_DOMAIN=grafana.maxocull.net"
-      - "GF_SERVER_ROOT_URL=https://grafana.maxocull.net"
+      - "GF_SERVER_DOMAIN=grafana.maxocull.com"
+      - "GF_SERVER_ROOT_URL=https://grafana.maxocull.com"
       - "GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource,grafana-worldmap-panel,grafana-pie-chart-panel"
     volumes:
       - /opt/flotilla/config/grafana:/etc/grafana:z
@@ -607,7 +631,7 @@ services:
       - PGID=1000
       - TZ=America/Indianapolis
     volumes:
-      - /opt/flotilla/data/all/logs:/var/log:Z
+      - /opt/flotilla/data/all/logs:/var/log:z
     #command:
       #- '--config.file=/etc/promtail/docker-config.yml'
     restart: unless-stopped
@@ -683,7 +707,7 @@ services:
       #- STAGING=false
     #volumes:
       #- /opt/flotilla/config/nginx:/config:z
-      #- /opt/flotilla/data/all/logs/nginx:/config/log:Z
+      #- /opt/flotilla/data/all/logs/nginx:/config/log:z
     #ports:
       #- "80:80"
       #- "443:443"
@@ -723,10 +747,23 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
-      - BASE_URL=https://search.maxocull.net/
+      - BASE_URL=https://search.maxocull.com/
       - MORTY_URL=http://morty/
     volumes:
       - /opt/flotilla/config/searx:/etc/searx:z
     ports:
       - "4050:8080"
+    restart: unless-stopped
+
+  graphhopper:
+    image: graphhopper/graphhopper
+    container_name: graphhopper
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+    volumes:
+      - /opt/flotilla/data/graphhopper:/data:z
+    ports:
+      - "8999:8989"
     restart: unless-stopped

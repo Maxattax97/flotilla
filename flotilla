@@ -82,12 +82,12 @@ case "$1" in
                 elevate systemctl start suricata.service
 
                 # NOTE: Dangerous! Can disrupt the SSH connection if Suricata fails.
-                elevate iptables -A INPUT -j NFQUEUE
-                elevate iptables -A OUTPUT -j NFQUEUE
+                #elevate iptables -A INPUT -j NFQUEUE
+                #elevate iptables -A OUTPUT -j NFQUEUE
                 ;;
             "down")
-                elevate iptables -D INPUT -j NFQUEUE
-                elevate iptables -D OUTPUT -j NFQUEUE
+                #elevate iptables -D INPUT -j NFQUEUE
+                #elevate iptables -D OUTPUT -j NFQUEUE
                 elevate systemctl stop suricata.service
                 ;;
             "update")

@@ -1,6 +1,6 @@
 [Unit]
 Description=Flotilla
-Requires=docker.service
+Requires=docker.service suricata.service
 After=docker.service
 
 [Service]

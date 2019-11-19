@@ -131,6 +131,29 @@ Password: <POSTGRES_PASSWORD from secrets.env>
 Save Password: true
 ```
 
+### Nextcloud
+
+Create a database for Nextcloud inside of Postgres:
+
+```sql
+CREATE USER nextcloud WITH PASSWORD 'password';
+CREATE DATABASE nextcloud TEMPLATE template0 ENCODING 'UNICODE';
+ALTER DATABASE nextcloud OWNER TO nextcloud;
+GRANT ALL PRIVILEGES ON DATABASE nextcloud TO nextcloud;
+```
+
+`password` should match the one provided for `POSTGRES_PASS` in
+`secrets.env`.
+
+Any extra domains must be added to `config/nextcloud/config.php` like so:
+```php
+  'trusted_domains' =>
+  array (
+    0 => 'cloud.maxocull.com',
+    1 => 'cloud.maxocull.net',
+  ),
+```
+
 ### Gitlab
 
 Create a database for Gitlab inside of Postgres:

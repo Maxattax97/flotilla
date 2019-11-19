@@ -391,7 +391,7 @@ outputs:
   # a full alerts log containing much information for signature writers
   # or for investigating suspected false positives.
   - alert-debug:
-      enabled: no
+      enabled: yes
       filename: alert-debug.log
       append: yes
       #filetype: regular # 'regular', 'unix_stream' or 'unix_dgram'
@@ -415,10 +415,10 @@ outputs:
 
   # a line based alerts log similar to fast.log into syslog
   - syslog:
-      enabled: no
+      enabled: yes
       # reported identity to syslog. If ommited the program name (usually
       # suricata) will be used.
-      #identity: "suricata"
+      identity: "suricata"
       facility: local5
       #level: Info ## possible levels: Emergency, Alert, Critical,
                    ## Error, Warning, Notice, Info, Debug
@@ -608,7 +608,7 @@ logging:
       filename: /var/log/suricata/suricata.log
       # type: json
   - syslog:
-      enabled: no
+      enabled: yes
       facility: local5
       format: "[%i] <%d> -- "
       # type: json
@@ -1173,12 +1173,12 @@ pcre:
 # reassembly. The host OS lookup is done using a radix tree, just
 # like a routing table so the most specific entry matches.
 host-os-policy:
-  # Make the default policy windows.
-  windows: [0.0.0.0/0]
+  windows: []
   bsd: []
   bsd-right: []
   old-linux: []
-  linux: []
+  # Make the default policy linux.
+  linux: [0.0.0.0/0]
   old-solaris: []
   solaris: []
   hpux10: []

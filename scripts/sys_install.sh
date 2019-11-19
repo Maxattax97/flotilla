@@ -94,6 +94,12 @@ done
 
 elevate systemctl daemon-reload
 
+# Enable the services.
+for service in $GITROOT/services/*; do
+    name="$(basename "$service")"
+    elevate systemctl enable "$name"
+done
+
 # Enable Cockpit on Fedora systems.
 if [[ "$(probe dnf)" -eq 1 ]]; then
     elevate systemctl enable --now cockpit.socket
