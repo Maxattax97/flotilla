@@ -10,6 +10,7 @@ config/*
 !config/prometheus/
 !config/grafana/
 !config/letsencrypt/
+!config/fail2ban/
 
 config/openvpn/*
 !config/openvpn/openvpn.conf
