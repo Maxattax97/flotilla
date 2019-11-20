@@ -54,8 +54,8 @@ All that should be required other than tweaking the `docker-compose` file is
 adding `/opt/flotilla/config/letsencrypt/nginx/.htpasswd`:
 
 ```
-# The -B <level> is for bcrypt, you can make it stronger by increasing it up to 17.
-htpasswd -B -C .htpasswd <user> # Then fill in the password prompt.
+# The -C <level> is for bcrypt, you can make it stronger by increasing it up to 17.
+htpasswd -B -C 10 -c .htpasswd <user> # Then fill in the password prompt.
 
 # For additional users:
 htpasswd -B .htpasswd <user> # Then fill in the password prompt.
@@ -104,6 +104,18 @@ Username: admin # Unless changed.
 Password: adminadmin # Unless changed.
 Use SSL: No
 ```
+
+Connect your download client folder under **Settings > Download Client > Remote
+Path Mappings** by filling in these settings:
+
+```
+Host: cleanroom
+Remote Path: /data/
+Local Path: /data/
+```
+
+When you add a new `{Series,Movie,Song}`, you'll want to set the path it gets
+placed in to `{/tv/,/movies/,/music/}` respectively.
 
 ### Jellyfin
 

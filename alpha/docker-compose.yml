@@ -33,7 +33,6 @@ version: "3.7"
 services:
 
   letsencrypt:
-    # TODO: map.
     image: linuxserver/letsencrypt
     container_name: letsencrypt
     cap_add:
@@ -43,14 +42,14 @@ services:
       - PGID=1000
       - TZ=America/Indianapolis
       - URL=maxocull.com
-      - SUBDOMAINS=www,resolute,whoami,dash,cloud,git,dns,office,lidarr,sonarr,radarr,media,torrent,jackett,ci,grafana,search
+      - SUBDOMAINS=www,resolute,whoami,dash,cloud,git,dns,office,lidarr,sonarr,radarr,media,torrent,jackett,ci,grafana,search,map,pgadmin,prometheus,portainer
       - VALIDATION=http # DNS? so can use wildcards
       #- DNSPLUGIN=cloudflare #optional
       #- DUCKDNSTOKEN=<token> #optional
       - EMAIL=max.ocull@protonmail.com
       - DHLEVEL=2048
       - ONLY_SUBDOMAINS=false
-      - EXTRA_DOMAINS=maxocull.net,www.maxocull.net,resolute.maxocull.net,whoami.maxocull.net,dash.maxocull.net,cloud.maxocull.net,git.maxocull.net,dns.maxocull.net,office.maxocull.net,lidarr.maxocull.net,sonarr.maxocull.net,radarr.maxocull.net,media.maxocull.net,torrent.maxocull.net,jackett.maxocull.net,ci.maxocull.net,grafana.maxocull.net,search.maxocull.net
+      - EXTRA_DOMAINS=maxocull.net,www.maxocull.net,resolute.maxocull.net,whoami.maxocull.net,dash.maxocull.net,cloud.maxocull.net,git.maxocull.net,dns.maxocull.net,office.maxocull.net,lidarr.maxocull.net,sonarr.maxocull.net,radarr.maxocull.net,media.maxocull.net,torrent.maxocull.net,jackett.maxocull.net,ci.maxocull.net,grafana.maxocull.net,search.maxocull.net,map.maxocull.net,pgadmin.maxocull.net,prometheus.maxocull.net,portainer.maxocull.net
       - STAGING=false # Enable when testing.
     volumes:
       - /opt/flotilla/data/letsencrypt/keys:/config/etc/letsencrypt:Z
