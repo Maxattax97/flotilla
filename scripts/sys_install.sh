@@ -45,7 +45,8 @@ fi
 elevate pip2 install pyyaml
 
 # Install the default Suricata config tweaked for IPS instead of IDS settings.
-elevate cp "${GITROOT}/config/suricata/suricata.yaml" /etc/suricata/suricata.yaml
+elevate cp "${GITROOT}/config/suricata/*.yaml" /etc/suricata/
+elevate cp "${GITROOT}/config/suricata/*.conf" /etc/suricata/
 if [[ "$(probe dnf)" -eq 1 ]]; then
     elevate echo "OPTIONS=\"-q 0\"" > /etc/sysconfig/suricata
 elif [[ "$(probe apt)" -eq 1 ]]; then
