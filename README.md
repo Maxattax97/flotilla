@@ -4,7 +4,7 @@ An easily deployed server based on Docker compose, complete with privacy tools,
 a media center, cloud storage, and much more.
 
 Currently it is designed with Fedora Server in mind with SELinux set to
-enforcing. The Flotilla is protected by Suricated, an intrusion protection
+enforcing. The Flotilla is protected by Suricata, an intrusion protection
 system.
 
 ## Installation
