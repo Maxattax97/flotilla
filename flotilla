@@ -117,9 +117,9 @@ case "$1" in
                 sudo ufw reset
                 sudo ufw default allow outgoing
                 sudo ufw default deny incoming
-                sudo ufw default allow incoming from 192.168.0.0/16
-                sudo ufw default allow incoming from 172.16.0.0/12
-                sudo ufw default allow incoming from 10.0.0.0/8
+                #sudo ufw default allow incoming from 192.168.0.0/16
+                #sudo ufw default allow incoming from 172.16.0.0/12
+                #sudo ufw default allow incoming from 10.0.0.0/8
                 sudo ufw logging on
                 sudo ufw allow 22/tcp       # SSH
                 sudo ufw limit 22/tcp

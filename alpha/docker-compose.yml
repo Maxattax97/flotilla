@@ -70,8 +70,7 @@ services:
     container_name: dockersocket
     privileged: true # Necessary for docker access.
     ports:
-      # TODO: Reduce this to 127.0.01:2375:2375.
-      - "2375:2375"
+      - "127.0.0.1:2375:2375"
     environment:
       - PUID=1000
       - PGID=1000
@@ -153,7 +152,7 @@ services:
     image: containous/whoami
     container_name: whoami
     ports:
-      - "8001:80"
+      - "127.0.0.1:8001:80"
     environment:
       - PUID=1000
       - PGID=1000
@@ -194,8 +193,8 @@ services:
       - "53:53/tcp"
       - "53:53/udp"
       - "67:67/udp"
-      - "1188:80/tcp"
-      - "2443:443/tcp"
+      - "127.0.0.1:1188:80/tcp"
+      - "127.0.0.1:2443:443/tcp"
     env_file:
       - /opt/flotilla/secrets.env
     environment:
@@ -222,12 +221,12 @@ services:
     #privileged: true # Necessary for sysctl net settings.
     # TODO: Test that these work.
     sysctls:
-      - "net.ipv4.ip_forward: 1"
-      - "net.ipv6.conf.all.disable_ipv6: 0"
-      - "net.ipv6.conf.default.forwarding: 1"
-      - "net.ipv6.conf.all.forwarding: 1"
-    cap_add:
-      - NET_ADMIN
+      - "net.ipv4.ip_forward=1"
+      - "net.ipv6.conf.all.disable_ipv6=0"
+      - "net.ipv6.conf.default.forwarding=1"
+      - "net.ipv6.conf.all.forwarding=1"
+    #cap_add:
+      #- NET_ADMIN
     volumes:
       - /opt/flotilla/config/openvpn:/etc/openvpn:z
     environment:
@@ -253,7 +252,7 @@ services:
       - /opt/flotilla/config/jackett:/config:z
       - /opt/flotilla/data/all/torrents:/downloads:z
     ports:
-      - "9117:9117"
+      - "127.0.0.1:9117:9117"
     restart: unless-stopped
 
   cleanroom:
@@ -284,8 +283,8 @@ services:
     ports:
       - "6881:6881"
       - "6881:6881/udp"
-      - "8800:8800" # Change the WEBUI_PORT environment variable as well!
-      - "8118:8118" # Change the proxy port for Jackett as well!
+      - "127.0.0.1:8800:8800" # Change the WEBUI_PORT environment variable as well!
+      - "127.0.0.1:8118:8118" # Change the proxy port for Jackett as well!
     restart: unless-stopped
 
   sonarr:
@@ -304,7 +303,7 @@ services:
       - /opt/flotilla/data/all/tvshows:/tv:z
       - /opt/flotilla/data/cleanroom:/data:z
     ports:
-      - "8989:8989"
+      - "127.0.0.1:8989:8989"
     restart: unless-stopped
 
   radarr:
@@ -323,7 +322,7 @@ services:
       - /opt/flotilla/data/all/movies:/movies:z
       - /opt/flotilla/data/cleanroom:/data:z
     ports:
-      - "7878:7878"
+      - "127.0.0.1:7878:7878"
     restart: unless-stopped
 
   lidarr:
@@ -342,7 +341,7 @@ services:
       - /opt/flotilla/data/all/music:/music:z
       - /opt/flotilla/data/cleanroom:/data:z
     ports:
-      - "8686:8686"
+      - "127.0.0.1:8686:8686"
     restart: unless-stopped
 
   jellyfin:
@@ -362,7 +361,7 @@ services:
       - /opt/flotilla/data/all/photos:/data/photos:z
       - /opt/flotilla/data/jellyfin/transcode:/transcode:z #optional
     ports:
-      - "8096:8096"
+      - "127.0.0.1:8096:8096"
       #- "8920:8920" #optional, https
     devices:
       - /dev/dri:/dev/dri #optional, for video HW acceleration
@@ -379,7 +378,7 @@ services:
       - TZ=America/Indianapolis
       #- POSTGRES_USER=harbor # Use the default "postgres" user.
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - /opt/flotilla/data/postgres:/var/lib/postgresql/data:z
     restart: unless-stopped
@@ -398,7 +397,7 @@ services:
       # The email below _is_ the username.
       - PGADMIN_DEFAULT_EMAIL=postgres@maxocull.com
     ports:
-      - "5480:80"
+      - "127.0.0.1:5480:80"
     volumes:
       #- /opt/flotilla/config/pgadmin:/pgadmin4:z
       - /opt/flotilla/data/pgadmin:/var/lib/pgadmin:z
@@ -419,7 +418,7 @@ services:
       - PGID=1000
       - TZ=America/Indianapolis
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     volumes:
       - /opt/flotilla/data/redis:/data:z # Remove this line if not persistent.
     restart: unless-stopped
@@ -454,7 +453,7 @@ services:
       - /opt/flotilla/config/nextcloud:/var/www/html/config:z
       - /opt/flotilla/data/nextcloud:/var/www/html:z # Share this folder with cron.
     ports:
-      - "3080:80"
+      - "127.0.0.1:3080:80"
       #- "3090:9000" # for FPM
     restart: unless-stopped
 
@@ -485,7 +484,7 @@ services:
       - /opt/flotilla/config/nextcloud:/var/www/html/config:z
       - /opt/flotilla/data/nextcloud:/var/www/html:z
     ports:
-      - "9980:9980"
+      - "127.0.0.1:9980:9980"
     cap_add:
       - MKNOD
     restart: unless-stopped
@@ -525,8 +524,8 @@ services:
       - /opt/flotilla/data/gitlab:/home/git/data:z
     ports:
       # Keep this as a string because I guess docker-compose (Python) has a bug?
-      - "4080:80"
-      - "4022:22"
+      - "127.0.0.1:4080:80"
+      - "127.0.0.1:4022:22"
     restart: unless-stopped
 
   #jenkins:
@@ -571,8 +570,8 @@ services:
     volumes:
       - /opt/flotilla/config/heimdall:/config:z
     ports:
-      - "1080:80"
-      - "1443:443"
+      - "127.0.0.1:1080:80"
+      - "127.0.0.1:1443:443"
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
@@ -606,7 +605,7 @@ services:
       #- /opt/flotilla/data/grafana/home:/usr/share/grafana:z
       - /opt/flotilla/data/grafana/logs:/var/log/grafana:z
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     restart: unless-stopped
 
   loki:
@@ -652,7 +651,7 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
     ports:
-      - "9095:9090" # conflicts with Fedora's Cockpit at 9090
+      - "127.0.0.1:9095:9090" # conflicts with Fedora's Cockpit at 9090
     restart: unless-stopped
 
   nodeexporter:
@@ -669,7 +668,7 @@ services:
     command:
       - '--path.rootfs=/host'
     ports:
-      - "9100:9100"
+      - "127.0.0.1:9100:9100"
     restart: unless-stopped
 
   portainer:
@@ -683,8 +682,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock # Behind a reverse proxy, it's okay.
       - /opt/flotilla/data/portainer:/data:z
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
     restart: unless-stopped
 
   #nginx:
@@ -724,7 +723,7 @@ services:
       - PGID=1000
       - TZ=America/Indianapolis
     ports:
-      - "4040:3000"
+      - "127.0.0.1:4040:3000"
     restart: unless-stopped
 
   searx:
@@ -751,7 +750,7 @@ services:
     volumes:
       - /opt/flotilla/config/searx:/etc/searx:z
     ports:
-      - "4050:8080"
+      - "127.0.0.1:4050:8080"
     restart: unless-stopped
 
   graphhopper:
@@ -764,5 +763,5 @@ services:
     volumes:
       - /opt/flotilla/data/graphhopper:/data:z
     ports:
-      - "8999:8989"
+      - "127.0.0.1:8999:8989"
     restart: unless-stopped

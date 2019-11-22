@@ -10,8 +10,8 @@ Documentation=man:suricata(1)
 EnvironmentFile=-/etc/sysconfig/suricata
 #EnvironmentFile=-/etc/default/suricata
 ExecStartPre=/bin/rm -f /var/run/suricata.pid
-ExecStartPre=/usr/sbin/iptables -A INPUT -j NFQUEUE
-ExecStartPre=/usr/sbin/iptables -A OUTPUT -j NFQUEUE
+ExecStartPre=/usr/sbin/iptables -I INPUT -j NFQUEUE
+ExecStartPre=/usr/sbin/iptables -I OUTPUT -j NFQUEUE
 ExecStart=/sbin/suricata -c /etc/suricata/suricata.yaml --pidfile /var/run/suricata.pid $OPTIONS
 ExecReload=/bin/kill -USR2 $MAINPID
 
