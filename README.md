@@ -126,6 +126,11 @@ Local Path: /data/
 When you add a new `{Series,Movie,Song}`, you'll want to set the path it gets
 placed in to `{/tv/,/movies/,/music/}` respectively.
 
+If this is exposed to the internet, you'll likely want to add authentication as
+well, which is configurable under **Settings > General > Security**. You'll
+likely also want to turn some quality settings down since they start on
+unlimited.
+
 ### Jellyfin
 
 Add Libraries for the following internal, shared volumes:
@@ -138,6 +143,10 @@ Add Libraries for the following internal, shared volumes:
 
 If you see an endlessly spinning circle on the webpage, clear your browser cache
 for the page.
+
+Optionally enable hardware accelerated transcoding under
+**Dashboard > Playback > Transcoding**, VAAPI-enabled devices should already be
+mounted into the Jellyfin container.
 
 ### Postgres & PGAdmin
 
@@ -169,13 +178,21 @@ GRANT ALL PRIVILEGES ON DATABASE nextcloud TO nextcloud;
 `password` should match the one provided for `POSTGRES_PASS` in
 `secrets.env`.
 
-Any extra domains must be added to `config/nextcloud/config.php` like so:
+Any extra domains must be added to `config/nextcloud/config.php` in addition to
+a few extra settings like so:
 ```php
+  'trusted_proxies' =>
+  array (
+    0 => 'letsencrypt',
+  ),
   'trusted_domains' =>
   array (
     0 => 'cloud.maxocull.com',
     1 => 'cloud.maxocull.net',
   ),
+  'overwriteprotocol' => "https",
+  'overwritehost' => "cloud.maxocull.com",
+  'overwrite.cli.url' => 'https://cloud.maxocull.com/',
 ```
 
 ### Gitlab

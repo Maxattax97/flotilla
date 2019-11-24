@@ -357,7 +357,7 @@ services:
       - /opt/flotilla/data/all/tvshows:/data/tvshows:z
       - /opt/flotilla/data/all/movies:/data/movies:z
       - /opt/flotilla/data/all/music:/data/music:z
-      - /opt/flotilla/data/all/books:/data/books:z
+      - /opt/flotilla/data/all/books:/data/books:z # Intended for audio books.
       - /opt/flotilla/data/all/photos:/data/photos:z
       - /opt/flotilla/data/jellyfin/transcode:/transcode:z #optional
     ports:
@@ -452,6 +452,7 @@ services:
     volumes:
       - /opt/flotilla/config/nextcloud:/var/www/html/config:z
       - /opt/flotilla/data/nextcloud:/var/www/html:z # Share this folder with cron.
+      #- /opt/flotilla/data/all/books:/external/books:z
     ports:
       - "127.0.0.1:3080:80"
       #- "3090:9000" # for FPM
