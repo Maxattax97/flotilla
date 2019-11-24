@@ -1,7 +1,8 @@
 # Sample Suricata systemd unit file.
 [Unit]
 Description=Suricata Intrusion Detection Service
-After=syslog.target network-online.target systemd-tmpfiles-setup.service
+After=syslog.target network-online.target systemd-tmpfiles-setup.service firewalld.service
+Requires=firewalld.service
 Documentation=man:suricata(1)
 
 [Service]
@@ -10,13 +11,18 @@ Documentation=man:suricata(1)
 EnvironmentFile=-/etc/sysconfig/suricata
 #EnvironmentFile=-/etc/default/suricata
 ExecStartPre=/bin/rm -f /var/run/suricata.pid
-ExecStartPre=/usr/sbin/iptables -I INPUT -j NFQUEUE
-ExecStartPre=/usr/sbin/iptables -I OUTPUT -j NFQUEUE
+# firewalld will not track established packets, so Suricata will get lots of 3-way handshake errors.
+#ExecStartPre=/usr/bin/firewall-cmd --direct --add-rule ipv4 filter INPUT 0 -j NFQUEUE
+#ExecStartPre=/usr/bin/firewall-cmd --direct --add-rule ipv4 filter OUTPUT 0 -j NFQUEUE
+ExecStartPre=/usr/sbin/iptables -I INPUT -m mark ! --mark 0x1/0x1 -j NFQUEUE
+ExecStartPre=/usr/sbin/iptables -I OUTPUT -m mark ! --mark 0x1/0x1 -j NFQUEUE
 ExecStart=/sbin/suricata -c /etc/suricata/suricata.yaml --pidfile /var/run/suricata.pid $OPTIONS
 ExecReload=/bin/kill -USR2 $MAINPID
 
-ExecStopPost=/usr/sbin/iptables -D INPUT -j NFQUEUE
-ExecStopPost=/usr/sbin/iptables -D OUTPUT -j NFQUEUE
+#ExecStopPost=/usr/bin/firewall-cmd --direct --remove-rule ipv4 filter INPUT 0 -j NFQUEUE
+#ExecStopPost=/usr/bin/firewall-cmd --direct --remove-rule ipv4 filter OUTPUT 0 -j NFQUEUE
+ExecStopPost=/usr/sbin/iptables -I INPUT -m mark ! --mark 0x1/0x1 -j NFQUEUE
+ExecStopPost=/usr/sbin/iptables -I OUTPUT -m mark ! --mark 0x1/0x1 -j NFQUEUE
 
 ### Security Settings ###
 MemoryDenyWriteExecute=true

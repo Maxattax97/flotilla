@@ -1,26 +1,33 @@
+# vim:ft=conf
 [DEFAULT]
+backend = systemd
 ignoreip = 127.0.0.1/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16
 bantime = 600
 findtime = 600
-maxretry = 3
-action = $(action_)s
-banaction = iptables-multiport
+maxretry = 5
+#action = $(action_)s
+banaction = firewallcmd-ipset
+#banaction = iptables-multiport
+enabled = false
 
 # Basic SSH protection.
 [sshd]
 enabled = true
-logpath = %(sshd_log)s
+#logpath = %(sshd_log)s
 
-[sshd-ddos]
+[selinux-ssh]
 enabled = true
-logpath = %(sshd_log)s
+#logpath = %(sshd_log)s
 
 [sshd-longterm]
 enabled = true
 port = ssh
 filter = sshd
-logpath = %(sshd_log)s
+#logpath = %(sshd_log)s
 # 35 retries over 3 days, bans for a week.
 maxretry = 35
 findtime = 259200
 bantime = 608400
+
+[apache-badbots]
+logpath =

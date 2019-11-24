@@ -78,8 +78,8 @@ for module in $GITROOT/config/*/; do
     elevated_link_source $module $dest
 done
 
-# Link fail2ban ssh protection.
-elevated_link_source "/etc/fail2ban/jail.d/local.conf" "${BASE}/config/fail2ban/local.conf"
+# Install fail2ban ssh protection.
+elevate cp "${BASE}/config/fail2ban/flotilla.local" "/etc/fail2ban/jail.d/flotilla.local"
 elevate systemctl enable fail2ban.service
 elevate systemctl start fail2ban.service
 

@@ -12,6 +12,8 @@ fi
 
 source "${SCRIPTS}/sys_lib.sh"
 
+flotilla_firewall="firewalld"
+flotilla_inet_iface="$(route | grep '^default' | grep -o '[^ ]*$')"
 
 case "$1" in
     "install" | "in" | "i")
@@ -105,33 +107,108 @@ case "$1" in
     "fw")
         case "$2" in
             "status")
-                sudo ufw status verbose # numbered
+                if [[ "${flotilla_firewall}" == "ufw" ]]; then
+                    sudo ufw status verbose # numbered
+                elif [[ "${flotilla_firewall}" == "firewalld" ]]; then
+                    sudo firewall-cmd --state
+                fi
                 ;;
             "enable")
-                sudo ufw enable
+                if [[ "${flotilla_firewall}" == "ufw" ]]; then
+                    sudo systemctl stop firewalld
+                    sudo systemctl disable firewalld
+                    sudo systemctl enable ufw
+                    sudo systemctl start ufw
+                    sudo ufw enable
+                elif [[ "${flotilla_firewall}" == "firewalld" ]]; then
+                    sudo ufw disable
+                    sudo systemctl stop ufw
+                    sudo systemctl disable ufw
+                    sudo systemctl enable firewalld
+                    sudo systemctl start firewalld
+                fi
                 ;;
             "disable")
-                sudo ufw disable
+                if [[ "${flotilla_firewall}" == "ufw" ]]; then
+                    sudo systemctl stop ufw
+                    sudo systemctl disable ufw
+                    sudo systemctl enable firewalld
+                    sudo systemctl start firewalld
+                    sudo ufw disable
+                elif [[ "${flotilla_firewall}" == "firewalld" ]]; then
+                    sudo systemctl stop firewalld
+                    sudo systemctl disable firewalld
+                    sudo systemctl enable ufw
+                    sudo systemctl start ufw
+                    sudo ufw enable
+                fi
                 ;;
             "update")
-                sudo ufw reset
-                sudo ufw default allow outgoing
-                sudo ufw default deny incoming
-                #sudo ufw default allow incoming from 192.168.0.0/16
-                #sudo ufw default allow incoming from 172.16.0.0/12
-                #sudo ufw default allow incoming from 10.0.0.0/8
-                sudo ufw logging on
-                sudo ufw allow 22/tcp       # SSH
-                sudo ufw limit 22/tcp
-                sudo ufw allow 25/tcp       # SMTP
-                sudo ufw allow 53           # DNS
-                sudo ufw allow 67/udp       # DHCP
-                sudo ufw allow 80           # HTTP
-                sudo ufw allow 443          # HTTPS
-                sudo ufw allow 1194/udp     # OpenVPN
-                sudo ufw allow 6881         # QBittorrent
-                sudo ufw allow 25565        # Minecraft
-                sudo ufw allow 27015        # Steam
+                if [[ "${flotilla_firewall}" == "ufw" ]]; then
+                    sudo ufw reset
+                    sudo ufw default allow outgoing
+                    sudo ufw default deny incoming
+                    #sudo ufw default allow incoming from 192.168.0.0/16
+                    #sudo ufw default allow incoming from 172.16.0.0/12
+                    #sudo ufw default allow incoming from 10.0.0.0/8
+                    sudo ufw logging on
+                    sudo ufw allow 22/tcp       # SSH
+                    sudo ufw limit 22/tcp
+                    sudo ufw allow 25/tcp       # SMTP
+                    sudo ufw allow 53           # DNS
+                    sudo ufw allow 67/udp       # DHCP
+                    sudo ufw allow 80           # HTTP
+                    sudo ufw allow 443          # HTTPS
+                    sudo ufw allow 1194/udp     # OpenVPN
+                    sudo ufw allow 6881         # QBittorrent
+                    sudo ufw allow 25565        # Minecraft
+                    sudo ufw allow 27015        # Steam
+                elif [[ "${flotilla_firewall}" == "firewalld" ]]; then
+                    fw_arg_all="--permanent"
+                    echo "Configuring firewall for for ${flotilla_inet_iface} in zone \"public\" ..."
+                    sudo firewall-cmd "${fw_arg_all}" --set-default-zone=public # Can now skip adding --zone=public to all commands.
+                    sudo firewall-cmd "${fw_arg_all}" --change-interface="${flotilla_inet_iface}"
+                    ##sudo firewall-cmd --add-interface="docker0"
+
+                    ## Recreate the Docker filtration chain.
+                    #sudo firewall-cmd --direct --remove-chain ipv4 filter DOCKER-USER
+                    #sudo firewall-cmd --direct --remove-rules ipv4 filter DOCKER-USER
+                    #sudo firewall-cmd --direct --add-chain ipv4 filter DOCKER-USER
+
+                    ## Setup basic Docker rules.
+                    #sudo firewall-cmd --direct --add-rule ipv4 filter DOCKER-USER 0 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT -m comment --comment "This allows docker containers to connect to the outside world."
+                    #sudo firewall-cmd --direct --add-rule ipv4 filter DOCKER-USER 0 -j RETURN -s 172.18.0.0/16 -m comment --comment "Allow internal docker communication."
+                    #sudo firewall-cmd --direct --add-rule ipv4 filter DOCKER-USER 0 -j INPUT_ZONES -m comment --comment "Filter by firewalld rules."
+
+                    ## Add any externally accessible rules.
+                    ##sudo firewall-cmd --direct --add-rule ipv4 filter DOCKER-USER 0 -p tcp -m multiport --dports https -s 123.456.7.89/32 -j ACCEPT -m comment --comment "my allowed ip address to http and https ports"
+
+                    ## Reject all other traffic.
+                    #sudo firewall-cmd --direct --add-rule ipv4 filter DOCKER-USER 0 -j REJECT -m comment --comment "Reject all other traffic."
+
+                    sudo firewall-cmd "${fw_arg_all}" --remove-service=mdns
+                    sudo firewall-cmd "${fw_arg_all}" --add-service=ssh
+                    sudo firewall-cmd "${fw_arg_all}" --add-service=smtp
+                    sudo firewall-cmd "${fw_arg_all}" --add-service=dns
+                    sudo firewall-cmd "${fw_arg_all}" --add-service=dhcp
+                    sudo firewall-cmd "${fw_arg_all}" --add-service=http
+                    sudo firewall-cmd "${fw_arg_all}" --add-service=https
+                    sudo firewall-cmd "${fw_arg_all}" --add-service=openvpn
+
+                    # QBittorrent
+                    sudo firewall-cmd "${fw_arg_all}" --add-port=6881/tcp
+                    sudo firewall-cmd "${fw_arg_all}" --add-port=6881/udp
+
+                    # Minecraft
+                    sudo firewall-cmd "${fw_arg_all}" --add-port=25565/tcp
+                    sudo firewall-cmd "${fw_arg_all}" --add-port=25565/udp
+
+                    # Steam
+                    sudo firewall-cmd "${fw_arg_all}" --add-port=27015/tcp
+                    sudo firewall-cmd "${fw_arg_all}" --add-port=27015/udp
+
+                    #sudo firewall-cmd --reload
+                fi
                 ;;
             *)
                 echo "Usage: flotilla fw <status | enable | disable | update>"
