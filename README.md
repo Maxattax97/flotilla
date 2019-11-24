@@ -4,7 +4,7 @@ An easily deployed server based on Docker compose, complete with privacy tools,
 a media center, cloud storage, and much more.
 
 Currently it is designed with Fedora Server in mind with SELinux set to
-enforcing. The Flotilla is protected by Suricata, an intrusion protection
+enforcing. The Flotilla is protected by Suricata, an intrusion prevention
 system.
 
 ## Installation
@@ -34,7 +34,7 @@ services running.
 
 ### Suricata
 
-The entire swarm is defended by Suricata, an Intrusion Protection System (IPS)
+The entire swarm is defended by Suricata, an Intrusion Prevention System (IPS)
 which runs on the host and intercepts malicious packets before they make
 contact with containers (or any other service on the host). Suricata
 automatically updates rules using a cron job which is performed daily.
@@ -46,7 +46,16 @@ data will pass, and any connections (e.g., SSH) will be terminated.
 The IPS may be handled via the `flotilla ips` subcommands.
 
 If you have issues, check that `/etc/sysconfig/suricata` is using the `-q 0`
-option so that it can execute in inline (IPS) mode and intercept packets!
+option so that it can execute in inline (IPS) mode and intercept packets! It
+must also be running in repeat mode (with masks), or else it will skip all
+other filters (effectively making your firewall useless).
+
+### FirewallD
+
+FirewallD is used to intelligently manage IPTables. It will not manage Docker
+services due to it's independent firewall, and it does not manage Suricata.
+
+Firewall commands are accessible via `flotilla fw` subcommands.
 
 ### Nginx & Let's Encrypt
 
@@ -126,6 +135,9 @@ Add Libraries for the following internal, shared volumes:
  - `/data/music` as Music from Lidarr
  - `/data/books` as Books from Calibre?
  - `/data/photos` as Photos from various uploads
+
+If you see an endlessly spinning circle on the webpage, clear your browser cache
+for the page.
 
 ### Postgres & PGAdmin
 
