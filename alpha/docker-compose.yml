@@ -23,8 +23,6 @@ version: "3.7"
 # Organization
   # TODO: Apply consistent port assignment scheme.
   # TODO: Segregate services into subnetworks.
-  # TODO: Make some services run on the host (performance, true IP visibility)
-  # TODO: Cap CPU and RAM usage per container.
 # Security
   # :Z is private Docker share (guarded by SELinux); these files are for that
   # container only.
@@ -42,14 +40,14 @@ services:
       - PGID=1000
       - TZ=America/Indianapolis
       - URL=maxocull.com
-      - SUBDOMAINS=www,resolute,whoami,dash,cloud,git,dns,office,lidarr,sonarr,radarr,media,torrent,jackett,ci,grafana,search,map,pgadmin,prometheus,portainer
+      - SUBDOMAINS=www,resolute,whoami,dash,cloud,git,dns,office,lidarr,sonarr,radarr,media,torrent,jackett,ci,grafana,search,map,pgadmin,prometheus,portainer,registry
       - VALIDATION=http # DNS? so can use wildcards
       #- DNSPLUGIN=cloudflare #optional
       #- DUCKDNSTOKEN=<token> #optional
       - EMAIL=max.ocull@protonmail.com
       - DHLEVEL=2048
       - ONLY_SUBDOMAINS=false
-      - EXTRA_DOMAINS=maxocull.net,www.maxocull.net,resolute.maxocull.net,whoami.maxocull.net,dash.maxocull.net,cloud.maxocull.net,git.maxocull.net,dns.maxocull.net,office.maxocull.net,lidarr.maxocull.net,sonarr.maxocull.net,radarr.maxocull.net,media.maxocull.net,torrent.maxocull.net,jackett.maxocull.net,ci.maxocull.net,grafana.maxocull.net,search.maxocull.net,map.maxocull.net,pgadmin.maxocull.net,prometheus.maxocull.net,portainer.maxocull.net
+      - EXTRA_DOMAINS=maxocull.net,www.maxocull.net,resolute.maxocull.net,whoami.maxocull.net,dash.maxocull.net,cloud.maxocull.net,git.maxocull.net,dns.maxocull.net,office.maxocull.net,lidarr.maxocull.net,sonarr.maxocull.net,radarr.maxocull.net,media.maxocull.net,torrent.maxocull.net,jackett.maxocull.net,ci.maxocull.net,grafana.maxocull.net,search.maxocull.net,map.maxocull.net,pgadmin.maxocull.net,prometheus.maxocull.net,portainer.maxocull.net,registry.maxocull.net
       - STAGING=false # Enable when testing.
     volumes:
       - /opt/flotilla/data/letsencrypt/keys:/config/etc/letsencrypt:Z
@@ -59,6 +57,10 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    #deploy:
+      #resources:
+        #limits:
+          #memory: "1g"
     restart: unless-stopped
 
   dockersocket:
@@ -158,6 +160,10 @@ services:
       - PGID=1000
       - TZ=America/Indianapolis
       ##- DOCKER_HOST=tcp://dockersocket
+    #deploy:
+      #resources:
+        #limits:
+          #memory: "40m"
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
@@ -213,6 +219,10 @@ services:
       - 84.200.69.80
     #cap_add: # DHCP only.
       #- NET_ADMIN
+    #deploy:
+      #resources:
+        #limits:
+          #memory: "1.6g"
     restart: unless-stopped
 
   openvpn:
@@ -253,6 +263,10 @@ services:
       - /opt/flotilla/data/all/torrents:/downloads:z
     ports:
       - "127.0.0.1:9117:9117"
+    #deploy:
+      #resources:
+        #limits:
+          #memory: "1.2g"
     restart: unless-stopped
 
   cleanroom:
@@ -285,6 +299,10 @@ services:
       - "6881:6881/udp"
       - "127.0.0.1:8800:8800" # Change the WEBUI_PORT environment variable as well!
       - "127.0.0.1:8118:8118" # Change the proxy port for Jackett as well!
+    #deploy:
+      #resources:
+        #limits:
+          #memory: "4g"
     restart: unless-stopped
 
   sonarr:
@@ -304,6 +322,10 @@ services:
       - /opt/flotilla/data/cleanroom:/data:z
     ports:
       - "127.0.0.1:8989:8989"
+    #deploy:
+      #resources:
+        #limits:
+          #memory: "4g"
     restart: unless-stopped
 
   radarr:
@@ -323,6 +345,10 @@ services:
       - /opt/flotilla/data/cleanroom:/data:z
     ports:
       - "127.0.0.1:7878:7878"
+    #deploy:
+      #resources:
+        #limits:
+          #memory: "4g"
     restart: unless-stopped
 
   lidarr:
@@ -342,6 +368,10 @@ services:
       - /opt/flotilla/data/cleanroom:/data:z
     ports:
       - "127.0.0.1:8686:8686"
+    #deploy:
+      #resources:
+        #limits:
+          #memory: "4g"
     restart: unless-stopped
 
   jellyfin:
@@ -365,6 +395,10 @@ services:
       #- "8920:8920" #optional, https
     devices:
       - /dev/dri:/dev/dri #optional, for video HW acceleration
+    #deploy:
+      #resources:
+        #limits:
+          #memory: "6g"
     restart: unless-stopped
 
   postgres:
@@ -381,6 +415,10 @@ services:
       - "127.0.0.1:5432:5432"
     volumes:
       - /opt/flotilla/data/postgres:/var/lib/postgresql/data:z
+    #deploy:
+      #resources:
+        #limits:
+          #memory: "4g"
     restart: unless-stopped
 
   pgadmin:
@@ -401,6 +439,10 @@ services:
     volumes:
       #- /opt/flotilla/config/pgadmin:/pgadmin4:z
       - /opt/flotilla/data/pgadmin:/var/lib/pgadmin:z
+    #deploy:
+      #resources:
+        #limits:
+          #memory: "1.2g"
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
@@ -421,6 +463,10 @@ services:
       - "127.0.0.1:6379:6379"
     volumes:
       - /opt/flotilla/data/redis:/data:z # Remove this line if not persistent.
+    #deploy:
+      #resources:
+        #limits:
+          #memory: "4g"
     restart: unless-stopped
 
   nextcloud:
@@ -456,6 +502,10 @@ services:
     ports:
       - "127.0.0.1:3080:80"
       #- "3090:9000" # for FPM
+    #deploy:
+      #resources:
+        #limits:
+          #memory: "2.4g"
     restart: unless-stopped
 
   nextcloud-cron:
@@ -470,6 +520,10 @@ services:
     volumes:
       - /opt/flotilla/config/nextcloud:/var/www/html/config:z
       - /opt/flotilla/data/nextcloud:/var/www/html:z # Share this folder with cron.
+    #deploy:
+      #resources:
+        #limits:
+          #memory: "40m"
     restart: unless-stopped
 
   collabora:
@@ -488,6 +542,10 @@ services:
       - "127.0.0.1:9980:9980"
     cap_add:
       - MKNOD
+    #deploy:
+      #resources:
+        #limits:
+          #memory: "4g"
     restart: unless-stopped
 
   gitlab:
@@ -496,9 +554,9 @@ services:
     env_file:
       - /opt/flotilla/secrets.env
     depends_on:
-      - postgres
       - redis
-      #- postfix
+      - postgres
+      - registry
     environment:
       - PUID=1000
       - PGID=1000
@@ -509,8 +567,11 @@ services:
       - DB_EXTENSION=pg_trgm
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - NGINX_MAX_UPLOAD_SIZE=250M
+      - GITLAB_HOST=git.maxocull.com
+      - GITLAB_NOTIFY_ON_BROKEN_BUILDS=true
       #- SMTP_ENABLED=true # Flip on after the mail server is setup.
-      - IMAP_ENABLED=true # Flip on after the mail server is setup.
+      #- IMAP_ENABLED=true # Flip on after the mail server is setup.
       - "IMAP_USER=maxocull.com@gmail.com"
       - "GITLAB_INCOMING_EMAIL_ADDRESS=maxocull.com+%{key}@gmail.com"
       #- IMAP_DOMAIN=www.maxocull.com
@@ -518,15 +579,61 @@ services:
       #- IMAP_PORT=993
       #- PIWIK_URL=
       #- PIWIK_SITE_ID=
-    depends_on:
-      - redis
-      - postgres
+      - GITLAB_REGISTRY_ENABLED=true
+      - GITLAB_REGISTRY_HOST=registry.maxocull.com
+      - GITLAB_REGISTRY_PORT=443
+      - GITLAB_REGISTRY_API_URL=http://registry:5000
+      - GITLAB_REGISTRY_KEY_PATH=/certs/live/maxocull.com/privkey.pem
+      #- GITLAB_REGISTRY_KEY_PATH=/certs/registry.key
     volumes:
       - /opt/flotilla/data/gitlab:/home/git/data:z
+      #- /home/git/.ssh/authorized_keys:/home/git/data/.ssh/authorized_keys:z
+      - /home/git/.ssh/authorized_keys_proxy:/home/git/data/.ssh/authorized_keys_proxy:z
+      - /opt/flotilla/data/letsencrypt/keys:/certs:z
+      #- /opt/flotilla/config/registry/certs:/certs:z
     ports:
       # Keep this as a string because I guess docker-compose (Python) has a bug?
       - "127.0.0.1:4080:80"
-      - "127.0.0.1:4022:22"
+      - "127.0.0.1:9922:22"
+    restart: unless-stopped
+
+  registry:
+    image: registry
+    container_name: registry
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - REGISTRY_LOG_LEVEL=info
+      - REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/registry
+      - REGISTRY_AUTH_TOKEN_REALM=https://git.maxocull.com/jwt/auth
+      - REGISTRY_AUTH_TOKEN_SERVICE=container_registry
+      - REGISTRY_AUTH_TOKEN_ISSUER=gitlab-issuer
+      - REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE=/certs/live/maxocull.com/fullchain.pem
+      #- REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE=/certs/registry.crt
+      - REGISTRY_STORAGE_DELETE_ENABLED=true
+    volumes:
+      - /opt/flotilla/data/gitlab/shared/registry:/registry:z
+      - /opt/flotilla/data/letsencrypt/keys:/certs:z
+      #- /opt/flotilla/config/registry/certs:/certs:z
+    ports:
+      - "127.0.0.1:5000:5000"
+    restart: unless-stopped
+
+  gitlab-runner:
+    image: gitlab/gitlab-runner:alpine
+    container_name: gitlab-runner
+    depends_on:
+      - gitlab
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - CI_SERVER_URL=https://git.maxocull.com/
+      - REGISTRATION_TOKEN=_WkSofVsJEziYh-ngWar # Change this to whatever the current token is.
+    volumes:
+      - /opt/flotilla/config/gitlab-runner:/etc/gitlab-runner:z
+      - /var/run/docker.sock:/var/run/docker.sock # Behind a reverse proxy, it's okay.
     restart: unless-stopped
 
   #jenkins:
@@ -573,6 +680,10 @@ services:
     ports:
       - "127.0.0.1:1080:80"
       - "127.0.0.1:1443:443"
+    #deploy:
+      #resources:
+        #limits:
+          #memory: "400m"
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
@@ -765,4 +876,52 @@ services:
       - /opt/flotilla/data/graphhopper:/data:z
     ports:
       - "127.0.0.1:8999:8989"
+    #deploy:
+      #resources:
+        #limits:
+          #memory: "1.2g"
+    restart: unless-stopped
+
+  minecraft:
+    # docker exec minecraft rcon-cli stop
+    # docker exec minecraft rcon-cli stop
+    image: itzg/minecraft-server
+    container_name: minecraft
+    environment:
+      - UID=1000
+      - GID=1000
+      - TZ=America/Indianapolis
+      - VERSION=1.15.1
+      - EULA=TRUE
+      #- CONSOLE=FALSE
+      - GUI=FALSE
+      - MEMORY=4G
+      - "JVM_XX_OPTS=-XX:+UseG1GC -XX:G1HeapRegionSize=32M -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=50 -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:+ParallelRefProcEnabled -XX:CodeCacheExpansionSize=1M -XX:InitialCodeCacheSize=32M -XX:ReservedCodeCacheSize=64M -XX:-TieredCompilation -XX:BackEdgeThreshold=10000 -XX:CompileThreshold=1000 -XX:CICompilerCount=16 -XX:CompilerThreadPriority=3 -XX:FreqInlineSize=325 -XX:InlineSmallCode=2000 -XX:MaxInlineSize=1024"
+      # These below are only used if server.properties doesn't already exist.
+      - SERVER_NAME=maxocull.com
+      - MOTD=Welcome to maxocull.com!
+      - DIFFICULTY=hard
+      - OPS=Maxattax,MasterAlan2001,houndeyex
+      - "ICON=https://www.gravatar.com/avatar/7143b51c5a72389622b31375e5e91b5b"
+      - MAX_PLAYERS=50
+      - ALLOW_NETHER=true
+      - ANNOUNCE_PLAYER_ACHIEVEMENTS=true
+      - ENABLE_COMMAND_BLOCK=true
+      - FORCE_GAMEMODE=false
+      - GENERATE_STRUCTURES=true
+      - HARDCORE=false
+      - SPAWN_ANIMALS=true
+      - SPAWN_MONSTERS=true
+      - SPAWN_NPCS=true
+      - SPAWN_PROTECTION=128
+      - VIEW_DISTANCE=14
+      - MODE=survival
+      - PVP=true
+      - LEVEL_TYPE=AMPLIFIED
+      - LEVEL=world
+      - ALLOW_FLIGHT=false
+    volumes:
+      - /opt/flotilla/data/minecraft:/data:Z
+    ports:
+      - "25565:25565"
     restart: unless-stopped

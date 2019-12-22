@@ -1,0 +1,8 @@
+policy_module(flotilla_ssh_tunnel_policy, 1.0)
+
+gen_require(`
+    type user_t;
+    unconfined_u;
+`)
+
+allow user_t:dir { getattr search open read };

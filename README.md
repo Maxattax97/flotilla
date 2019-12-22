@@ -109,8 +109,8 @@ Name: Flotilla qBittorrent
 Enable: Yes
 Host: cleanroom
 Port: 8800
-Username: admin # Unless changed.
-Password: adminadmin # Unless changed.
+Username: admin         # Unless changed.
+Password: adminadmin    # Unless changed.
 Use SSL: No
 ```
 
@@ -205,10 +205,49 @@ CREATE DATABASE gitlabhq_production;
 GRANT ALL PRIVILEGES ON DATABASE gitlabhq_production to gitlab;
 ```
 
-`password` should match the one provided for `POSTGRES_PASSWORD` in
-`secrets.env`.
+`password` should match the one provided for `DB_PASS` in
+`secrets.env`. This use should have permission to create databases, but he does
+not have to be superuser. Afterward, create the `pg_trgm` extension on the
+database with the superuser (who should be `postgres`).
 
-Afterward, create the `pg_trgm` extension on the database with the superuser
-(who should be `postgres`).
+Since the host will be using port 22, this container will share it by creating a
+`git` user on the host and SSH tunnelling into the Docker network's Gitlab
+instance. This requires ~symlinking~ manually copying  SSH keys from the
+container volume bind mount into the local `git` user's `.ssh` folder. See
+[here](https://github.com/sameersbn/docker-gitlab/blob/master/docs/exposing-ssh-port.md)
+for more details. It must be manually copied because of SELinux permissions;
+container security contexts may not mix with `sshd` contexts of a different user.
+
+The Gitlab Runner must be connected to the Gitlab instance. Paste the key from
+the web UI into the `REGISTRATION_TOKEN` environment variable.
+
+Gitlab must also connect to a Docker registry to host Docker images. This shares
+the letsencrypt certificates to make API calls.
 
 **TODO**: Automate this procedure.
+**TODO**: Automate update of SSH keys, possibly with inotify/crond/incrontab.
+
+### Heimdall
+
+Any services you add which contact an API will require the hostname of the
+_Docker container_ and their port listed. As an example, for qBittorrent you
+would enter:
+
+```
+URL: cleanroom:8800
+Username: admin         # Unless changed.
+Password: adminadmin    # Unless changed.
+```
+
+## TODO List
+
+- [Lazy Librarian](https://hub.docker.com/r/linuxserver/lazylibrarian/)
+- [Calibre](https://hub.docker.com/r/linuxserver/calibre-web/)
+- [Mayan EDMS](https://hub.docker.com/r/mayanedms/mayanedms) for managing documents
+- [NordVPN router](https://hub.docker.com/r/bubuntux/nordvpn)
+- Switching to [Deluge](https://hub.docker.com/r/linuxserver/deluge)
+- Set Jackett to use VPN rather than proxy
+- [Shadowsocks](https://hub.docker.com/r/shadowsocks/shadowsocks-libev) proxy server through the VPN (does this gain me anything?)
+- Matomo/Piwik for analytics
+- A TOR node, then hosting an onion site
+- An IRC server

@@ -177,6 +177,48 @@ if [[ ! -d "${BASE}/data/postgres" ]]; then
     #docker-compose --file "${COMPOSE_FILE}" stop postgres
 fi
 
+# Setup SSH tunnelling for Gitlab.
+id -u git
+if [[ $? -eq 1 ]]; then
+    #wget https://github.com/sameersbn/docker-gitlab/raw/master/contrib/expose-gitlab-ssh-port.sh -O /tmp/setup-git.sh
+    #chmod +x /tmp/setup-git.sh
+    #elevate /tmp/setup-git.sh
+
+    if ! id -u git >> /dev/null 2>&1; then
+        groupadd -g 1010 git
+        useradd -m -u 9922 -g git -s /bin/sh -d /home/git git
+    fi
+
+    sudo -u git mkdir -p /home/git/.ssh/
+
+
+    sudo -u git if [ ! -f /home/git/.ssh/id_rsa ]; then \
+        ssh-keygen -t rsa -b 4096 -N "" -f /home/git/.ssh/id_rsa; \
+    fi
+    sudo -u git if [ -f /home/git/.ssh/id_rsa.pub ]; then \
+        mv /home/git/.ssh/id_rsa.pub /home/git/.ssh/authorized_keys_proxy; \
+    fi
+
+    mkdir -p /home/git/gitlab-shell/bin/
+    rm -f /home/git/gitlab-shell/bin/gitlab-shell
+    tee -a /home/git/gitlab-shell/bin/gitlab-shell > /dev/null <<EOF
+#!/bin/sh
+ssh -i /home/git/.ssh/id_rsa -p 9922 -o StrictHostKeyChecking=no git@127.0.0.1 "SSH_ORIGINAL_COMMAND=\"\$SSH_ORIGINAL_COMMAND\" \$0 \$@"
+EOF
+    chown git:git /home/git/gitlab-shell/bin/gitlab-shell
+    chmod u+x /home/git/gitlab-shell/bin/gitlab-shell
+
+    # Symlink authorized keys (provided via web interface) so you don't get a password prompt.
+    mkdir -p "${BASE}/data/gitlab/.ssh/"
+    chown git:git -R "${BASE}/data/gitlab/.ssh/"
+    chown git:git -R /home/git/.ssh
+    sudo -u git touch "${BASE}/data/gitlab/.ssh/authorized_keys"
+    rm -f /home/git/.ssh/authorized_keys
+    sudo -u git ln -s "${BASE}/data/gitlab/.ssh/authorized_keys" /home/git/.ssh/authorized_keys
+
+    rm /tmp/setup-git.sh
+fi
+
 # Reset the permissions for any previously ran elevated commands.
 if [[ "$(probe chcon)" -eq 1 ]]; then
     elevate chcon -RLt svirt_sandbox_file_t "${BASE}"
