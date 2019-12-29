@@ -239,11 +239,65 @@ Username: admin         # Unless changed.
 Password: adminadmin    # Unless changed.
 ```
 
+### LazyLibrarian
+
+Some configuration options should be set.
+
+- **Config > Interface > Access Control**: Set a WebServer login
+- **Config > Interface > Startup**: Enable API
+- **Config > Interface > Appearance**: Set to `flatly`
+- **Config > Interface > OPDS Server**: Enable, require credentials, leave credentials empty, enable metadata
+- **Config > Downloaders > Torrents**: Enable qBittorrent, `cleanroom:8800`, `admin` and `adminadmin` (unless changed), `/downloads`
+- **Config > Providers > Torznab Providers**: Name it `Jackett All`, enable, `http://jackett:9117/torznab/all`, enter the API key from the Jackett webpage
+- **Config > Providers > Direct Download Providers**: You may have to change the mirror (`libgen.pw`, `gen.lib.rus.ec`, ...), set one to use `search.php` and the other `foreignfiction/index.php`, enable Z-Library as well with `b-ok.cc`
+- **Config > Processing > Calibre**: Set the `calibredb` import program to `/usr/bin/calibredb`
+
+### Calibre
+
+Setup LazyLibrarian first to generate a databse. Otherwise, you must manually
+generate a metadata.db file and upload it to `/books` using Calibre desktop. It
+is unfortunate that the main project does not support automatically generating
+this file.
+
+At the setup menu, enter these values:
+
+```
+Location of Calibre databse: /books
+Enable uploading: true
+Use Calibre's ebook converter: true
+Path to convertertool: /usr/bin/ebook-convert
+Location of Unrar binary: /usr/bin/unrar
+```
+
+The default login is `admin` and `admin123`. Change these.
+
+### Mayan EDMS
+
+Mayan needs a database, create one in our existing Postgres DB. First make a
+user `mayan` with the password you specified (`$MAYAN_DATABASE_PASSWORD`), then
+make a database named `mayan` owned by the `mayan` user.
+
+If after first run it doesn't provide a web dialog with a password, the
+initialization failed. Try again by running: `docker-compose exec mayan /opt/mayan-edms/bin/mayan-edms.py initialsetup`.
+
+Configure the email account:
+
+```
+Label: maxocull.com Gmail
+Default: true
+Enabled: true
+Host: smtp.gmail.com
+Port: 587
+Use TLS: true
+Use SSL: false
+Username: maxocull.com
+Password: <Gmail password, does not need an app password, should match $SMTP_PASSWORD>
+From: max.ocull@gmail.com
+```
+
+
 ## TODO List
 
-- [Lazy Librarian](https://hub.docker.com/r/linuxserver/lazylibrarian/)
-- [Calibre](https://hub.docker.com/r/linuxserver/calibre-web/)
-- [Mayan EDMS](https://hub.docker.com/r/mayanedms/mayanedms) for managing documents
 - [NordVPN router](https://hub.docker.com/r/bubuntux/nordvpn)
 - Switching to [Deluge](https://hub.docker.com/r/linuxserver/deluge)
 - Set Jackett to use VPN rather than proxy

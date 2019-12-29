@@ -40,14 +40,14 @@ services:
       - PGID=1000
       - TZ=America/Indianapolis
       - URL=maxocull.com
-      - SUBDOMAINS=www,resolute,whoami,dash,cloud,git,dns,office,lidarr,sonarr,radarr,media,torrent,jackett,ci,grafana,search,map,pgadmin,prometheus,portainer,registry
+      - SUBDOMAINS=www,resolute,whoami,dash,cloud,git,dns,office,lidarr,sonarr,radarr,media,torrent,jackett,ci,grafana,search,map,pgadmin,prometheus,portainer,registry,librarian,books,doc,analytics
       - VALIDATION=http # DNS? so can use wildcards
       #- DNSPLUGIN=cloudflare #optional
       #- DUCKDNSTOKEN=<token> #optional
       - EMAIL=max.ocull@protonmail.com
       - DHLEVEL=2048
       - ONLY_SUBDOMAINS=false
-      - EXTRA_DOMAINS=maxocull.net,www.maxocull.net,resolute.maxocull.net,whoami.maxocull.net,dash.maxocull.net,cloud.maxocull.net,git.maxocull.net,dns.maxocull.net,office.maxocull.net,lidarr.maxocull.net,sonarr.maxocull.net,radarr.maxocull.net,media.maxocull.net,torrent.maxocull.net,jackett.maxocull.net,ci.maxocull.net,grafana.maxocull.net,search.maxocull.net,map.maxocull.net,pgadmin.maxocull.net,prometheus.maxocull.net,portainer.maxocull.net,registry.maxocull.net
+      - EXTRA_DOMAINS=maxocull.net,www.maxocull.net,resolute.maxocull.net,whoami.maxocull.net,dash.maxocull.net,cloud.maxocull.net,git.maxocull.net,dns.maxocull.net,office.maxocull.net,lidarr.maxocull.net,sonarr.maxocull.net,radarr.maxocull.net,media.maxocull.net,torrent.maxocull.net,jackett.maxocull.net,ci.maxocull.net,grafana.maxocull.net,search.maxocull.net,map.maxocull.net,pgadmin.maxocull.net,prometheus.maxocull.net,portainer.maxocull.net,registry.maxocull.net,librarian.maxocull.net,books.maxocull.net,doc.maxocull.net,analytics.maxocull.net
       - STAGING=false # Enable when testing.
     volumes:
       - /opt/flotilla/data/letsencrypt/keys:/config/etc/letsencrypt:Z
@@ -61,6 +61,21 @@ services:
       #resources:
         #limits:
           #memory: "1g"
+    restart: unless-stopped
+
+  weblog:
+    image: node:lts
+    container_name: weblog
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+    working_dir: /weblog
+    command: "npm run serve"
+    volumes:
+      - /opt/flotilla/data/weblog:/weblog:z
+    ports:
+      - "127.0.0.1:4000:4000"
     restart: unless-stopped
 
   dockersocket:
@@ -880,6 +895,69 @@ services:
       #resources:
         #limits:
           #memory: "1.2g"
+    restart: unless-stopped
+
+  calibre:
+    image: linuxserver/calibre-web
+    container_name: calibre
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - DOCKER_MODS=linuxserver/calibre-web:calibre # x86_64 only
+    volumes:
+      - /opt/flotilla/config/calibre:/config:Z
+      - /opt/flotilla/data/all/books:/books:z
+    ports:
+      - "127.0.0.1:8083:8083"
+    restart: unless-stopped
+
+  lazylibrarian:
+    image: linuxserver/lazylibrarian
+    container_name: lazylibrarian
+    depends_on:
+      - cleanroom
+      - jackett
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - DOCKER_MODS=linuxserver/calibre-web:calibre # x86_64 only
+    volumes:
+      - /opt/flotilla/config/lazylibrarian:/config:Z
+      - /opt/flotilla/data/cleanroom:/downloads:z
+      - /opt/flotilla/data/all/books:/books:z
+    ports:
+      - "127.0.0.1:5299:5299"
+    restart: unless-stopped
+
+  mayan:
+    image: mayanedms/mayanedms
+    container_name: mayan
+    depends_on:
+      - postgres
+      - redis
+    env_file:
+      - /opt/flotilla/secrets.env
+    environment:
+      - MAYAN_USER_UID=1000
+      - MAYAN_USER_GID=1000
+      - TZ=America/Indianapolis
+      - MAYAN_DATABASE_ENGINE=django.db.backends.postgresql
+      - MAYAN_DATABASE_HOST=postgres
+      - MAYAN_DATABASE_NAME=mayan
+      - MAYAN_DATABASE_USER=mayan
+      - MAYAN_CELERY_BROKER_URL=redis://redis:6379
+      - MAYAN_CELERY_RESULT_BACKEND=redis://redis:6379
+      - MAYAN_WORKER_FAST_CONCURRENCY=0 # Use all threads, defaults to 1.
+      - MAYAN_WORKER_MEDIUM_CONCURRENCY=0 # Use all threads, defaults to 1.
+      - MAYAN_WORKER_SLOW_CONCURRENCY=0 # Use all threads, defaults to 1.
+      #- MAYAN_APT_INSTALLS="tesseract-ocr-deu tesseract-ocr-spa"
+      #- MAYAN_PIP_INSTALLS="" # redis is already installed
+    volumes:
+      - /opt/flotilla/data/mayan:/var/lib/mayan:z
+    ports:
+      - "127.0.0.1:7980:8000"
     restart: unless-stopped
 
   minecraft:

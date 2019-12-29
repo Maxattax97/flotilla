@@ -31,7 +31,13 @@ server {
 	client_max_body_size 0;
 
 	location / {
-		try_files $uri $uri/ /index.html /index.php?$args =404;
+		# Instead of serving up a webroot, reverse proxy to the blog.
+		include /config/nginx/proxy.conf;
+		resolver 127.0.0.11 valid=30s;
+		set $upstream_weblog weblog;
+		proxy_pass http://$upstream_weblog:4000;
+
+		#try_files $uri $uri/ /index.html /index.php?$args =404;
 	}
 
 	location ~ \.php$ {
