@@ -3,13 +3,13 @@
     "id": "sitelink",
     "type": "inputstring",
     "name": "Site Link",
-    "value": "https://yts.lt/"
+    "value": "https://yts.mx/"
   },
   {
     "id": "cookieheader",
     "type": "hiddendata",
     "name": "CookieHeader",
-    "value": "__cfduid=dc8e3c7dca46d29a934dbfa2c6d3b08e31577587963; PHPSESSID=54s0492abs49rm54kljmud1s1d"
+    "value": "__cfduid=d834e29d1421997d0914da75c100ff31c1583697962; PHPSESSID=4f9gjibq3muqtvkiahagh3767q"
   },
   {
     "id": "lasterror",

@@ -11,13 +11,19 @@ location ^~ /radarr {
 
     include /config/nginx/proxy.conf;
     resolver 127.0.0.11 valid=30s;
-    set $upstream_radarr radarr;
-    proxy_pass http://$upstream_radarr:7878;
+    set $upstream_app radarr;
+    set $upstream_port 7878;
+    set $upstream_proto http;
+    proxy_pass $upstream_proto://$upstream_app:$upstream_port;
+
 }
 
 location ^~ /radarr/api {
     include /config/nginx/proxy.conf;
     resolver 127.0.0.11 valid=30s;
-    set $upstream_radarr radarr;
-    proxy_pass http://$upstream_radarr:7878;
+    set $upstream_app radarr;
+    set $upstream_port 7878;
+    set $upstream_proto http;
+    proxy_pass $upstream_proto://$upstream_app:$upstream_port;
+
 }

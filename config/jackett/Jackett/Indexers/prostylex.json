@@ -9,12 +9,46 @@
     "id": "cookieheader",
     "type": "hiddendata",
     "name": "CookieHeader",
-    "value": "__cfduid=d7c59c020821c55ed9450eae144d23d251568248994; pass=deleted; uid=deleted"
+    "value": "__cfduid=da492016dbf5ea3c293a3ffa1ef451a341583518592; pass=deleted; uid=deleted"
   },
   {
     "id": "lasterror",
     "type": "hiddendata",
     "name": "LastError",
     "value": null
+  },
+  {
+    "id": "username",
+    "type": "inputstring",
+    "name": "Username",
+    "value": null
+  },
+  {
+    "id": "password",
+    "type": "inputstring",
+    "name": "Password",
+    "value": ""
+  },
+  {
+    "id": "sortrequestedfromsite",
+    "type": "inputselect",
+    "name": "Sort requested from site",
+    "value": "id",
+    "options": {
+      "id": "created",
+      "seeders": "seeders",
+      "size": "size",
+      "name": "title"
+    }
+  },
+  {
+    "id": "orderrequestedfromsite",
+    "type": "inputselect",
+    "name": "Order requested from site",
+    "value": "desc",
+    "options": {
+      "desc": "desc",
+      "asc": "asc"
+    }
   }
 ]

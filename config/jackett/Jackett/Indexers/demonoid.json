@@ -3,18 +3,39 @@
     "id": "sitelink",
     "type": "inputstring",
     "name": "Site Link",
-    "value": "https://www.dnoid.to/"
+    "value": "https://www.demonoid.is/"
   },
   {
     "id": "cookieheader",
     "type": "hiddendata",
     "name": "CookieHeader",
-    "value": "__cfduid=d0fe7f9ce631b9bccb7edb789325e97081568248991; pass=deleted; uid=deleted"
+    "value": "__cfduid=d0fe7f9ce631b9bccb7edb789325e97081568248991; pass=deleted; uid=deleted; defense=jh6e75bc38go54t14b5dqn30nq; demonoid=ijmoiqtm8f3st33pijocfvnp6k"
   },
   {
     "id": "lasterror",
     "type": "hiddendata",
     "name": "LastError",
     "value": "Exception (demonoid): Got redirected to another domain. Try changing the indexer URL to https://www.demonoid.is/.: Parse error"
+  },
+  {
+    "id": "sortrequestedfromsite",
+    "type": "inputselect",
+    "name": "Sort requested from site",
+    "value": "added",
+    "options": {
+      "added": "created",
+      "seeders": "seeders",
+      "size": "size"
+    }
+  },
+  {
+    "id": "orderrequestedfromsite",
+    "type": "inputselect",
+    "name": "Order requested from site",
+    "value": "desc",
+    "options": {
+      "desc": "desc",
+      "asc": "asc"
+    }
   }
 ]

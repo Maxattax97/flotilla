@@ -29,7 +29,6 @@ version: "3.7"
   # :z is public Docker share (guarded by SELinux); these files are for several
   # containers to share.
 services:
-
   letsencrypt:
     image: linuxserver/letsencrypt
     container_name: letsencrypt
@@ -61,6 +60,8 @@ services:
       #resources:
         #limits:
           #memory: "1g"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   weblog:
@@ -76,6 +77,8 @@ services:
       - /opt/flotilla/data/weblog:/weblog:z
     ports:
       - "127.0.0.1:4000:4000"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   dockersocket:
@@ -120,6 +123,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     labels:
       - 'traefik.enable=false'
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     restart: unless-stopped
 
   #traefik:
@@ -181,6 +186,7 @@ services:
           #memory: "40m"
     restart: unless-stopped
     labels:
+      - "com.centurylinklabs.watchtower.enable=true"
       - "traefik.enable=true"
       - "traefik.http.routers.http-whoami.rule=Host(`whoami.maxocull.com`)"
       - "traefik.http.routers.http-whoami.entryPoints=http"
@@ -190,22 +196,34 @@ services:
       - "traefik.http.routers.https-whoami.tls.certResolver=le-main"
       #- "traefik.http.routers.https-whoami.tls.domains[0].main=whoami.maxocull.com"
 
-  #watchtower:
-    ## TODO: Not recommended by LinuxServer.io
-    #image: containrrr/watchtower
-    #container_name: watchtower
-    #environment:
-      #- PUID=1000
-      #- PGID=1000
-      #- TZ=America/Indianapolis
-      #- WATCHTOWER_CLEANUP=true
-      ##- WATCHTOWER_SCHEDULE='0 0 4 * * *' # Every night at 04:00.
-      ## TODO: Email notifications (requires SMTP).
-      ## https://containrrr.github.io/watchtower/notifications/
-    #volumes:
-      #- /var/run/docker.sock:/var/run/docker.sock
-      ##- /opt/flotilla/config/watchtower/config.json:/config.json:z
-    #restart: unless-stopped
+  watchtower:
+    # Not recommended by LinuxServer.io for general use. We will auto-upgrade sparingly.
+    image: containrrr/watchtower
+    container_name: watchtower
+    command:
+      - '--label-enable' # By default, containers DO NOT upgrade with this settings, must be explicitly enabled.
+    env_file:
+      - /opt/flotilla/secrets.env
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - WATCHTOWER_CLEANUP=true
+      #- WATCHTOWER_POLL_INTERVAL=30
+      - WATCHTOWER_TIMEOUT=60 # How long to wait before forcibly stopping a container.
+      #- WATCHTOWER_DEBUG=true
+      - WATCHTOWER_SCHEDULE=0 0 4 * * * # Every night at 04:00.
+      - WATCHTOWER_NOTIFICATION_EMAIL_FROM=maxocull.com@gmail.com
+      - WATCHTOWER_NOTIFICATION_EMAIL_TO=max.ocull@protonmail.com
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER=smtp.gmail.com
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PORT=587
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_USER=maxocull.com@gmail.com
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      #- /opt/flotilla/config/watchtower/config.json:/config.json:z
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    restart: unless-stopped
 
   pihole:
     image: pihole/pihole
@@ -238,6 +256,8 @@ services:
       #resources:
         #limits:
           #memory: "1.6g"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   openvpn:
@@ -261,6 +281,8 @@ services:
       - TZ=America/Indianapolis
     ports:
       - "1194:1194/udp"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     restart: unless-stopped
 
   jackett:
@@ -282,6 +304,8 @@ services:
       #resources:
         #limits:
           #memory: "1.2g"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   cleanroom:
@@ -318,6 +342,8 @@ services:
       #resources:
         #limits:
           #memory: "4g"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     restart: unless-stopped
 
   sonarr:
@@ -341,6 +367,8 @@ services:
       #resources:
         #limits:
           #memory: "4g"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   radarr:
@@ -364,6 +392,8 @@ services:
       #resources:
         #limits:
           #memory: "4g"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   lidarr:
@@ -387,6 +417,8 @@ services:
       #resources:
         #limits:
           #memory: "4g"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   jellyfin:
@@ -414,6 +446,8 @@ services:
       #resources:
         #limits:
           #memory: "6g"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   postgres:
@@ -434,9 +468,12 @@ services:
       #resources:
         #limits:
           #memory: "4g"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     restart: unless-stopped
 
   pgadmin:
+    # Permissions errors are likely caused by files not being owned by user ID 5050 (pgadmin).
     image: dpage/pgadmin4
     container_name: pgadmin
     env_file:
@@ -460,6 +497,7 @@ services:
           #memory: "1.2g"
     restart: unless-stopped
     labels:
+      - "com.centurylinklabs.watchtower.enable=true"
       - "traefik.enable=true"
       - "traefik.http.routers.pgadmin.rule=PathPrefix(`/pgadmin`)"
       - "traefik.http.routers.pgadmin.entryPoints=http"
@@ -482,6 +520,8 @@ services:
       #resources:
         #limits:
           #memory: "4g"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     restart: unless-stopped
 
   nextcloud:
@@ -506,7 +546,7 @@ services:
       - REDIS_HOST=redis
       - SMTP_HOST=smtp.gmail.com
       - SMTP_SECURE=tls
-      - SMTP_PORT=465
+      - SMTP_PORT=587
       - SMTP_NAME=maxocull.com
       - MAIL_FROM_ADDRESS=maxocull.com@gmail.com
       #- MAIL_DOMAIN=mail.maxocull.com
@@ -521,6 +561,8 @@ services:
       #resources:
         #limits:
           #memory: "2.4g"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     restart: unless-stopped
 
   nextcloud-cron:
@@ -539,6 +581,8 @@ services:
       #resources:
         #limits:
           #memory: "40m"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     restart: unless-stopped
 
   collabora:
@@ -561,6 +605,8 @@ services:
       #resources:
         #limits:
           #memory: "4g"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   gitlab:
@@ -610,6 +656,8 @@ services:
       # Keep this as a string because I guess docker-compose (Python) has a bug?
       - "127.0.0.1:4080:80"
       - "127.0.0.1:9922:22"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     restart: unless-stopped
 
   registry:
@@ -633,6 +681,8 @@ services:
       #- /opt/flotilla/config/registry/certs:/certs:z
     ports:
       - "127.0.0.1:5000:5000"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   gitlab-runner:
@@ -649,6 +699,8 @@ services:
     volumes:
       - /opt/flotilla/config/gitlab-runner:/etc/gitlab-runner:z
       - /var/run/docker.sock:/var/run/docker.sock # Behind a reverse proxy, it's okay.
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     restart: unless-stopped
 
   #jenkins:
@@ -695,20 +747,9 @@ services:
     ports:
       - "127.0.0.1:1080:80"
       - "127.0.0.1:1443:443"
-    #deploy:
-      #resources:
-        #limits:
-          #memory: "400m"
     restart: unless-stopped
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.http-dash.rule=Host(`dash.maxocull.com`)"
-      - "traefik.http.routers.http-dash.entryPoints=http"
-      - "traefik.http.routers.https-dash.rule=Host(`dash.maxocull.com`)"
-      - "traefik.http.routers.https-dash.entryPoints=https"
-      - "traefik.http.routers.https-dash.tls=true"
-      - "traefik.http.routers.https-dash.tls.certResolver=le-main"
-      #- "traefik.http.routers.https-dash.tls.domains[0].main=dash.maxocull.com"
+      - "com.centurylinklabs.watchtower.enable=true"
 
   grafana:
     image: grafana/grafana
@@ -733,6 +774,8 @@ services:
       - /opt/flotilla/data/grafana/logs:/var/log/grafana:z
     ports:
       - "127.0.0.1:3000:3000"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     restart: unless-stopped
 
   loki:
@@ -743,9 +786,11 @@ services:
       - PGID=1000
       - TZ=America/Indianapolis
     ports:
-      - "3100:3100"
+      - "127.0.0.1:3100:3100"
     #command:
       #- '--config.file=/etc/loki/local-config.yml'
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     restart: unless-stopped
 
   promtail:
@@ -759,6 +804,8 @@ services:
       - /opt/flotilla/data/all/logs:/var/log:z
     #command:
       #- '--config.file=/etc/promtail/docker-config.yml'
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     restart: unless-stopped
 
   prometheus:
@@ -779,6 +826,8 @@ services:
       - '--storage.tsdb.path=/prometheus'
     ports:
       - "127.0.0.1:9095:9090" # conflicts with Fedora's Cockpit at 9090
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     restart: unless-stopped
 
   nodeexporter:
@@ -796,6 +845,8 @@ services:
       - '--path.rootfs=/host'
     ports:
       - "127.0.0.1:9100:9100"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   portainer:
@@ -811,6 +862,8 @@ services:
     ports:
       - "127.0.0.1:9000:9000"
       - "127.0.0.1:9001:9001"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   #nginx:
@@ -851,6 +904,8 @@ services:
       - TZ=America/Indianapolis
     ports:
       - "127.0.0.1:4040:3000"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   searx:
@@ -878,6 +933,8 @@ services:
       - /opt/flotilla/config/searx:/etc/searx:z
     ports:
       - "127.0.0.1:4050:8080"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   graphhopper:
@@ -895,6 +952,8 @@ services:
       #resources:
         #limits:
           #memory: "1.2g"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   calibre:
@@ -910,6 +969,8 @@ services:
       - /opt/flotilla/data/all/books:/books:z
     ports:
       - "127.0.0.1:8083:8083"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   lazylibrarian:
@@ -929,6 +990,8 @@ services:
       - /opt/flotilla/data/all/books:/books:z
     ports:
       - "127.0.0.1:5299:5299"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   mayan:
@@ -958,6 +1021,8 @@ services:
       - /opt/flotilla/data/mayan:/var/lib/mayan:z
     ports:
       - "127.0.0.1:7980:8000"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     restart: unless-stopped
 
   minecraft:
@@ -969,7 +1034,7 @@ services:
       - UID=1000
       - GID=1000
       - TZ=America/Indianapolis
-      - VERSION=1.15.1
+      - VERSION=1.15.2
       - EULA=TRUE
       #- CONSOLE=FALSE
       - GUI=FALSE
@@ -1002,4 +1067,6 @@ services:
       - /opt/flotilla/data/minecraft:/data:Z
     ports:
       - "25565:25565"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     restart: unless-stopped

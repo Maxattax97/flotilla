@@ -9,12 +9,33 @@
     "id": "cookieheader",
     "type": "hiddendata",
     "name": "CookieHeader",
-    "value": "__cfduid=d11f321c0c9f8e6a0ec0c8fdab88bfaf41568171572"
+    "value": "__cfduid=d0c21447a3e3570c54ca6c4aa3928e5031583028082"
   },
   {
     "id": "lasterror",
     "type": "hiddendata",
     "name": "LastError",
     "value": null
+  },
+  {
+    "id": "sortrequestedfromsite",
+    "type": "inputselect",
+    "name": "Sort requested from site",
+    "value": "dt",
+    "options": {
+      "dt": "created",
+      "ns": "seeders",
+      "sz": "size"
+    }
+  },
+  {
+    "id": "orderrequestedfromsite",
+    "type": "inputselect",
+    "name": "Order requested from site",
+    "value": "d",
+    "options": {
+      "d": "desc",
+      "a": "asc"
+    }
   }
 ]

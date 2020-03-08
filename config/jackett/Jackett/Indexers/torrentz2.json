@@ -9,7 +9,7 @@
     "id": "cookieheader",
     "type": "hiddendata",
     "name": "CookieHeader",
-    "value": "__cfduid=dbf20c80b743d6ba281ce250a5d96e1fd1568248997"
+    "value": "__cfduid=dbf20c80b743d6ba281ce250a5d96e1fd1568248997; cf_clearance=4656fbe11b8c40421639f20502e1faedd68f0c52-1583654560-0-150"
   },
   {
     "id": "lasterror",
@@ -34,5 +34,17 @@
     "type": "inputbool",
     "name": "Only include verifed content in results",
     "value": false
+  },
+  {
+    "id": "sortrequestedfromsite",
+    "type": "inputselect",
+    "name": "Sort requested from site",
+    "value": "A",
+    "options": {
+      "_": "peers",
+      "N": "rating",
+      "A": "created",
+      "S": "size"
+    }
   }
 ]
