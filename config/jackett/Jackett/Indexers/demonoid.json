@@ -9,13 +9,25 @@
     "id": "cookieheader",
     "type": "hiddendata",
     "name": "CookieHeader",
-    "value": "__cfduid=d0fe7f9ce631b9bccb7edb789325e97081568248991; pass=deleted; uid=deleted; defense=jh6e75bc38go54t14b5dqn30nq; demonoid=ijmoiqtm8f3st33pijocfvnp6k"
+    "value": "__cfduid=df34cbd4a586460580434eeb3c3faf4b91586348214; pass=deleted; uid=deleted; __cf_bm=52075f02cc698e35cf54eb6d6e3cabfa394197d1-1586348214-1800-AXZikPDnzg9JgXBaTS3SqhIAADOHYUSHFN94bOPbDWrAjsn/DJLqiObIq0jOTvmuvOf8DWV7LjLpGxNbACGlsLA=; __cf_bm=1eda864561dfce6f201d1e72a1a8ce6cd15f9ff1-1586348215-1800-Adyv64IAT2ffOdiRK/WE6crVJkJ6fStcnroS/gNGLMGlM41Tf/cOL4Q8pyPU7grbccFYe6+XB3SvsLIuZRtHiDQ=; __cf_bm=722881a8dbc6faaf6424e3788e2b6981ec45a99d-1586348367-1800-AZlPDcXjucDw6tRv+BAb+jAKy0AhM0ypKYr6uLAeNmBTP4BijAoHMvq31emb+3ELcRKduclJAZfZra8ywPfVWa8=; __cf_bm=5f6fd0f91748f85b1f6c0ab3b2b5f0db8226d920-1586348426-1800-AWwsvFPWh2mWOw/tsHnFe8XM859eO5EJSP/nlrQIyq0SuLAja1E5yqlQLRuTOLe/bwoIny2tHkqzc8c6w+sawRE=; __cf_bm=b85386ff284a5f3f777c76d83b735513c16cf061-1586349327-1800-AT3PSKO2snKlKis3iC/C4b1uVeN+PqUIeXa35PuapmCHxW2u81LkRaJRaOaePNlAbqekGUn63IHolH5EQ3oSTjU=; __cf_bm=4774357ef58437235fbf110085601d4ed7a1737c-1586349386-1800-Ad9jDIzi4QTU9S+AqpKgiSBD+P7BTEJ8leeJiWdHz23NkPILJlQ3FacvRY8rt2zQjrHaTbrnnYPCHjMplQ718LA="
   },
   {
     "id": "lasterror",
     "type": "hiddendata",
     "name": "LastError",
     "value": "Exception (demonoid): Got redirected to another domain. Try changing the indexer URL to https://www.demonoid.is/.: Parse error"
+  },
+  {
+    "id": "cookie",
+    "type": "inputstring",
+    "name": "Cookie",
+    "value": null
+  },
+  {
+    "id": "howtogetthecookie",
+    "type": "displayinfo",
+    "name": "How to get the Cookie",
+    "value": "<ol><li>Access this tracker with your browser<li>Open the <b>DevTools</b> panel by pressing <b>F12</b><li>Select the <b>Network</b> tab<li>Click on the <b>Doc</b> button<li>Refresh the page by pressing <b>F5</b><li>Select the <b>Headers</b> tab<li>Find <b>'cookie:'</b> in the <b>Request Headers</b> section<li><b>Select</b> and <b>Copy</b> the whole cookie string <i>(everything after 'cookie: ')</i> and <b>Paste</b> here.</ol>"
   },
   {
     "id": "sortrequestedfromsite",

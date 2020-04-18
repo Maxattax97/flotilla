@@ -209,12 +209,12 @@ EOF
     chmod u+x /home/git/gitlab-shell/bin/gitlab-shell
 
     # Symlink authorized keys (provided via web interface) so you don't get a password prompt.
-    mkdir -p "${BASE}/data/gitlab/.ssh/"
-    chown git:git -R "${BASE}/data/gitlab/.ssh/"
+    mkdir -p "${BASE}/data/gitlab/ssh/"
+    chown git:git -R "${BASE}/data/gitlab/ssh/"
     chown git:git -R /home/git/.ssh
-    sudo -u git touch "${BASE}/data/gitlab/.ssh/authorized_keys"
+    sudo -u git touch "${BASE}/data/gitlab/ssh/authorized_keys"
     rm -f /home/git/.ssh/authorized_keys
-    sudo -u git ln -s "${BASE}/data/gitlab/.ssh/authorized_keys" /home/git/.ssh/authorized_keys
+    sudo -u git ln -s "${BASE}/data/gitlab/ssh/authorized_keys" /home/git/.ssh/authorized_keys
 
     rm /tmp/setup-git.sh
 fi

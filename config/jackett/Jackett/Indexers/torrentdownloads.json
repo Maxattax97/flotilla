@@ -3,13 +3,13 @@
     "id": "sitelink",
     "type": "inputstring",
     "name": "Site Link",
-    "value": "https://www.torrentdownloads.info/"
+    "value": "https://www.limetorrents.info/"
   },
   {
     "id": "cookieheader",
     "type": "hiddendata",
     "name": "CookieHeader",
-    "value": "__cfduid=dc8583bff3a523e3325e04cdb8a2cfe591568248996; PHPSESSID=tbna81756r7flr659mpctbsbv3"
+    "value": "__cfduid=dc8583bff3a523e3325e04cdb8a2cfe591568248996; PHPSESSID=en6sem4mlv7r9a5s53nms9oj15"
   },
   {
     "id": "lasterror",

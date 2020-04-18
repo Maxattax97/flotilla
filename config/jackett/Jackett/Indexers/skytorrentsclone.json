@@ -9,7 +9,7 @@
     "id": "cookieheader",
     "type": "hiddendata",
     "name": "CookieHeader",
-    "value": "__cfduid=dbcb676591497b6c32ce5f04c6041c2351568248995; PHPSESSID=0jip738p6cklgjgv8jn0fic6j5; flash="
+    "value": "__cfduid=dbcb676591497b6c32ce5f04c6041c2351568248995; PHPSESSID=0jip738p6cklgjgv8jn0fic6j5; __cf_bm=185e01d9122e07d83516e8eb93bc6d0e06750861-1587251956-1800-AfPu162Hcy382S05QnqPVj2/VkVzf4EY4V4+1Jqbp7OsxTw9CTh4M3nXYGt4p4NKP89ubuhe87OVwuI+Qt97ePiiQ2zTZSxz+E4KTVwdlQc7GehXC670wHKa/Yx80jt6/A=="
   },
   {
     "id": "lasterror",
@@ -18,15 +18,13 @@
     "value": null
   },
   {
-    "id": "adddownloadlinksviaitorrents.org",
-    "type": "inputbool",
-    "name": "Add download links via itorrents.org",
-    "value": true
-  },
-  {
-    "id": "itorrentsnote",
-    "type": "displayinfo",
-    "name": "ITorrents Note",
-    "value": "Without the itorrents option only magnet links will be provided."
+    "id": "sortrequestedfromsite",
+    "type": "inputselect",
+    "name": "Sort requested from site",
+    "value": "created",
+    "options": {
+      "created": "created",
+      "seeders": "seeders"
+    }
   }
 ]

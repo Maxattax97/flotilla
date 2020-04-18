@@ -9,7 +9,7 @@
     "id": "cookieheader",
     "type": "hiddendata",
     "name": "CookieHeader",
-    "value": "__cfduid=d46ec4de9a903234ea5bae90a7ac5e36f1568171572"
+    "value": "__cfduid=d298217d95491bfe194f27fdfe4950fd61586507798; cf_clearance=592ada49af1379fb58febd320c88e6a3527c5775-1584518213-0-150; __cf_bm=fe560c94a9d57398b1d9398516cfb6e1e738ed29-1587251956-1800-AV8eqac2RARc3eFw0DXajwXPZkm2TumCg9tDrSAY7EZUe0/GMbKpj3x6OBOTATOAIbYocGAStnM7gBxMWeQBqlsYjAvzcDsIkiNSmRN4GzxUnbRjRugRDdZF9TO63ZHR1g=="
   },
   {
     "id": "lasterror",
@@ -27,6 +27,27 @@
       "http://torrage.info/": "Torrage.info",
       "http://btcache.me/": "BTcache.me",
       "magnet:": "magnet"
+    }
+  },
+  {
+    "id": "sortrequestedfromsite",
+    "type": "inputselect",
+    "name": "Sort requested from site",
+    "value": "time",
+    "options": {
+      "time": "created",
+      "seeders": "seeders",
+      "size": "size"
+    }
+  },
+  {
+    "id": "orderrequestedfromsite",
+    "type": "inputselect",
+    "name": "Order requested from site",
+    "value": "desc",
+    "options": {
+      "desc": "desc",
+      "asc": "asc"
     }
   }
 ]

@@ -631,10 +631,11 @@ services:
       - NGINX_MAX_UPLOAD_SIZE=250M
       - GITLAB_HOST=git.maxocull.com
       - GITLAB_NOTIFY_ON_BROKEN_BUILDS=true
-      #- SMTP_ENABLED=true # Flip on after the mail server is setup.
-      #- IMAP_ENABLED=true # Flip on after the mail server is setup.
-      - "IMAP_USER=maxocull.com@gmail.com"
-      - "GITLAB_INCOMING_EMAIL_ADDRESS=maxocull.com+%{key}@gmail.com"
+      - SMTP_ENABLED=true # Flip on after the mail server is setup.
+      - IMAP_ENABLED=false # Flip on after the mail server is setup.
+      - "SMTP_USER=maxocull.com@gmail.com"
+      #- "IMAP_USER=maxocull.com@gmail.com"
+      #- "GITLAB_INCOMING_EMAIL_ADDRESS=maxocull.com+%{key}@gmail.com"
       #- IMAP_DOMAIN=www.maxocull.com
       #- IMAP_HOST=mail.maxocull.com
       #- IMAP_PORT=993
