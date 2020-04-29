@@ -39,14 +39,14 @@ services:
       - PGID=1000
       - TZ=America/Indianapolis
       - URL=maxocull.com
-      - SUBDOMAINS=www,resolute,whoami,dash,cloud,git,dns,office,lidarr,sonarr,radarr,media,torrent,jackett,ci,grafana,search,map,pgadmin,prometheus,portainer,registry,librarian,books,doc,analytics
+      - SUBDOMAINS=www,resolute,whoami,dash,cloud,git,dns,office,lidarr,sonarr,radarr,media,torrent,jackett,ci,grafana,search,map,pgadmin,prometheus,portainer,registry,librarian,books,doc,analytics,irc,meet
       - VALIDATION=http # DNS? so can use wildcards
       #- DNSPLUGIN=cloudflare #optional
       #- DUCKDNSTOKEN=<token> #optional
       - EMAIL=max.ocull@protonmail.com
       - DHLEVEL=2048
       - ONLY_SUBDOMAINS=false
-      - EXTRA_DOMAINS=maxocull.net,www.maxocull.net,resolute.maxocull.net,whoami.maxocull.net,dash.maxocull.net,cloud.maxocull.net,git.maxocull.net,dns.maxocull.net,office.maxocull.net,lidarr.maxocull.net,sonarr.maxocull.net,radarr.maxocull.net,media.maxocull.net,torrent.maxocull.net,jackett.maxocull.net,ci.maxocull.net,grafana.maxocull.net,search.maxocull.net,map.maxocull.net,pgadmin.maxocull.net,prometheus.maxocull.net,portainer.maxocull.net,registry.maxocull.net,librarian.maxocull.net,books.maxocull.net,doc.maxocull.net,analytics.maxocull.net
+      - EXTRA_DOMAINS=maxocull.net,www.maxocull.net,resolute.maxocull.net,whoami.maxocull.net,dash.maxocull.net,cloud.maxocull.net,git.maxocull.net,dns.maxocull.net,office.maxocull.net,lidarr.maxocull.net,sonarr.maxocull.net,radarr.maxocull.net,media.maxocull.net,torrent.maxocull.net,jackett.maxocull.net,ci.maxocull.net,grafana.maxocull.net,search.maxocull.net,map.maxocull.net,pgadmin.maxocull.net,prometheus.maxocull.net,portainer.maxocull.net,registry.maxocull.net,librarian.maxocull.net,books.maxocull.net,doc.maxocull.net,analytics.maxocull.net,irc.maxocull.net,meet.maxocull.net
       - STAGING=false # Enable when testing.
     volumes:
       - /opt/flotilla/data/letsencrypt/keys:/config/etc/letsencrypt:Z
@@ -1025,6 +1025,295 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=false"
     restart: unless-stopped
+
+  inspircd:
+    image: inspircd/inspircd-docker
+    container_name: inspircd
+    depends_on:
+      - atheme
+    env_file:
+      - /opt/flotilla/secrets.env
+    user: "10000:10000"
+    environment:
+      - PUID=10000
+      - PGID=10000
+      - TZ=America/Indianapolis
+      - INSP_NET_SUFFIX=.maxocull.com
+      - INSP_NET_NAME=Entourage
+      - INSP_SERVER_NAME=irc.maxocull.com
+      - INSP_ADMIN_NAME=Max OCull
+      - INSP_ADMIN_NICK=Maxattax
+      - INSP_ENABLE_DNSBL=yes
+      - INSP_OPER_FINGERPRINT=553de3f801cd432be5a0fb4d2a1baa8db60cb326a26bd6253cfe93d82a9f32f5
+      - INSP_OPER_NAME=Maxattax
+      - INSP_SERVICES_NAME=atheme.maxocull.com
+      - INSP_SERVICES_IPADDR=atheme
+      - INSP_SERVICES_PASSWORD=2fc28a4d34471e34c6ab2e3067aabb548c930fe583546a6c2b550a9c18cc1e07
+      - INSP_SERVICES_TLS_ON=yes
+      #- INSP_SERVICE_OPTIONS=
+      # TODO: Fill in TLS certs.
+    volumes:
+      - /opt/flotilla/config/inspircd/conf:/inspircd/conf:z
+      - /opt/flotilla/config/inspircd/conf.d:/inspircd/conf.d:z
+      #- /opt/flotilla/data/letsencrypt/keys/archive/maxocull.com/cert1.pem:/inspircd/conf/cert.pem:ro
+      #- /opt/flotilla/data/letsencrypt/keys/archive/maxocull.com/privkey1.pem:/inspircd/conf/key.pem:ro
+    ports:
+      - "6667:6667"
+      - "6697:6697"
+      #- "7000:7000"
+      #- "7001:7001"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    restart: unless-stopped
+
+  atheme:
+    image: ovdnet/atheme
+    container_name: atheme
+    env_file:
+      - /opt/flotilla/secrets.env
+    user: "10000:10000"
+    environment:
+      - PUID=10000
+      - PGID=10000
+      - TZ=America/Indianapolis
+    volumes:
+      - /opt/flotilla/config/atheme:/atheme/etc:z
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    restart: unless-stopped
+
+  jitsi:
+    image: jitsi/web
+    container_name: jitsi
+    depends_on:
+      - prosody
+      - jicofo
+      - jvb
+    env_file:
+      - /opt/flotilla/secrets.env
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - ENABLE_AUTH=1
+      - ENABLE_GUESTS=1
+      - ENABLE_LETSENCRYPT=0
+      - ENABLE_HTTP_REDIRECT=0
+      - ENABLE_TRANSCRIPTIONS=0
+      - DISABLE_HTTPS=1
+      - JICOFO_AUTH_USER=focus
+      #- LETSENCRYPT_DOMAIN
+      #- LETSENCRYPT_EMAIL
+      - PUBLIC_URL=https://meet.maxocull.com
+      # These XMPP settings should work out of the box.
+      - XMPP_DOMAIN=meet.jitsi
+      - XMPP_AUTH_DOMAIN=prosody
+      - XMPP_BOSH_URL_BASE=http://prosody:5280
+      - XMPP_GUEST_DOMAIN=guest.meet.jitsi
+      - XMPP_MUC_DOMAIN=muc.meet.jitsi
+      - XMPP_RECORDER_DOMAIN=recorder.meet.jitsi
+      #- ETHERPAD_URL_BASE
+      #- JIBRI_BREWERY_MUC
+      #- JIBRI_PENDING_TIMEOUT
+      #- JIBRI_XMPP_USER
+      #- JIBRI_XMPP_PASSWORD
+      #- JIBRI_RECORDER_USER
+      #- JIBRI_RECORDER_PASSWORD
+      - ENABLE_RECORDING=0
+    volumes:
+      - /opt/flotilla/config/jitsi/web:/config:z
+      - /opt/flotilla/config/jitsi/letsencrypt:/etc/letsencrypt:z
+      #- /opt/flotilla/config/jitsi/transcripts:/usr/share/jitsi-meet/transcripts:z
+    ports:
+      - "127.0.0.1:6080:80"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    restart: unless-stopped
+
+  prosody:
+    image: jitsi/prosody
+    container_name: prosody
+    env_file:
+      - /opt/flotilla/secrets.env
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - AUTH_TYPE=internal
+      - ENABLE_AUTH=1
+      - ENABLE_GUESTS=1
+      #- GLOBAL_MODULES
+      #- GLOBAL_CONFIG
+      #- LDAP_URL
+      #- LDAP_BASE
+      #- LDAP_BINDDN
+      #- LDAP_BINDPW
+      #- LDAP_FILTER
+      #- LDAP_AUTH_METHOD
+      #- LDAP_VERSION
+      #- LDAP_USE_TLS
+      #- LDAP_TLS_CIPHERS
+      #- LDAP_TLS_CHECK_PEER
+      #- LDAP_TLS_CACERT_FILE
+      #- LDAP_TLS_CACERT_DIR
+      #- LDAP_START_TLS
+      - XMPP_AUTH_DOMAIN=auth.meet.jitsi
+      - XMPP_BOSH_URL_BASE=http://prosody:5280
+      - XMPP_GUEST_DOMAIN=guest.meet.jitsi
+      - XMPP_MUC_DOMAIN=muc.meet.jitsi
+      - XMPP_DOMAIN=meet.jitsi
+      - XMPP_INTERNAL_MUC_DOMAIN=internal-muc.meet.jitsi
+      - XMPP_MODULES=
+      - XMPP_MUC_MODULES=
+      - XMPP_INTERNAL_MUC_MODULES=
+      - XMPP_RECORDER_DOMAIN=recorder.meet.jitsi
+      - JICOFO_AUTH_USER=focus
+      - JVB_AUTH_USER=jvb
+      #- JIGASI_XMPP_USER
+      #- JIGASI_XMPP_PASSWORD
+      #- JIBRI_XMPP_USER
+      #- JIBRI_XMPP_PASSWORD
+      #- JIBRI_RECORDER_USER
+      #- JIBRI_RECORDER_PASSWORD
+      #- JWT_APP_ID
+      #- JWT_APP_SECRET
+      #- JWT_ACCEPTED_ISSUERS
+      #- JWT_ACCEPTED_AUDIENCES
+      #- JWT_ASAP_KEYSERVER
+      #- JWT_ALLOW_EMPTY
+      #- JWT_AUTH_TYPE
+      #- JWT_TOKEN_AUTH_MODULE
+      #- LOG_LEVEL
+    volumes:
+      - /opt/flotilla/config/prosody:/config:z
+    ports:
+      - "127.0.0.1:5222:5222"
+      - "127.0.0.1:5347:5347"
+      - "127.0.0.1:5280:5280"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    restart: unless-stopped
+
+  jicofo:
+    image: jitsi/jicofo
+    container_name: jicofo
+    depends_on:
+      - prosody
+    env_file:
+      - /opt/flotilla/secrets.env
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - ENABLE_AUTH=1
+      - XMPP_INTERNAL_MUC_DOMAIN=internal-muc.meet.jitsi
+      - XMPP_AUTH_DOMAIN=auth.meet.jitsi
+      - XMPP_DOMAIN=meet.jitsi
+      - XMPP_SERVER=xmpp.meet.jitsi
+      - JICOFO_AUTH_USER=focus
+      #- JICOFO_RESERVATION_REST_BASE_URL=http://reservation.example.com
+      - JVB_BREWERY_MUC=jvbbrewery
+      #- JIGASI_BREWERY_MUC
+      #- JIGASI_SIP_URI
+      #- JIBRI_BREWERY_MUC
+      #- JIBRI_PENDING_TIMEOUT
+    volumes:
+      - /opt/flotilla/config/jicofo:/config:z
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    restart: unless-stopped
+
+  jvb:
+    image: jitsi/jvb
+    container_name: jvb
+    depends_on:
+      - prosody
+    env_file:
+      - /opt/flotilla/secrets.env
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - DOCKER_HOST_ADDRESS=meet.maxocull.com
+      - XMPP_AUTH_DOMAIN=auth.meet.jitsi
+      - XMPP_INTERNAL_MUC_DOMAIN=internal-muc.meet.jitsi
+      - XMPP_SERVER=xmpp.meet.jitsi
+      - JVB_AUTH_USER=jvb
+      - JVB_BREWERY_MUC=jvbbrewery
+      - JVB_PORT=10000
+      - JVB_TCP_HARVESTER_DISABLED=true
+      - JVB_TCP_PORT=10001
+      - JVB_STUN_SERVERS=stun.l.google.com:19302,stun.sipnet.net:3478,stun.sipgate.net:3478,meet-jit-si-turnrelay.jitsi.net:443
+      #- JVB_ENABLE_APIS
+    volumes:
+      - /opt/flotilla/config/jvb:/config:z
+    ports:
+      - "10000:10000/udp"
+      - "10001:10001"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    restart: unless-stopped
+
+  #greenlight:
+    ## http://docs.bigbluebutton.org/greenlight/gl-install.html#installing-on-a-bigbluebutton-server
+    #image: bigbluebutton/greenlight:v2
+    #container_name: greenlight
+    #depends_on:
+      #- bigbluebutton
+    #env_file:
+      #- /opt/flotilla/secrets.env
+    #environment:
+      #- PUID=1000
+      #- PGID=1000
+      #- TZ=America/Indianapolis
+      #- DB_ADAPTER=postgresql
+      #- DB_HOST=postgres
+      #- DB_NAME=greenlight_production
+      #- DB_USERNAME=greenlight
+      #- DEFAULT_REGISTRATION=open
+      #- HELP_URL=https://docs.bigbluebutton.org/greenlight/gl-overview.html
+      #- ENABLE_GOOGLE_CALENDAR_BUTTON=true
+      #- NUMBER_OF_ROWS=25
+      #- PAGINATION_NUMBER=25
+      #- ROOM_FEATURES=mute-on-join,require-moderator-approval,anyone-can-start,all-join-moderator
+      #- RELATIVE_URL_ROOT=/b
+      #- ALLOW_GREENLIGHT_ACCOUNTS=true
+      #- ALLOW_MAIL_NOTIFICATIONS=true
+      #- SMTP_SERVER=smtp.gmail.com
+      #- SMTP_PORT=587
+      #- SMTP_DOMAIN=gmail.com
+      #- SMTP_USERNAME=maxocull.com@gmail.com
+      #- SMTP_STARTTLS_AUTO=true
+      #- SMTP_AUTH=plain
+    #volumes:
+      ##- /opt/flotilla/config/greenlight:/usr/src/app:z
+      #- /opt/flotilla/data/greenlight/log:/usr/src/app/log:z
+    #ports:
+      #- "127.0.0.1:5002:80"
+    #labels:
+      #- "com.centurylinklabs.watchtower.enable=true"
+    #restart: unless-stopped
+
+  #bigbluebutton:
+    #image: mirhosting/bigbluebutton
+    #container_name: bigbluebutton
+    #env_file:
+      #- /opt/flotilla/secrets.env
+    #entrypoint: bbb-conf
+    #command:
+      #- "--start"
+    #environment:
+      #- PUID=1000
+      #- PGID=1000
+      #- TZ=America/Indianapolis
+    ##volumes:
+      ##- /opt/flotilla/data/bigbluebutton:/var/bigbluebutton:z
+    #ports:
+      #- "127.0.0.1:5001:80"
+      #- "127.0.0.1:5066:5066"
+    #labels:
+      #- "com.centurylinklabs.watchtower.enable=true"
+    #restart: unless-stopped
 
   minecraft:
     # docker exec minecraft rcon-cli stop

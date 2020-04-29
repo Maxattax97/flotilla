@@ -1,0 +1,32 @@
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+
+    server_name meet.*;
+
+    include /config/nginx/ssl.conf;
+
+    client_max_body_size 0;
+
+    location / {
+        include /config/nginx/proxy.conf;
+        resolver 127.0.0.11 valid=30s;
+        set $upstream_bigbluebutton bigbluebutton;
+        proxy_pass http://$upstream_bigbluebutton:80;
+
+        proxy_buffering off;
+        proxy_set_header Range $http_range;
+        proxy_set_header If-Range $http_if_range;
+    }
+
+    location /ws {
+        include /config/nginx/proxy.conf;
+        resolver 127.0.0.11 valid=30s;
+        set $upstream_bigbluebutton bigbluebutton;
+        proxy_pass http://$upstream_bigbluebutton:5066; # Might be 7443
+
+        proxy_buffering off;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $http_connection;
+   }
+}

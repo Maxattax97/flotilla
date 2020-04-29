@@ -295,6 +295,21 @@ Password: <Gmail password, does not need an app password, should match $SMTP_PAS
 From: max.ocull@gmail.com
 ```
 
+### BigBlueButton and Greenlight
+
+Create a database for Greenlight inside of Postgres:
+
+```sql
+CREATE USER greenlight WITH PASSWORD 'password';
+CREATE DATABASE greenlight_production;
+ALTER DATABASE greenlight_production OWNER TO greenlight;
+GRANT ALL PRIVILEGES ON DATABASE greenlight_production TO greenlight;
+```
+
+`password` should match the one provided for `DB_PASSWORD` in
+`secrets.env`.
+
+You'll need to generate secret keys for BBB and Greenlight and place them in `secrets.env`.
 
 ## TODO List
 
