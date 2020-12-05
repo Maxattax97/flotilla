@@ -311,6 +311,19 @@ GRANT ALL PRIVILEGES ON DATABASE greenlight_production TO greenlight;
 
 You'll need to generate secret keys for BBB and Greenlight and place them in `secrets.env`.
 
+### Wireguard
+
+Fedora does not load the wireguard module by default. To load it on boot,
+create a file at `/etc/modules-load.d/wireguard.conf` with contents:
+
+```
+wireguard
+```
+
+Then run `sudo modprobe wireguard` to load it without rebooting.
+
+**TODO**: Document config process.
+
 ## TODO List
 
 - [NordVPN router](https://hub.docker.com/r/bubuntux/nordvpn)

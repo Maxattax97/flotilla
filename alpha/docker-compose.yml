@@ -39,14 +39,14 @@ services:
       - PGID=1000
       - TZ=America/Indianapolis
       - URL=maxocull.com
-      - SUBDOMAINS=www,resolute,whoami,dash,cloud,git,dns,office,lidarr,sonarr,radarr,media,torrent,jackett,ci,grafana,search,map,pgadmin,prometheus,portainer,registry,librarian,books,doc,analytics,irc,meet
+      - SUBDOMAINS=www,resolute,whoami,dash,cloud,git,dns,office,lidarr,sonarr,radarr,media,torrent,jackett,ci,grafana,search,map,pgadmin,prometheus,portainer,registry,librarian,books,doc,analytics,irc,meet,bazarr
       - VALIDATION=http # DNS? so can use wildcards
       #- DNSPLUGIN=cloudflare #optional
       #- DUCKDNSTOKEN=<token> #optional
       - EMAIL=max.ocull@protonmail.com
       - DHLEVEL=2048
       - ONLY_SUBDOMAINS=false
-      - EXTRA_DOMAINS=maxocull.net,www.maxocull.net,resolute.maxocull.net,whoami.maxocull.net,dash.maxocull.net,cloud.maxocull.net,git.maxocull.net,dns.maxocull.net,office.maxocull.net,lidarr.maxocull.net,sonarr.maxocull.net,radarr.maxocull.net,media.maxocull.net,torrent.maxocull.net,jackett.maxocull.net,ci.maxocull.net,grafana.maxocull.net,search.maxocull.net,map.maxocull.net,pgadmin.maxocull.net,prometheus.maxocull.net,portainer.maxocull.net,registry.maxocull.net,librarian.maxocull.net,books.maxocull.net,doc.maxocull.net,analytics.maxocull.net,irc.maxocull.net,meet.maxocull.net
+      - EXTRA_DOMAINS=maxocull.net,www.maxocull.net,resolute.maxocull.net,whoami.maxocull.net,dash.maxocull.net,cloud.maxocull.net,git.maxocull.net,dns.maxocull.net,office.maxocull.net,lidarr.maxocull.net,sonarr.maxocull.net,radarr.maxocull.net,media.maxocull.net,torrent.maxocull.net,jackett.maxocull.net,ci.maxocull.net,grafana.maxocull.net,search.maxocull.net,map.maxocull.net,pgadmin.maxocull.net,prometheus.maxocull.net,portainer.maxocull.net,registry.maxocull.net,librarian.maxocull.net,books.maxocull.net,doc.maxocull.net,analytics.maxocull.net,irc.maxocull.net,meet.maxocull.net,bazarr.maxocull.net
       - STAGING=false # Enable when testing.
     volumes:
       - /opt/flotilla/data/letsencrypt/keys:/config/etc/letsencrypt:Z
@@ -260,29 +260,56 @@ services:
       - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
-  openvpn:
-    image: kylemanna/openvpn
-    container_name: openvpn
-    #privileged: true # Necessary for sysctl net settings.
-    # TODO: Test that these work.
+  #openvpn:
+    #image: kylemanna/openvpn
+    #container_name: openvpn
+    ##privileged: true # Necessary for sysctl net settings.
+    ## TODO: Test that these work.
+    #sysctls:
+      #- "net.ipv4.ip_forward=1"
+      #- "net.ipv6.conf.all.disable_ipv6=0"
+      #- "net.ipv6.conf.default.forwarding=1"
+      #- "net.ipv6.conf.all.forwarding=1"
+    ##cap_add:
+      ##- NET_ADMIN
+    #volumes:
+      #- /opt/flotilla/config/openvpn:/etc/openvpn:z
+    #environment:
+      #- EASYRSA_KEY_SIZE=4096
+      #- PUID=1000
+      #- PGID=1000
+      #- TZ=America/Indianapolis
+    #ports:
+      #- "1194:1194/udp"
+    #labels:
+      #- "com.centurylinklabs.watchtower.enable=false"
+    #restart: unless-stopped
+
+  wireguard:
+    image: linuxserver/wireguard
+    container_name: wireguard
     sysctls:
-      - "net.ipv4.ip_forward=1"
-      - "net.ipv6.conf.all.disable_ipv6=0"
-      - "net.ipv6.conf.default.forwarding=1"
-      - "net.ipv6.conf.all.forwarding=1"
-    #cap_add:
-      #- NET_ADMIN
+      - "net.ipv4.conf.all.src_valid_mark=1"
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
     volumes:
-      - /opt/flotilla/config/openvpn:/etc/openvpn:z
+      - /opt/flotilla/config/wireguard:/config:z
+      - /lib/modules:/lib/modules
+      - /usr/src:/usr/src
     environment:
-      - EASYRSA_KEY_SIZE=4096
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
+      - SERVERURL=wireguard.maxocull.com
+      - SERVERPORT=51820
+      - PEERS=16
+      - PEERDNS=84.200.69.80
+      - INTERNAL_SUBNET=10.6.0.0
     ports:
-      - "1194:1194/udp"
+      - "51820:51820/udp"
     labels:
-      - "com.centurylinklabs.watchtower.enable=false"
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   jackett:
@@ -413,6 +440,28 @@ services:
       - /opt/flotilla/data/cleanroom:/data:z
     ports:
       - "127.0.0.1:8686:8686"
+    #deploy:
+      #resources:
+        #limits:
+          #memory: "4g"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    restart: unless-stopped
+
+  bazarr:
+    image: linuxserver/bazarr
+    container_name: bazarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - UMASK=022
+    volumes:
+      - /opt/flotilla/config/bazarr:/config:z
+      - /opt/flotilla/data/all/tvshows:/tv:z
+      - /opt/flotilla/data/all/movies:/movies:z
+    ports:
+      - "127.0.0.1:6767:6767"
     #deploy:
       #resources:
         #limits:
@@ -657,6 +706,12 @@ services:
       # Keep this as a string because I guess docker-compose (Python) has a bug?
       - "127.0.0.1:4080:80"
       - "127.0.0.1:9922:22"
+    #healthcheck:
+      #test: ["CMD", "/usr/local/sbin/healthcheck"]
+      #interval: 1m
+      #timeout: 5s
+      #retries: 5
+      #start_period: 2m
     labels:
       - "com.centurylinklabs.watchtower.enable=false"
     restart: unless-stopped
@@ -1211,7 +1266,7 @@ services:
       #- XMPP_DOMAIN=meet.jitsi
       #- XMPP_SERVER=xmpp.meet.jitsi
       #- JICOFO_AUTH_USER=focus
-      ##- JICOFO_RESERVATION_REST_BASE_URL=http://reservation.example.com
+      #- JICOFO_RESERVATION_REST_BASE_URL=http://reservation.example.com
       #- JVB_BREWERY_MUC=jvbbrewery
       ##- JIGASI_BREWERY_MUC
       ##- JIGASI_SIP_URI
@@ -1324,7 +1379,7 @@ services:
       - UID=1000
       - GID=1000
       - TZ=America/Indianapolis
-      - VERSION=1.16.1
+      - VERSION=1.16.3
       - EULA=TRUE
       #- CONSOLE=FALSE
       - GUI=FALSE
