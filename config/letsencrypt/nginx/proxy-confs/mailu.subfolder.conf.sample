@@ -1,3 +1,4 @@
+## Version 2020/12/09
 # mailu does not require a base url setting, but the container needs to be named front
 
 # This config have been tested with "TLS_FLAVOR=mail"
@@ -6,6 +7,7 @@
 location /admin{
     return 301 $scheme://$host/admin/;
 }
+
 location ^~ /admin/ {
     # enable the next two lines for http auth
     #auth_basic "Restricted";
@@ -13,8 +15,11 @@ location ^~ /admin/ {
 
     # enable the next two lines for ldap auth, also customize and enable ldap.conf in the default conf
     #auth_request /auth;
-    #error_page 401 =200 /login;
-    
+    #error_page 401 =200 /ldaplogin;
+
+    # enable for Authelia, also enable authelia-server.conf in the default site config
+    #include /config/nginx/authelia-location.conf;
+
     include /config/nginx/proxy.conf;
     resolver 127.0.0.11 valid=30s;
     set $upstream_app front;
@@ -27,6 +32,7 @@ location ^~ /admin/ {
 location /webmail{
     return 301 $scheme://$host/webmail/;
 }
+
 location ^~ /webmail/ {
     # enable the next two lines for http auth
     #auth_basic "Restricted";
@@ -34,8 +40,11 @@ location ^~ /webmail/ {
 
     # enable the next two lines for ldap auth, also customize and enable ldap.conf in the default conf
     #auth_request /auth;
-    #error_page 401 =200 /login;
-    
+    #error_page 401 =200 /ldaplogin;
+
+    # enable for Authelia, also enable authelia-server.conf in the default site config
+    #include /config/nginx/authelia-location.conf;
+
     include /config/nginx/proxy.conf;
     resolver 127.0.0.11 valid=30s;
     set $upstream_app front;

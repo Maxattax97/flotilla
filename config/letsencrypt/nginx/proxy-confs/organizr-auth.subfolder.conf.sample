@@ -1,3 +1,4 @@
+## Version 2020/12/09
 # To use config this with subfolder proxies:
 #   Rename this file to organizr-auth.subfolder.conf
 #   Add one of the auth_request lines from the comments below
@@ -20,7 +21,8 @@ location ~ /auth-([0-9]+) {
     set $upstream_auth_app organizr;
     set $upstream_auth_port 80;
     set $upstream_auth_proto http;
-    proxy_pass $upstream_auth_proto://$upstream_auth_app:$upstream_auth_port/api/?v1/auth&group=$1;
+    proxy_pass $upstream_auth_proto://$upstream_auth_app:$upstream_auth_port/api/v2/auth?group=$1;
+
     proxy_set_header Content-Length "";
 
     # Do not uncomment the lines below, these are examples for usue in other proxy configs

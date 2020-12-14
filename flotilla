@@ -163,11 +163,17 @@ case "$1" in
                     sudo ufw allow 6881         # QBittorrent
                     sudo ufw allow 25565        # Minecraft
                     sudo ufw allow 27015        # Steam
+                    sudo ufw allow 51820        # Wireguard
                 elif [[ "${flotilla_firewall}" == "firewalld" ]]; then
                     fw_arg_all="--permanent"
                     echo "Configuring firewall for for ${flotilla_inet_iface} in zone \"public\" ..."
                     sudo firewall-cmd "${fw_arg_all}" --set-default-zone=public # Can now skip adding --zone=public to all commands.
                     sudo firewall-cmd "${fw_arg_all}" --change-interface="${flotilla_inet_iface}"
+                    # Fix after upgrading from 31->33, Firewalld changes to iptables
+                    # require us to do this so Docker containers can communicate to
+                    # each other.
+                    sudo firewall-cmd --zone=public --add-masquerade --permanent
+
                     ##sudo firewall-cmd --add-interface="docker0"
 
                     ## Recreate the Docker filtration chain.
@@ -206,6 +212,10 @@ case "$1" in
                     # Steam
                     sudo firewall-cmd "${fw_arg_all}" --add-port=27015/tcp
                     sudo firewall-cmd "${fw_arg_all}" --add-port=27015/udp
+
+                    # Wireguard
+                    sudo firewall-cmd "${fw_arg_all}" --add-port=51820/tcp
+                    sudo firewall-cmd "${fw_arg_all}" --add-port=51820/udp
 
                     #sudo firewall-cmd --reload
                 fi

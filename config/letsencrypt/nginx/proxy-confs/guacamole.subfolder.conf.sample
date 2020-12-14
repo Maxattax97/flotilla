@@ -1,8 +1,10 @@
+## Version 2020/12/09
 # guacamole does not require a base url setting
 
 location /guacamole {
     return 301 $scheme://$host/guacamole/;
 }
+
 location ^~ /guacamole/ {
     # enable the next two lines for http auth
     #auth_basic "Restricted";
@@ -10,15 +12,18 @@ location ^~ /guacamole/ {
 
     # enable the next two lines for ldap auth, also customize and enable ldap.conf in the default conf
     #auth_request /auth;
-    #error_page 401 =200 /login;
+    #error_page 401 =200 /ldaplogin;
+
+    # enable for Authelia, also enable authelia-server.conf in the default site config
+    #include /config/nginx/authelia-location.conf;
 
     include /config/nginx/proxy.conf;
-    proxy_buffering off;
     resolver 127.0.0.11 valid=30s;
     set $upstream_app guacamole;
     set $upstream_port 8080;
     set $upstream_proto http;
     proxy_pass $upstream_proto://$upstream_app:$upstream_port;
 
+    proxy_buffering off;
     rewrite /guacamole(.*) $1 break;
 }

@@ -1,3 +1,4 @@
+## Version 2020/12/09
 # first go into tautulli settings, under "Web Interface", click on show advanced, set the HTTP root to /tautulli and restart the tautulli container
 
 location ^~ /tautulli {
@@ -7,7 +8,10 @@ location ^~ /tautulli {
 
     # enable the next two lines for ldap auth, also customize and enable ldap.conf in the default conf
     #auth_request /auth;
-    #error_page 401 =200 /login;
+    #error_page 401 =200 /ldaplogin;
+
+    # enable for Authelia, also enable authelia-server.conf in the default site config
+    #include /config/nginx/authelia-location.conf;
 
     include /config/nginx/proxy.conf;
     resolver 127.0.0.11 valid=30s;
@@ -19,6 +23,26 @@ location ^~ /tautulli {
 }
 
 location ^~ /tautulli/api {
+    include /config/nginx/proxy.conf;
+    resolver 127.0.0.11 valid=30s;
+    set $upstream_app tautulli;
+    set $upstream_port 8181;
+    set $upstream_proto http;
+    proxy_pass $upstream_proto://$upstream_app:$upstream_port;
+
+}
+
+location ^~ /tautulli/newsletter {
+    include /config/nginx/proxy.conf;
+    resolver 127.0.0.11 valid=30s;
+    set $upstream_app tautulli;
+    set $upstream_port 8181;
+    set $upstream_proto http;
+    proxy_pass $upstream_proto://$upstream_app:$upstream_port;
+
+}
+
+location ^~ /tautulli/image {
     include /config/nginx/proxy.conf;
     resolver 127.0.0.11 valid=30s;
     set $upstream_app tautulli;

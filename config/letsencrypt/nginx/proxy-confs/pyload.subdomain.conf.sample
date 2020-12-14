@@ -1,3 +1,4 @@
+## Version 2020/12/09
 # make sure that your dns has a cname set for pyload and that your pyload container is not using a base url
 
 server {
@@ -13,6 +14,9 @@ server {
     # enable for ldap auth, fill in ldap details in ldap.conf
     #include /config/nginx/ldap.conf;
 
+    # enable for Authelia
+    #include /config/nginx/authelia-server.conf;
+
     location / {
         # enable the next two lines for http auth
         #auth_basic "Restricted";
@@ -20,7 +24,10 @@ server {
 
         # enable the next two lines for ldap auth
         #auth_request /auth;
-        #error_page 401 =200 /login;
+        #error_page 401 =200 /ldaplogin;
+
+        # enable for Authelia
+        #include /config/nginx/authelia-location.conf;
 
         include /config/nginx/proxy.conf;
         resolver 127.0.0.11 valid=30s;

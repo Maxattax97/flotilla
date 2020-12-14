@@ -30,7 +30,7 @@ version: "3.7"
   # containers to share.
 services:
   letsencrypt:
-    image: linuxserver/letsencrypt
+    image: linuxserver/swag
     container_name: letsencrypt
     cap_add:
       - NET_ADMIN
@@ -225,40 +225,40 @@ services:
       - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
-  pihole:
-    image: pihole/pihole
-    container_name: pihole
-    ports:
-      - "53:53/tcp"
-      - "53:53/udp"
-      - "67:67/udp"
-      - "127.0.0.1:1188:80/tcp"
-      - "127.0.0.1:2443:443/tcp"
-    env_file:
-      - /opt/flotilla/secrets.env
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Indianapolis
-      - "DNS1=84.200.69.80"  # DNS.WATCH servers, with DNSSEC enabled.
-      - "DNS2=84.200.70.40"
-      - "DNSSEC=True"
-      #- "ServerIP=107.217.95.124" # Only required for DHCP.
-    volumes:
-      - /opt/flotilla/config/pihole/pihole:/etc/pihole:z
-      - /opt/flotilla/config/pihole/dnsmasq:/etc/dnsmasq.d:z
-    dns:
-      - 127.0.0.1
-      - 84.200.69.80
-    #cap_add: # DHCP only.
-      #- NET_ADMIN
-    #deploy:
-      #resources:
-        #limits:
-          #memory: "1.6g"
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
-    restart: unless-stopped
+  #pihole:
+    #image: pihole/pihole
+    #container_name: pihole
+    #ports:
+      #- "53:53/tcp"
+      #- "53:53/udp"
+      #- "67:67/udp"
+      #- "127.0.0.1:1188:80/tcp"
+      #- "127.0.0.1:2443:443/tcp"
+    #env_file:
+      #- /opt/flotilla/secrets.env
+    #environment:
+      #- PUID=1000
+      #- PGID=1000
+      #- TZ=America/Indianapolis
+      #- "DNS1=84.200.69.80"  # DNS.WATCH servers, with DNSSEC enabled.
+      #- "DNS2=84.200.70.40"
+      #- "DNSSEC=True"
+      ##- "ServerIP=107.217.95.124" # Only required for DHCP.
+    #volumes:
+      #- /opt/flotilla/config/pihole/pihole:/etc/pihole:z
+      #- /opt/flotilla/config/pihole/dnsmasq:/etc/dnsmasq.d:z
+    #dns:
+      #- 127.0.0.1
+      #- 84.200.69.80
+    ##cap_add: # DHCP only.
+      ##- NET_ADMIN
+    ##deploy:
+      ##resources:
+        ##limits:
+          ##memory: "1.6g"
+    #labels:
+      #- "com.centurylinklabs.watchtower.enable=true"
+    #restart: unless-stopped
 
   #openvpn:
     #image: kylemanna/openvpn

@@ -1,9 +1,11 @@
+## Version 2020/12/09
 # works with https://github.com/breakall/mytinytodo-docker
 # set the mtt_url to 'https://your.domain.com/todo/' in db/config.php
 
 location /todo {
     return 301 $scheme://$host/todo/;
 }
+
 location ^~ /todo/ {
 
     # enable the next two lines for http auth
@@ -12,7 +14,10 @@ location ^~ /todo/ {
 
     # enable the next two lines for ldap auth, also customize and enable ldap.conf in the default conf
     #auth_request /auth;
-    #error_page 401 =200 /login;
+    #error_page 401 =200 /ldaplogin;
+
+    # enable for Authelia, also enable authelia-server.conf in the default site config
+    #include /config/nginx/authelia-location.conf;
 
     include /config/nginx/proxy.conf;
     resolver 127.0.0.11 valid=30s;

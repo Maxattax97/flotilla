@@ -1,3 +1,4 @@
+## Version 2020/12/09
 # make sure that your dns has a cname set for bookstack and that your bookstack container is named bookstack
 # Ensure you have the APP_URL Environment Variable set correctly in your Docker Run/Compose or in BookStack Env File (/www/.env)
 # https://github.com/linuxserver/docker-bookstack#docker
@@ -12,6 +13,12 @@ server {
 
     client_max_body_size 0;
 
+    # enable for ldap auth, fill in ldap details in ldap.conf
+    #include /config/nginx/ldap.conf;
+
+    # enable for Authelia
+    #include /config/nginx/authelia-server.conf;
+
     location / {
         #enable the next two lines for http auth
         #auth_basic "Restricted";
@@ -19,7 +26,10 @@ server {
 
         # enable the next two lines for ldap auth
         #auth_request /auth;
-        #error_page 401 =200 /login;
+        #error_page 401 =200 /ldaplogin;
+
+        # enable for Authelia
+        #include /config/nginx/authelia-location.conf;
 
         include /config/nginx/proxy.conf;
         resolver 127.0.0.11 valid=30s;
@@ -28,5 +38,5 @@ server {
         set $upstream_proto http;
         proxy_pass $upstream_proto://$upstream_app:$upstream_port;
 
-    }   
+    }
 }

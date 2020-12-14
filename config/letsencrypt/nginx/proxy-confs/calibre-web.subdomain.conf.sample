@@ -1,3 +1,4 @@
+## Version 2020/12/09
 # make sure that your dns has a cname set for calibre-web
 
 server {
@@ -13,23 +14,28 @@ server {
     # enable for ldap auth, fill in ldap details in ldap.conf
     #include /config/nginx/ldap.conf;
 
-	location / {
-		# enable the next two lines for http auth
-		#auth_basic "Restricted";
-		#auth_basic_user_file /config/nginx/.htpasswd;
+    # enable for Authelia
+    #include /config/nginx/authelia-server.conf;
 
-		# enable the next two lines for ldap auth, also customize and enable ldap.conf in the default conf
-		#auth_request /auth;
-		#error_page 401 =200 /login;
+    location / {
+        # enable the next two lines for http auth
+        #auth_basic "Restricted";
+        #auth_basic_user_file /config/nginx/.htpasswd;
 
-    include /config/nginx/proxy.conf;
-		resolver 127.0.0.11 valid=30s;
-		set $upstream_app calibre-web;
-		set $upstream_port 8083;
-		set $upstream_proto http;
-		proxy_pass $upstream_proto://$upstream_app:$upstream_port;
+        # enable the next two lines for ldap auth, also customize and enable ldap.conf in the default conf
+        #auth_request /auth;
+        #error_page 401 =200 /ldaplogin;
 
-		proxy_set_header Host $http_host;
-		proxy_set_header X-Scheme $scheme;
-	}
+        # enable for Authelia
+        #include /config/nginx/authelia-location.conf;
+
+        include /config/nginx/proxy.conf;
+        resolver 127.0.0.11 valid=30s;
+        set $upstream_app calibre-web;
+        set $upstream_port 8083;
+        set $upstream_proto http;
+        proxy_pass $upstream_proto://$upstream_app:$upstream_port;
+
+        proxy_set_header X-Scheme $scheme;
+    }
 }

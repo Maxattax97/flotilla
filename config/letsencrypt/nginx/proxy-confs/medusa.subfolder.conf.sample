@@ -1,3 +1,4 @@
+## Version 2020/12/09
 # first go into medusa settings, under "Interface" set the URL Base to /medusa and restart the medusa container
 
 location ^~ /medusa {
@@ -7,11 +8,12 @@ location ^~ /medusa {
 
     # enable the next two lines for ldap auth, also customize and enable ldap.conf in the default conf
     #auth_request /auth;
-    #error_page 401 =200 /login;
+    #error_page 401 =200 /ldaplogin;
+
+    # enable for Authelia, also enable authelia-server.conf in the default site config
+    #include /config/nginx/authelia-location.conf;
 
     include /config/nginx/proxy.conf;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection "upgrade";
     resolver 127.0.0.11 valid=30s;
     set $upstream_app medusa;
     set $upstream_port 8081;

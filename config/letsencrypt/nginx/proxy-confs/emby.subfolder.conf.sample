@@ -1,3 +1,4 @@
+## Version 2020/12/09
 # make sure that your dns has a cname set for emby
 # if emby is running in bridge mode and the container is named "emby", the below config should work as is
 # if not, replace the line "set $upstream_app emby;" with "set $upstream_app <containername>;"
@@ -8,6 +9,7 @@
 location /emby {
     return 301 $scheme://$host/emby/;
 }
+
 location ^~ /emby/ {
     include /config/nginx/proxy.conf;
     resolver 127.0.0.11 valid=30s;
@@ -28,6 +30,4 @@ location ^~ /embywebsocket {
     set $upstream_proto http;
     proxy_pass $upstream_proto://$upstream_app:$upstream_port;
 
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection $http_connection;
 }
