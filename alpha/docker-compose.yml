@@ -312,6 +312,22 @@ services:
       - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
+  monerod:
+    image: kannix/monero-full-node
+    container_name: monerod
+    volumes:
+      - /opt/flotilla/data/monerod:/home/monero/.bitmonero:z
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+    ports:
+      - "18080:18080"
+      - "18081:18081"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    restart: unless-stopped
+
   jackett:
     image: linuxserver/jackett
     container_name: jackett
@@ -611,7 +627,7 @@ services:
         #limits:
           #memory: "2.4g"
     labels:
-      - "com.centurylinklabs.watchtower.enable=false"
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   nextcloud-cron:
@@ -631,7 +647,7 @@ services:
         #limits:
           #memory: "40m"
     labels:
-      - "com.centurylinklabs.watchtower.enable=false"
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   collabora:
