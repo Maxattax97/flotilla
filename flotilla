@@ -164,6 +164,8 @@ case "$1" in
                     sudo ufw allow 25565        # Minecraft
                     sudo ufw allow 27015        # Steam
                     sudo ufw allow 51820        # Wireguard
+                    sudo ufw allow 18080        # Monero Daemon
+                    sudo ufw allow 18081        # Monero Daemon
                 elif [[ "${flotilla_firewall}" == "firewalld" ]]; then
                     fw_arg_all="--permanent"
                     echo "Configuring firewall for for ${flotilla_inet_iface} in zone \"public\" ..."
@@ -216,6 +218,12 @@ case "$1" in
                     # Wireguard
                     sudo firewall-cmd "${fw_arg_all}" --add-port=51820/tcp
                     sudo firewall-cmd "${fw_arg_all}" --add-port=51820/udp
+
+                    # Monero Daemon
+                    sudo firewall-cmd "${fw_arg_all}" --add-port=18080/tcp
+                    sudo firewall-cmd "${fw_arg_all}" --add-port=18080/udp
+                    sudo firewall-cmd "${fw_arg_all}" --add-port=18081/tcp
+                    sudo firewall-cmd "${fw_arg_all}" --add-port=18081/udp
 
                     #sudo firewall-cmd --reload
                 fi
