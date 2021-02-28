@@ -2,15 +2,17 @@ secrets.env
 !config/
 
 config/*
-!config/openvpn/
+!config/fail2ban/
+!config/grafana/
 !config/heimdall/
 !config/jackett/
+!config/letsencrypt/
+!config/openvpn/
+!config/postgres/
+!config/rssbridge/
+!config/prometheus/
 !config/suricata/
 !config/traefik/
-!config/prometheus/
-!config/grafana/
-!config/letsencrypt/
-!config/fail2ban/
 
 config/openvpn/*
 !config/openvpn/openvpn.conf
