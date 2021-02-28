@@ -164,6 +164,11 @@ Password: <POSTGRES_PASSWORD from secrets.env>
 Save Password: true
 ```
 
+The user ID must be `1000` in order to share the key files from letsencrypt.
+
+For security, each user is restricted to a table in `pg_hba.conf`, you will have
+to add new users under there.
+
 ### Nextcloud
 
 Create a database for Nextcloud inside of Postgres:

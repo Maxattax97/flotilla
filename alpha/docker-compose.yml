@@ -19,7 +19,6 @@ version: "3.7"
   # KVM?
   # LDAP?
   # Matomo
-  # GraphHopper
 # Organization
   # TODO: Apply consistent port assignment scheme.
   # TODO: Segregate services into subnetworks.
@@ -39,14 +38,14 @@ services:
       - PGID=1000
       - TZ=America/Indianapolis
       - URL=maxocull.com
-      - SUBDOMAINS=www,resolute,whoami,dash,cloud,git,dns,office,lidarr,sonarr,radarr,media,torrent,jackett,ci,grafana,search,map,pgadmin,prometheus,portainer,registry,librarian,books,doc,analytics,irc,meet,bazarr
+      - SUBDOMAINS=www,resolute,whoami,dash,cloud,git,dns,office,lidarr,sonarr,radarr,media,torrent,jackett,ci,grafana,search,map,pgadmin,prometheus,portainer,registry,librarian,books,doc,analytics,irc,meet,bazarr,rss
       - VALIDATION=http # DNS? so can use wildcards
       #- DNSPLUGIN=cloudflare #optional
       #- DUCKDNSTOKEN=<token> #optional
       - EMAIL=max.ocull@protonmail.com
       - DHLEVEL=2048
       - ONLY_SUBDOMAINS=false
-      - EXTRA_DOMAINS=maxocull.net,www.maxocull.net,resolute.maxocull.net,whoami.maxocull.net,dash.maxocull.net,cloud.maxocull.net,git.maxocull.net,dns.maxocull.net,office.maxocull.net,lidarr.maxocull.net,sonarr.maxocull.net,radarr.maxocull.net,media.maxocull.net,torrent.maxocull.net,jackett.maxocull.net,ci.maxocull.net,grafana.maxocull.net,search.maxocull.net,map.maxocull.net,pgadmin.maxocull.net,prometheus.maxocull.net,portainer.maxocull.net,registry.maxocull.net,librarian.maxocull.net,books.maxocull.net,doc.maxocull.net,analytics.maxocull.net,irc.maxocull.net,meet.maxocull.net,bazarr.maxocull.net
+      - EXTRA_DOMAINS=maxocull.net,www.maxocull.net,resolute.maxocull.net,whoami.maxocull.net,dash.maxocull.net,cloud.maxocull.net,git.maxocull.net,dns.maxocull.net,office.maxocull.net,lidarr.maxocull.net,sonarr.maxocull.net,radarr.maxocull.net,media.maxocull.net,torrent.maxocull.net,jackett.maxocull.net,ci.maxocull.net,grafana.maxocull.net,search.maxocull.net,map.maxocull.net,pgadmin.maxocull.net,prometheus.maxocull.net,portainer.maxocull.net,registry.maxocull.net,librarian.maxocull.net,books.maxocull.net,doc.maxocull.net,analytics.maxocull.net,irc.maxocull.net,meet.maxocull.net,bazarr.maxocull.net,rss.maxocull.net
       - STAGING=false # Enable when testing.
     volumes:
       - /opt/flotilla/data/letsencrypt/keys:/config/etc/letsencrypt:Z
@@ -124,7 +123,7 @@ services:
     labels:
       - 'traefik.enable=false'
     labels:
-      - "com.centurylinklabs.watchtower.enable=false"
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   #traefik:
@@ -313,17 +312,19 @@ services:
     restart: unless-stopped
 
   monerod:
-    image: kannix/monero-full-node
+    image: xmrto/monero:most_recent_tag
     container_name: monerod
     volumes:
-      - /opt/flotilla/data/monerod:/home/monero/.bitmonero:z
+      - /opt/flotilla/data/monerod:/monero:z
     environment:
-      - PUID=1000
-      - PGID=1000
+      - USER_ID=1000
+      - P2P_BIND_PORT=18080
+      - RPC_BIND_PORT=18081
       - TZ=America/Indianapolis
     ports:
       - "18080:18080"
       - "18081:18081"
+    command: monerod --non-interactive --restricted-rpc --rpc-bind-ip=0.0.0.0 --confirm-external-bind --public-node --enable-dns-blocklist --enforce-dns-checkpointing --out-peers=8 --data-dir=/monero
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
@@ -386,7 +387,7 @@ services:
         #limits:
           #memory: "4g"
     labels:
-      - "com.centurylinklabs.watchtower.enable=false"
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   sonarr:
@@ -516,7 +517,7 @@ services:
     restart: unless-stopped
 
   postgres:
-    image: postgres
+    image: postgres:12
     container_name: postgres
     env_file:
       - /opt/flotilla/secrets.env
@@ -525,16 +526,21 @@ services:
       - PGID=1000
       - TZ=America/Indianapolis
       #- POSTGRES_USER=harbor # Use the default "postgres" user.
+      #
+    user: "1000" # We need this in order to share certs and make it public.
     ports:
-      - "127.0.0.1:5432:5432"
+      - "5432:5432"
     volumes:
+      - /opt/flotilla/config/postgres/postgresql.conf:/var/lib/postgresql/data/postgresql.conf:z
+      - /opt/flotilla/config/postgres/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf:z
       - /opt/flotilla/data/postgres:/var/lib/postgresql/data:z
+      - /opt/flotilla/data/letsencrypt/keys:/certs:z
     #deploy:
       #resources:
         #limits:
           #memory: "4g"
     labels:
-      - "com.centurylinklabs.watchtower.enable=false"
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   pgadmin:
@@ -571,7 +577,7 @@ services:
 
   redis:
     # TODO: Resolve some kernel settings to clear up the logs.
-    image: redis
+    image: redis:5
     container_name: redis
     environment:
       - PUID=1000
@@ -586,7 +592,7 @@ services:
         #limits:
           #memory: "4g"
     labels:
-      - "com.centurylinklabs.watchtower.enable=false"
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   nextcloud:
@@ -729,7 +735,7 @@ services:
       #retries: 5
       #start_period: 2m
     labels:
-      - "com.centurylinklabs.watchtower.enable=false"
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   registry:
@@ -758,7 +764,7 @@ services:
     restart: unless-stopped
 
   gitlab-runner:
-    image: gitlab/gitlab-runner:alpine
+    image: gitlab/gitlab-runner:v12.8.0
     container_name: gitlab-runner
     depends_on:
       - gitlab
@@ -772,7 +778,7 @@ services:
       - /opt/flotilla/config/gitlab-runner:/etc/gitlab-runner:z
       - /var/run/docker.sock:/var/run/docker.sock # Behind a reverse proxy, it's okay.
     labels:
-      - "com.centurylinklabs.watchtower.enable=false"
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   #jenkins:
@@ -1094,7 +1100,23 @@ services:
     ports:
       - "127.0.0.1:7980:8000"
     labels:
-      - "com.centurylinklabs.watchtower.enable=false"
+      - "com.centurylinklabs.watchtower.enable=true"
+    restart: unless-stopped
+
+  rssbridge:
+    image: rssbridge/rss-bridge
+    container_name: rssbridge
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+    volumes:
+      - /opt/flotilla/config/rssbridge/whitelist.txt:/app/whitelist.txt:z
+      - /opt/flotilla/config/rssbridge/config.ini.php:/app/config.ini.php:z
+    ports:
+      - "127.0.0.1:5080:80"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   #inspircd:

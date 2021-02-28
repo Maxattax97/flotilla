@@ -12,7 +12,8 @@ fi
 
 source "${SCRIPTS}/sys_lib.sh"
 
-flotilla_firewall="firewalld"
+#flotilla_firewall="firewalld"
+flotilla_firewall="ufw"
 flotilla_inet_iface="$(route | grep '^default' | grep -o '[^ ]*$')"
 
 case "$1" in
@@ -162,10 +163,13 @@ case "$1" in
                     sudo ufw allow 1194/udp     # OpenVPN
                     sudo ufw allow 6881         # QBittorrent
                     sudo ufw allow 25565        # Minecraft
+                    sudo ufw allow 25566        # Minecraft Forge
                     sudo ufw allow 27015        # Steam
                     sudo ufw allow 51820        # Wireguard
                     sudo ufw allow 18080        # Monero Daemon
                     sudo ufw allow 18081        # Monero Daemon
+                    sudo ufw allow 8443         # Luchadores
+                    sudo ufw allow 5432         # Postgres
                 elif [[ "${flotilla_firewall}" == "firewalld" ]]; then
                     fw_arg_all="--permanent"
                     echo "Configuring firewall for for ${flotilla_inet_iface} in zone \"public\" ..."
@@ -210,6 +214,9 @@ case "$1" in
                     # Minecraft
                     sudo firewall-cmd "${fw_arg_all}" --add-port=25565/tcp
                     sudo firewall-cmd "${fw_arg_all}" --add-port=25565/udp
+                    # Minecraft Forge
+                    sudo firewall-cmd "${fw_arg_all}" --add-port=25566/tcp
+                    sudo firewall-cmd "${fw_arg_all}" --add-port=25566/udp
 
                     # Steam
                     sudo firewall-cmd "${fw_arg_all}" --add-port=27015/tcp
@@ -225,7 +232,14 @@ case "$1" in
                     sudo firewall-cmd "${fw_arg_all}" --add-port=18081/tcp
                     sudo firewall-cmd "${fw_arg_all}" --add-port=18081/udp
 
-                    #sudo firewall-cmd --reload
+                    # Postgres
+                    sudo firewall-cmd "${fw_arg_all}" --add-port=5432/udp
+
+                    # Custom
+                    # Luchadores
+                    sudo firewall-cmd "${fw_arg_all}" --add-port=8443/tcp
+
+                    sudo firewall-cmd --reload
                 fi
                 ;;
             *)

@@ -1,10 +1,11 @@
-## Version 2021/01/29
-# grafana requires environment variables set thus:
-#    environment:
-#      - "GF_SERVER_ROOT_URL=https://my.domain.com/grafana"
-#      - "GF_SERVER_DOMAIN=https://my.domain.com/"
+## Version 2021/01/16
+# filebot does not require a base url setting
 
-location ^~ /grafana/ {
+location /filebot {
+    return 301 $scheme://$host/filebot/;
+}
+
+location ^~ /filebot/ {
     # enable the next two lines for http auth
     #auth_basic "Restricted";
     #auth_basic_user_file /config/nginx/.htpasswd;
@@ -18,14 +19,10 @@ location ^~ /grafana/ {
 
     include /config/nginx/proxy.conf;
     resolver 127.0.0.11 valid=30s;
-    set $upstream_grafana grafana;
-    set $upstream_port 3000;
+    set $upstream_app filebot;
+    set $upstream_port 5800;
     set $upstream_proto http;
-    proxy_pass http://$upstream_grafana:$upstream_port ;
-    
-    # Clear Authorization Header if you are using http auth and normal Grafana auth
-    #proxy_set_header    Authorization       "";
-    
-    rewrite ^/grafana/(.*)$ /$1 break;
+    proxy_pass $upstream_proto://$upstream_app:$upstream_port;
 
+    rewrite /filebot(.*) $1 break;
 }

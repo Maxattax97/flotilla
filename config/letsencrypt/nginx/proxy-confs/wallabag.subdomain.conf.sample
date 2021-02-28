@@ -1,15 +1,13 @@
-## Version 2021/01/21
-# make sure that your dns has a cname set for recipes
-# make sure to mount /media/ in your swag container to point to your Recipes Media directory
-
-# if using Authelia use this one:
-# Doc: https://vabene1111.github.io/recipes/install/docker/#using-proxy-authentication
+## Version 2021/02/16
+# make sure that your dns has a cname set for wallabag and that your wallabag container is not using a base url.
+# also, make sure your env var in your docker run or compose match the full domain, incl. https://
+# i.e. - SYMFONY__ENV__DOMAIN_NAME=https://wallabag.yourdomain.com
 
 server {
     listen 443 ssl;
     listen [::]:443 ssl;
 
-    server_name recipes.*;
+    server_name wallabag.*;
 
     include /config/nginx/ssl.conf;
 
@@ -20,12 +18,7 @@ server {
 
     # enable for Authelia
     #include /config/nginx/authelia-server.conf;
-	
-    # serve media files
-    location /media/ {
-        alias /media/;
-    }
-	
+
     location / {
         # enable the next two lines for http auth
         #auth_basic "Restricted";
@@ -40,8 +33,8 @@ server {
 
         include /config/nginx/proxy.conf;
         resolver 127.0.0.11 valid=30s;
-        set $upstream_app recipes;
-        set $upstream_port 8080;
+        set $upstream_app wallabag;
+        set $upstream_port 80;
         set $upstream_proto http;
         proxy_pass $upstream_proto://$upstream_app:$upstream_port;
 
