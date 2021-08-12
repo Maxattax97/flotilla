@@ -1,4 +1,4 @@
-## Version 2020/12/09
+## Version 2021/07/08
 # Use this with SyncLounge v3 and up.
 # Make sure that you do not have HSTS enabled, otherwise http access won't work
 # Make sure that your dns has a cname set for synclounge
@@ -34,13 +34,12 @@ server {
         #include /config/nginx/authelia-location.conf;
 
         include /config/nginx/proxy.conf;
-        resolver 127.0.0.11 valid=30s;
+        include /config/nginx/resolver.conf;
         set $upstream_app synclounge;
         set $upstream_port 8088;
         set $upstream_proto http;
         proxy_pass $upstream_proto://$upstream_app:$upstream_port;
 
-        proxy_redirect off;
         proxy_buffering off;
         proxy_socket_keepalive on;
         proxy_set_header X-Forwarded-Proto $scheme;

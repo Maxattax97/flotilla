@@ -27,6 +27,22 @@ root of this repository. Fill it out so that docker containers may read them.
 Unfortunately many containers have yet to accept the standard _Secrets_
 feature recently added in Docker.
 
+## Quirks
+Docker will complain with this error on some versions of Fedora:
+```
+ERROR: for CONTAINER_NAME  Cannot start service CONTAINER_NAME: open /dev/dma_heap: permission denied
+```
+
+As of writing Fedora 33 has an SELinux issue where `/dev/dma_heap/` gets labeled
+incorrectly. Follow  these commands to fix it:
+```
+sudo setenforce 0
+# Check it with:
+# ls -aZ /dev/dma*
+sudo chcon -t device_t /dev/dma_heap
+sudo setenforce 1
+```
+
 ## Services
 
 Some special manual actions are currently are necessary to get a handful of
@@ -298,6 +314,14 @@ Use SSL: false
 Username: maxocull.com
 Password: <Gmail password, does not need an app password, should match $SMTP_PASSWORD>
 From: max.ocull@gmail.com
+```
+
+### Kimai
+
+You'll need to touch this file:
+
+```
+touch /opt/flotilla/config/kimai/local.yaml:
 ```
 
 ### BigBlueButton and Greenlight
