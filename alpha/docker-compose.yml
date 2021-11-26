@@ -1430,6 +1430,20 @@ services:
       #- "com.centurylinklabs.watchtower.enable=true"
     #restart: unless-stopped
 
+  minetest:
+    image: lscr.io/linuxserver/minetest
+    container_name: minetest
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+      #- CLI_ARGS="--gameid minetest"
+    volumes:
+      - /opt/flotilla/data/minetest:/config/.minetest:z
+    ports:
+      - 30000:30000/udp
+    restart: unless-stopped
+
   minecraft:
     # docker exec minecraft rcon-cli stop
     # docker exec minecraft rcon-cli stop
