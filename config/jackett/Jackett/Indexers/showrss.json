@@ -9,12 +9,18 @@
     "id": "cookieheader",
     "type": "hiddendata",
     "name": "CookieHeader",
-    "value": "__cfduid=dd19be6ba5bf254e9c76855d2a235cde11588200870; XSRF-TOKEN=eyJpdiI6ImtGUnBVcmdMaTJCWEM3THI4SzlIMnc9PSIsInZhbHVlIjoibk5IZnN1K3ZuQmVxbzczVEdiNU54MWJJSzBSeWFjWVQrZUNna01jYUJVXC9WQ05EMFpNTVI1bEE1TWUzQ1V5KysiLCJtYWMiOiIzNzUzOWY2Nzc3OTM5YmU3OWNmYWE4NDhiZTIwMGI3MDY2NzBhOWJlZGUxY2Y3Y2Y2ZWViNjg2OTQwYmMxNmMwIn0%3D"
+    "value": "__cfduid=d7e746c0c0f6320619081779c1be8cbf91589615689; XSRF-TOKEN=eyJpdiI6Imwrb21UcHlLeStFSGx2TTlrTXdJYkE9PSIsInZhbHVlIjoiVmFyek9VRVF4XC95cG1YWmIwd21pWnhxdkRWVlRcL0FjXC9WKzZUKzl0dlZadzZYS0JsMEdwWlRhb3p5VHpocEltZSIsIm1hYyI6IjA4ZmQxODQ0ODVhODRmYjAzYjk1NWU5Zjc4ZjhiYzZiODZjNmRiOWUxY2ZhZGVmYmNjN2JkMThkM2FjMDA1OGIifQ%3D%3D"
   },
   {
     "id": "lasterror",
     "type": "hiddendata",
     "name": "LastError",
     "value": null
+  },
+  {
+    "id": "tags",
+    "type": "inputtags",
+    "name": "Tags",
+    "value": ""
   }
 ]

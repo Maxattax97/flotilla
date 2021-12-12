@@ -9,24 +9,13 @@
     "id": "cookieheader",
     "type": "hiddendata",
     "name": "CookieHeader",
-    "value": ""
+    "value": "__ddg1=ycH4FvZvIeGSDQqBkr8A"
   },
   {
     "id": "lasterror",
     "type": "hiddendata",
     "name": "LastError",
-    "value": null
-  },
-  {
-    "id": "filter",
-    "type": "inputselect",
-    "name": "Filter",
-    "value": "0",
-    "options": {
-      "0": "No filter",
-      "1": "No remakes",
-      "2": "Trusted only"
-    }
+    "value": ""
   },
   {
     "id": "category",
@@ -44,6 +33,27 @@
       "2_0": "Real Life",
       "2_1": "Real Life - Photobooks and Pictures",
       "2_2": "Real Life - Videos"
+    }
+  },
+  {
+    "id": "sortrequestedfromsite",
+    "type": "inputselect",
+    "name": "Sort requested from site",
+    "value": "seeders",
+    "options": {
+      "id": "created",
+      "seeders": "seeders",
+      "size": "size"
+    }
+  },
+  {
+    "id": "orderrequestedfromsite",
+    "type": "inputselect",
+    "name": "Order requested from site",
+    "value": "desc",
+    "options": {
+      "desc": "desc",
+      "asc": "asc"
     }
   }
 ]

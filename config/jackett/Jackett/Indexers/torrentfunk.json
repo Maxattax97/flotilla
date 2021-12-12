@@ -9,12 +9,18 @@
     "id": "cookieheader",
     "type": "hiddendata",
     "name": "CookieHeader",
-    "value": "__cfduid=d3f26ad8bc2292e7e0f9b1512389112481568248996; cf_clearance=8491d5a4f4b2ac4fdae9c0f30206030bab4dfac6-1578225976-0-150; __cf_bm=50d82405f3b6a86632a5f44a98bacc568b6f5816-1588200646-1800-AZeRSK0JmTq7lA7KBxicpfyGPjAy0bI9OzFlWwQqF2aUArTGHEeHpPi1DZbyYiVPQramvRG8WwL6+Th0mimOCJb+7OXGSjx7yAAbYRLGHC6ophCTUH94CVcf3dHi3/8w/Q=="
+    "value": "__cfduid=d3f26ad8bc2292e7e0f9b1512389112481568248996; cf_clearance=8491d5a4f4b2ac4fdae9c0f30206030bab4dfac6-1578225976-0-150; __cf_bm=U7yaiFuPCTGsHl.Vb.ciKAVTbBH8HS5N7my1B5w1jME-1639336011-0-AW+liuBjCVr4QkJm7WmH2JBsoWYi5glSYMULvU4aqzZEka60MN4Og77uvkXfu0Ue3oYG+K838ioQ1SY5Vnu0kIE="
   },
   {
     "id": "lasterror",
     "type": "hiddendata",
     "name": "LastError",
     "value": null
+  },
+  {
+    "id": "tags",
+    "type": "inputtags",
+    "name": "Tags",
+    "value": ""
   }
 ]

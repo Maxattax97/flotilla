@@ -9,19 +9,30 @@
     "id": "cookieheader",
     "type": "hiddendata",
     "name": "CookieHeader",
-    "value": "__ddg1=775D9CB06C70ABC229C83C5BD08DFD37148D9822"
+    "value": "__ddg1=775D9CB06C70ABC229C83C5BD08DFD37148D9822; __ddgid=tDmsAYingUiKFb7X; __ddgmark=9SLv5Cx9DYKkGBhx; session=.eJzN09FugjAUBuBXOfbazImMKSEmqBO7obINZbgYU-RYyLBdWrwyvLssWbJHWK9O_vz5k-_mXMnhVDFdoCbu55VA3R6SM8FRkW6bz8Qlnq6VFHzsC0ClpAJ5PF6Uwrzj9X4rmGF24VCKk1RnVpdSQME0ZIgCKsk55ncQVcg0wjfTGljVrqAuSg105oL3leXjdBAvJrsp9Xo_iTT7pvu_oJenwLGG240xoPto-vphvwXGgJyUrkarxBxQEL5v0kd7aQwoniTrh4XlGANa-_No588TY0BDmoaDLTXny-L-c9hPLPsPtG9u_JC8Yw.YXbZKg.-P83_O3LjhgCM6ryp-hUnyuy7dU"
   },
   {
     "id": "lasterror",
     "type": "hiddendata",
     "name": "LastError",
-    "value": null
+    "value": ""
+  },
+  {
+    "id": "filter",
+    "type": "inputselect",
+    "name": "Filter",
+    "value": "0",
+    "options": {
+      "0": "No filter",
+      "1": "No remakes",
+      "2": "Trusted only"
+    }
   },
   {
     "id": "category",
     "type": "inputselect",
     "name": "Category",
-    "value": "0_0",
+    "value": "1_2",
     "options": {
       "0_0": "All categories",
       "1_0": "Anime",
@@ -53,7 +64,7 @@
     "id": "sortrequestedfromsite",
     "type": "inputselect",
     "name": "Sort requested from site",
-    "value": "id",
+    "value": "seeders",
     "options": {
       "id": "created",
       "seeders": "seeders",
@@ -69,5 +80,11 @@
       "desc": "desc",
       "asc": "asc"
     }
+  },
+  {
+    "id": "tags",
+    "type": "inputtags",
+    "name": "Tags",
+    "value": ""
   }
 ]

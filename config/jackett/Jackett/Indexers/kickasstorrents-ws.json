@@ -3,13 +3,13 @@
     "id": "sitelink",
     "type": "inputstring",
     "name": "Site Link",
-    "value": "https://www.magnetdl.com/"
+    "value": "https://kickass.ws/"
   },
   {
     "id": "cookieheader",
     "type": "hiddendata",
     "name": "CookieHeader",
-    "value": "__cfduid=daa30f63388baab9214f772a90845c7a11568248994; __cf_bm=516d5b648952a459b98a23b04afe8d58720ce18d-1588200646-1800-AbCNY9gAgSN6i08PucjloxY/sw+HJt29VDKEAAq61846BbyQQQS1z29Ed622EJxmhw8WLOaE+nae19CP147+kSA9wcQZN1h2RVczAMP4nzZZTPoQ+XclMT/sBcomkmFm/w=="
+    "value": "__cfduid=ddf4ee528def35c065342207ac971f2a41568248993; __cf_bm=e93a3007e2deb822fed14de1223c84840569afa3-1594333869-1800-AeZuqNc8K8Vl7MoGsRKsBn8f+0gT9uw2sGCW4jhddk8TgpSHbadL+qBDqXLuCsN3Ze+C52NYmX44KgwouVh7p+M="
   },
   {
     "id": "lasterror",
@@ -21,10 +21,10 @@
     "id": "sortrequestedfromsite",
     "type": "inputselect",
     "name": "Sort requested from site",
-    "value": "age",
+    "value": "time_add",
     "options": {
-      "age": "created",
-      "se": "seeders",
+      "time_add": "created",
+      "seeders": "seeders",
       "size": "size"
     }
   },

@@ -29,7 +29,14 @@ config/jackett/*
 !config/jackett/Jackett/
 config/jackett/Jackett/*
 !config/jackett/Jackett/Indexers/
+
+# Contains login information.
+!config/jackett/Jackett/Indexers/*
 config/jackett/Jackett/Indexers/*.bak
+config/jackett/Jackett/Indexers/aither.json
+config/jackett/Jackett/Indexers/speedcd.json
+config/jackett/Jackett/Indexers/demonoid.json
+config/jackett/Jackett/Indexers/prostylex.json
 
 config/letsencrypt/*
 !config/letsencrypt/nginx/

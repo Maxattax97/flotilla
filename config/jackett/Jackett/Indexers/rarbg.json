@@ -6,22 +6,22 @@
     "value": "https://rarbg.to/"
   },
   {
-    "id": "url",
-    "type": "inputstring",
-    "name": "Url",
-    "value": "https://torrentapi.org/"
-  },
-  {
     "id": "cookieheader",
     "type": "hiddendata",
     "name": "CookieHeader",
-    "value": "__cfduid=d71789c2aa3178312993e2f08e38251391588200870; __cf_bm=dc015da70e576b4e7d0124fc433c4048ea88ce68-1588200870-1800-ATKHmjjkAwso1voQjs4u14i48A3zAUJwQnVhyN+cIGGQemA06Y1KRkq5jyGdpq9tiomvoQzn/t5uCcS8A0cGWF8="
+    "value": "__cfduid=d266a8b8fab268618d7e96234cc31275e1606223364; __cf_bm=ixIhprWyGronXADxXAfOBH70IROi_Wy9fg1N5P1CXmw-1639336008-0-AfwdOBFJ1SVrH1qZpFaTCCAsFQgFbFHmbtD3evRfGgBUy4jXQyJ0cEvSs7QnWQ7nUODushLlY2UvdIyGcyo4v90="
   },
   {
     "id": "lasterror",
     "type": "hiddendata",
     "name": "LastError",
     "value": null
+  },
+  {
+    "id": "apiurl",
+    "type": "inputstring",
+    "name": "API URL",
+    "value": "https://torrentapi.org/pubapi_v2.php"
   },
   {
     "id": "sortrequestedfromsite",
@@ -35,9 +35,23 @@
     }
   },
   {
-    "id": "generatetorrentdownloadlinkadditionallytomagnet(notrecommendedduetoddosprotection).",
-    "type": "inputbool",
-    "name": "Generate torrent download link additionally to magnet (not recommended due to DDoS protection).",
-    "value": false
+    "id": "numberofretries",
+    "type": "inputselect",
+    "name": "Number of retries",
+    "value": "2",
+    "options": {
+      "0": "No retries (fail fast)",
+      "1": "1 retry (0.5s delay)",
+      "2": "2 retries (1s delay)",
+      "3": "3 retries (2s delay)",
+      "4": "4 retries (4s delay)",
+      "5": "5 retries (8s delay)"
+    }
+  },
+  {
+    "id": "tags",
+    "type": "inputtags",
+    "name": "Tags",
+    "value": ""
   }
 ]
