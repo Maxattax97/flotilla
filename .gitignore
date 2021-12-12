@@ -35,5 +35,9 @@ config/letsencrypt/*
 !config/letsencrypt/nginx/
 !config/letsencrypt/php/
 !config/letsencrypt/www/
+!config/letsencrypt/fail2ban/
+config/letsencrypt/nginx/proxy-confs/*.sample
 config/letsencrypt/nginx/dhparams.pem
 config/letsencrypt/nginx/.htpasswd
+config/letsencrypt/fail2ban/*
+!config/letsencrypt/fail2ban/jail.local
