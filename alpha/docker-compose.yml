@@ -1474,7 +1474,7 @@ services:
       - UID=1000
       - GID=1000
       - TZ=America/Indianapolis
-      - VERSION=1.18
+      - VERSION=1.18.1
       - EULA=TRUE
       #- CONSOLE=FALSE
       - GUI=FALSE
