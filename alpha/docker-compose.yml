@@ -41,7 +41,7 @@ services:
       - TZ=America/Indianapolis
       - URL=maxocull.com
       # apartment,bbb,irc,meet,
-      - SUBDOMAINS=analytics,bazarr,books,ci,cloud,dash,dns,doc,git,grafana,jackett,kimai,librarian,lidarr,map,media,office,openvpn,pgadmin,portainer,prometheus,radarr,registry,resolute,rss,search,sonarr,torrent,whoami,wireguard,www,znc
+      - SUBDOMAINS=analytics,bazarr,books,ci,cloud,dash,dns,doc,git,grafana,jackett,kimai,librarian,lidarr,map,media,office,openvpn,pgadmin,portainer,prometheus,prowlarr,radarr,registry,resolute,rss,search,sonarr,torrent,whoami,wireguard,www,znc
       - VALIDATION=http # DNS? so can use wildcards
       #- DNSPLUGIN=cloudflare #optional
       #- DUCKDNSTOKEN=<token> #optional
@@ -49,7 +49,7 @@ services:
       #- DHLEVEL=2048 # No longer used?
       - ONLY_SUBDOMAINS=false
       # apartment.maxocull.net,bbb.maxocull.net,irc.maxocull.net,meet.maxocull.net,
-      - EXTRA_DOMAINS=maxocull.net,analytics.maxocull.net,bazarr.maxocull.net,books.maxocull.net,ci.maxocull.net,cloud.maxocull.net,dash.maxocull.net,dns.maxocull.net,doc.maxocull.net,git.maxocull.net,grafana.maxocull.net,jackett.maxocull.net,kimai.maxocull.net,librarian.maxocull.net,lidarr.maxocull.net,map.maxocull.net,media.maxocull.net,office.maxocull.net,openvpn.maxocull.net,pgadmin.maxocull.net,portainer.maxocull.net,prometheus.maxocull.net,radarr.maxocull.net,registry.maxocull.net,resolute.maxocull.net,rss.maxocull.net,search.maxocull.net,sonarr.maxocull.net,torrent.maxocull.net,whoami.maxocull.net,wireguard.maxocull.net,www.maxocull.net,znc.maxocull.net
+      - EXTRA_DOMAINS=maxocull.net,analytics.maxocull.net,bazarr.maxocull.net,books.maxocull.net,ci.maxocull.net,cloud.maxocull.net,dash.maxocull.net,dns.maxocull.net,doc.maxocull.net,git.maxocull.net,grafana.maxocull.net,jackett.maxocull.net,kimai.maxocull.net,librarian.maxocull.net,lidarr.maxocull.net,map.maxocull.net,media.maxocull.net,office.maxocull.net,openvpn.maxocull.net,pgadmin.maxocull.net,portainer.maxocull.net,prometheus.maxocull.net,prowlarr.maxocull.net,radarr.maxocull.net,registry.maxocull.net,resolute.maxocull.net,rss.maxocull.net,search.maxocull.net,sonarr.maxocull.net,torrent.maxocull.net,whoami.maxocull.net,wireguard.maxocull.net,www.maxocull.net,znc.maxocull.net
       - STAGING=false # Enable when testing.
     volumes:
       - /opt/flotilla/data/letsencrypt/keys:/config/etc/letsencrypt:Z
@@ -485,6 +485,30 @@ services:
       - /opt/flotilla/data/all/movies:/movies:z
     ports:
       - "127.0.0.1:6767:6767"
+    #deploy:
+      #resources:
+        #limits:
+          #memory: "4g"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    restart: unless-stopped
+
+  prowlarr:
+    # TODO: When Prowlarr is released, set this to latest.
+    image: linuxserver/prowlarr:develop
+    container_name: prowlarr
+    depends_on:
+      - cleanroom
+      - jackett
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - UMASK=022
+    volumes:
+      - /opt/flotilla/config/prowlarr:/config:z
+    ports:
+      - "127.0.0.1:9696:9696"
     #deploy:
       #resources:
         #limits:
