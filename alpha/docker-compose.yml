@@ -41,7 +41,7 @@ services:
       - TZ=America/Indianapolis
       - URL=maxocull.com
       # apartment,bbb,irc,meet,
-      - SUBDOMAINS=analytics,bazarr,books,ci,cloud,dash,dns,doc,git,grafana,jackett,kimai,librarian,lidarr,map,media,office,openvpn,pgadmin,portainer,prometheus,prowlarr,radarr,registry,resolute,rss,search,sonarr,torrent,whoami,wireguard,www,znc
+      - SUBDOMAINS=analytics,bazarr,books,ci,cloud,dash,dns,doc,git,grafana,hashcat,jackett,kimai,librarian,lidarr,map,mastodon,media,office,openvpn,pgadmin,portainer,prometheus,prowlarr,radarr,registry,resolute,rss,search,sonarr,torrent,whoami,wireguard,www,znc
       - VALIDATION=http # DNS? so can use wildcards
       #- DNSPLUGIN=cloudflare #optional
       #- DUCKDNSTOKEN=<token> #optional
@@ -49,7 +49,7 @@ services:
       #- DHLEVEL=2048 # No longer used?
       - ONLY_SUBDOMAINS=false
       # apartment.maxocull.net,bbb.maxocull.net,irc.maxocull.net,meet.maxocull.net,
-      - EXTRA_DOMAINS=maxocull.net,analytics.maxocull.net,bazarr.maxocull.net,books.maxocull.net,ci.maxocull.net,cloud.maxocull.net,dash.maxocull.net,dns.maxocull.net,doc.maxocull.net,git.maxocull.net,grafana.maxocull.net,jackett.maxocull.net,kimai.maxocull.net,librarian.maxocull.net,lidarr.maxocull.net,map.maxocull.net,media.maxocull.net,office.maxocull.net,openvpn.maxocull.net,pgadmin.maxocull.net,portainer.maxocull.net,prometheus.maxocull.net,prowlarr.maxocull.net,radarr.maxocull.net,registry.maxocull.net,resolute.maxocull.net,rss.maxocull.net,search.maxocull.net,sonarr.maxocull.net,torrent.maxocull.net,whoami.maxocull.net,wireguard.maxocull.net,www.maxocull.net,znc.maxocull.net
+      - EXTRA_DOMAINS=maxocull.net,analytics.maxocull.net,bazarr.maxocull.net,books.maxocull.net,ci.maxocull.net,cloud.maxocull.net,dash.maxocull.net,dns.maxocull.net,doc.maxocull.net,git.maxocull.net,grafana.maxocull.net,hashcat.maxocull.net,jackett.maxocull.net,kimai.maxocull.net,librarian.maxocull.net,lidarr.maxocull.net,map.maxocull.net,mastodon.maxocull.net,media.maxocull.net,office.maxocull.net,openvpn.maxocull.net,pgadmin.maxocull.net,portainer.maxocull.net,prometheus.maxocull.net,prowlarr.maxocull.net,radarr.maxocull.net,registry.maxocull.net,resolute.maxocull.net,rss.maxocull.net,search.maxocull.net,sonarr.maxocull.net,torrent.maxocull.net,whoami.maxocull.net,wireguard.maxocull.net,www.maxocull.net,znc.maxocull.net
       - STAGING=false # Enable when testing.
     volumes:
       - /opt/flotilla/data/letsencrypt/keys:/config/etc/letsencrypt:Z
@@ -85,6 +85,23 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
+
+  #coursewatcher:
+    #image: node:lts
+    #container_name: coursewatcher
+    #environment:
+      #- PUID=1000
+      #- PGID=1000
+      #- TZ=America/Indianapolis
+      #- NODE_ENV=production
+    #user: "node"
+    #working_dir: /home/node/coursewatcher
+    #command: "npm run serve"
+    #volumes:
+      #- /opt/flotilla/data/coursewatcher:/home/node/coursewatcher:z
+    #labels:
+      #- "com.centurylinklabs.watchtower.enable=true"
+    #restart: unless-stopped
 
   dockersocket:
     # Limits access to the docker socket which is dangerous to expose to
@@ -318,7 +335,7 @@ services:
     restart: unless-stopped
 
   monerod:
-    image: xmrto/monero:most_recent_tag
+    image: rinocommunity/monero:most_recent_tag
     container_name: monerod
     volumes:
       - /opt/flotilla/data/monerod:/monero:z
@@ -331,6 +348,29 @@ services:
       - "18080:18080"
       - "18081:18081"
     command: monerod --non-interactive --restricted-rpc --rpc-bind-ip=0.0.0.0 --confirm-external-bind --public-node --enable-dns-blocklist --enforce-dns-checkpointing --out-peers=8 --data-dir=/monero
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    restart: unless-stopped
+
+  hashcat:
+    image: dizcza/hashcat-wpa-server:latest
+    container_name: hashcat
+    privileged: true # Necessary for GPU access
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+    volumes:
+      - /opt/flotilla/data/hashcat:/root/.hashcat/wpa-server:z
+    ports:
+      - "127.0.0.1:9111:80"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
@@ -686,26 +726,61 @@ services:
       - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
-  collabora:
-    image: collabora/code
-    container_name: collabora
+  #collabora:
+    #image: collabora/code
+    #container_name: collabora
+    #environment:
+      #- PUID=1000
+      #- PGID=1000
+      #- TZ=America/Indianapolis
+      #- "domain=cloud\\.maxocull\\.com|cloud\\.maxocull\\.net"
+      #- "dictionaries=en"
+    #volumes:
+      #- /opt/flotilla/config/nextcloud:/var/www/html/config:z
+      #- /opt/flotilla/data/nextcloud:/var/www/html:z
+    #ports:
+      #- "127.0.0.1:9980:9980"
+    #cap_add:
+      #- MKNOD
+    ##deploy:
+      ##resources:
+        ##limits:
+          ##memory: "4g"
+    #labels:
+      #- "com.centurylinklabs.watchtower.enable=true"
+    #restart: unless-stopped
+
+  mastodon:
+    image: lscr.io/linuxserver/mastodon:latest
+    container_name: mastodon
+    depends_on:
+      - redis
+      - postgres
+    env_file:
+      - /opt/flotilla/secrets.env
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
-      - "domain=cloud\\.maxocull\\.com|cloud\\.maxocull\\.net"
-      - "dictionaries=en"
+      - LOCAL_DOMAIN=mastodon.maxocull.com # Normally this is `maxocull.com`, but I didn't want to dedicate a webfinger to `mastodon.maxocull.com`: https://docs.joinmastodon.org/admin/config/#web_domain
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DB_HOST=postgres
+      - DB_USER=mastodon
+      - DB_NAME=mastodon
+      - DB_PORT=5432
+      - ES_ENABLED=false
+      - SMTP_SERVER=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_LOGIN=maxocull.com@gmail.com
+      - SMTP_FROM_ADDRESS=maxocull.com@gmail.com
+      - S3_ENABLED=false
+      - WEB_DOMAIN=mastodon.maxocull.com #optional
+      #- DB_POOL=5 #optional
     volumes:
-      - /opt/flotilla/config/nextcloud:/var/www/html/config:z
-      - /opt/flotilla/data/nextcloud:/var/www/html:z
+      - /opt/flotilla/config/mastodon:/config:Z
     ports:
-      - "127.0.0.1:9980:9980"
-    cap_add:
-      - MKNOD
-    #deploy:
-      #resources:
-        #limits:
-          #memory: "4g"
+      - "127.0.0.1:9080:80"
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
@@ -1498,7 +1573,7 @@ services:
       - UID=1000
       - GID=1000
       - TZ=America/Indianapolis
-      - VERSION=1.18.1
+      - VERSION=23w12a
       - EULA=TRUE
       #- CONSOLE=FALSE
       - GUI=FALSE
