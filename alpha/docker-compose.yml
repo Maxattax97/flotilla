@@ -334,46 +334,49 @@ services:
       - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
-  monerod:
-    image: rinocommunity/monero:most_recent_tag
-    container_name: monerod
-    volumes:
-      - /opt/flotilla/data/monerod:/monero:z
-    environment:
-      - USER_ID=1000
-      - P2P_BIND_PORT=18080
-      - RPC_BIND_PORT=18081
-      - TZ=America/Indianapolis
-    ports:
-      - "18080:18080"
-      - "18081:18081"
-    command: monerod --non-interactive --restricted-rpc --rpc-bind-ip=0.0.0.0 --confirm-external-bind --public-node --enable-dns-blocklist --enforce-dns-checkpointing --out-peers=8 --data-dir=/monero
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
-    restart: unless-stopped
+  #monerod:
+    #image: rinocommunity/monero:most_recent_tag
+    #container_name: monerod
+    #volumes:
+      #- /opt/flotilla/data/monerod:/monero:z
+    #environment:
+      #- USER_ID=1000
+      #- P2P_BIND_PORT=18080
+      #- RPC_BIND_PORT=18081
+      #- TZ=America/Indianapolis
+    #ports:
+      #- "18080:18080"
+      #- "18081:18081"
+    #command: monerod --non-interactive --restricted-rpc --rpc-bind-ip=0.0.0.0 --confirm-external-bind --public-node --enable-dns-blocklist --enforce-dns-checkpointing --out-peers=8 --data-dir=/monero
+    #labels:
+      #- "com.centurylinklabs.watchtower.enable=true"
+    #restart: unless-stopped
 
-  hashcat:
-    image: dizcza/hashcat-wpa-server:latest
-    container_name: hashcat
-    privileged: true # Necessary for GPU access
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Indianapolis
-    volumes:
-      - /opt/flotilla/data/hashcat:/root/.hashcat/wpa-server:z
-    ports:
-      - "127.0.0.1:9111:80"
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
-    restart: unless-stopped
+  #hashcat:
+    #image: maxattax/hashcat-wpa-server-lite:latest
+    #container_name: hashcat
+    #privileged: true # Necessary for GPU access
+    #env_file:
+      #- /opt/flotilla/secrets.env
+    #environment:
+      #- PUID=1000
+      #- PGID=1000
+      #- TZ=America/Indianapolis
+    #volumes:
+      #- /opt/flotilla/data/hashcat:/root/.hashcat/wpa-server:z
+    #ports:
+      #- "127.0.0.1:9111:8000"
+      ##- "127.0.0.1:9111:80"
+    #deploy:
+      #resources:
+        #reservations:
+          #devices:
+            #- driver: nvidia
+              #count: 1
+              #capabilities: [gpu]
+    #labels:
+      #- "com.centurylinklabs.watchtower.enable=true"
+    #restart: unless-stopped
 
   jackett:
     image: linuxserver/jackett
@@ -750,40 +753,41 @@ services:
       #- "com.centurylinklabs.watchtower.enable=true"
     #restart: unless-stopped
 
-  mastodon:
-    image: lscr.io/linuxserver/mastodon:latest
-    container_name: mastodon
-    depends_on:
-      - redis
-      - postgres
-    env_file:
-      - /opt/flotilla/secrets.env
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Indianapolis
-      - LOCAL_DOMAIN=mastodon.maxocull.com # Normally this is `maxocull.com`, but I didn't want to dedicate a webfinger to `mastodon.maxocull.com`: https://docs.joinmastodon.org/admin/config/#web_domain
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - DB_HOST=postgres
-      - DB_USER=mastodon
-      - DB_NAME=mastodon
-      - DB_PORT=5432
-      - ES_ENABLED=false
-      - SMTP_SERVER=smtp.gmail.com
-      - SMTP_PORT=587
-      - SMTP_LOGIN=maxocull.com@gmail.com
-      - SMTP_FROM_ADDRESS=maxocull.com@gmail.com
-      - S3_ENABLED=false
-      - WEB_DOMAIN=mastodon.maxocull.com #optional
-      #- DB_POOL=5 #optional
-    volumes:
-      - /opt/flotilla/config/mastodon:/config:Z
-    ports:
-      - "127.0.0.1:9080:80"
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
-    restart: unless-stopped
+  # NOTE: Uses a tremendous amount of storage.
+  #mastodon:
+    #image: lscr.io/linuxserver/mastodon:latest
+    #container_name: mastodon
+    #depends_on:
+      #- redis
+      #- postgres
+    #env_file:
+      #- /opt/flotilla/secrets.env
+    #environment:
+      #- PUID=1000
+      #- PGID=1000
+      #- TZ=America/Indianapolis
+      #- LOCAL_DOMAIN=mastodon.maxocull.com # Normally this is `maxocull.com`, but I didn't want to dedicate a webfinger to `mastodon.maxocull.com`: https://docs.joinmastodon.org/admin/config/#web_domain
+      #- REDIS_HOST=redis
+      #- REDIS_PORT=6379
+      #- DB_HOST=postgres
+      #- DB_USER=mastodon
+      #- DB_NAME=mastodon
+      #- DB_PORT=5432
+      #- ES_ENABLED=false
+      #- SMTP_SERVER=smtp.gmail.com
+      #- SMTP_PORT=587
+      #- SMTP_LOGIN=maxocull.com@gmail.com
+      #- SMTP_FROM_ADDRESS=maxocull.com@gmail.com
+      #- S3_ENABLED=false
+      #- WEB_DOMAIN=mastodon.maxocull.com #optional
+      ##- DB_POOL=5 #optional
+    #volumes:
+      #- /opt/flotilla/config/mastodon:/config:Z
+    #ports:
+      #- "127.0.0.1:9080:80"
+    #labels:
+      #- "com.centurylinklabs.watchtower.enable=true"
+    #restart: unless-stopped
 
   gitlab:
     image: sameersbn/gitlab:16.7.0
@@ -1542,8 +1546,11 @@ services:
       - TZ=Europe/London
     volumes:
       - /opt/flotilla/config/znc:/config:z
+      # https://wiki.znc.in/Signed_SSL_certificate#Certbot
+      - /opt/flotilla/data/letsencrypt/keys/live/maxocull.com/priv-fullchain-bundle.pem:/config/znc.pem:ro
     ports:
-      - "127.0.0.1:6501:6501"
+      - 6501:6501
+      - 6502:6502
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
