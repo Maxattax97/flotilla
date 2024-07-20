@@ -587,7 +587,7 @@ services:
     restart: unless-stopped
 
   postgres:
-    image: postgres:12
+    image: postgres:16
     container_name: postgres
     env_file:
       - /opt/flotilla/secrets.env
@@ -601,9 +601,9 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - /opt/flotilla/config/postgres/postgresql.conf:/var/lib/postgresql/data/postgresql.conf:z
-      - /opt/flotilla/config/postgres/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf:z
-      - /opt/flotilla/data/postgres:/var/lib/postgresql/data:z
+      - /opt/flotilla/config/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:z
+      - /opt/flotilla/config/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:z
+      - /opt/flotilla/data/postgres.16:/var/lib/postgresql/data:z
       - /opt/flotilla/data/letsencrypt/keys:/certs:z
     #deploy:
       #resources:
@@ -786,7 +786,7 @@ services:
     restart: unless-stopped
 
   gitlab:
-    image: sameersbn/gitlab
+    image: sameersbn/gitlab:16.7.0
     container_name: gitlab
     env_file:
       - /opt/flotilla/secrets.env
@@ -869,7 +869,7 @@ services:
     restart: unless-stopped
 
   gitlab-runner:
-    image: gitlab/gitlab-runner:v12.8.0
+    image: gitlab/gitlab-runner:v16.6.2
     container_name: gitlab-runner
     depends_on:
       - gitlab
