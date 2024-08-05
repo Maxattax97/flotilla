@@ -598,12 +598,15 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
+      # md5 was used by legacy postgres versions, so we are retaining it for now.
+      - POSTGRES_HOST_AUTH_METHOD=md5
       #- POSTGRES_USER=harbor # Use the default "postgres" user.
       #
     user: "1000" # We need this in order to share certs and make it public.
     ports:
       - "5432:5432"
     volumes:
+      # Don't forget to update the command below!
       - /opt/flotilla/config/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:z
       - /opt/flotilla/config/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:z
       - /opt/flotilla/data/postgres.16:/var/lib/postgresql/data:z
@@ -612,6 +615,7 @@ services:
       #resources:
         #limits:
           #memory: "4g"
+    command: 'postgres -c config_file=/etc/postgresql/postgresql.conf'
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
@@ -789,106 +793,106 @@ services:
       #- "com.centurylinklabs.watchtower.enable=true"
     #restart: unless-stopped
 
-  gitlab:
-    image: sameersbn/gitlab:16.7.0
-    container_name: gitlab
-    env_file:
-      - /opt/flotilla/secrets.env
-    depends_on:
-      - redis
-      - postgres
-      - registry
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Indianapolis
-      - DB_HOST=postgres
-      - DB_NAME=gitlabhq_production
-      - DB_USER=gitlab
-      - DB_EXTENSION=pg_trgm
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - NGINX_MAX_UPLOAD_SIZE=250M
-      - GITLAB_HOST=git.maxocull.com
-      - GITLAB_NOTIFY_ON_BROKEN_BUILDS=true
-      - SMTP_ENABLED=true # Flip on after the mail server is setup.
-      - IMAP_ENABLED=false # Flip on after the mail server is setup.
-      - "SMTP_USER=maxocull.com@gmail.com"
-      #- "IMAP_USER=maxocull.com@gmail.com"
-      #- "GITLAB_INCOMING_EMAIL_ADDRESS=maxocull.com+%{key}@gmail.com"
-      #- IMAP_DOMAIN=www.maxocull.com
-      #- IMAP_HOST=mail.maxocull.com
-      #- IMAP_PORT=993
-      #- PIWIK_URL=
-      #- PIWIK_SITE_ID=
-      - GITLAB_REGISTRY_ENABLED=true
-      - GITLAB_REGISTRY_HOST=registry.maxocull.com
-      - GITLAB_REGISTRY_PORT=443
-      - GITLAB_REGISTRY_API_URL=http://registry:5000
-      - GITLAB_REGISTRY_KEY_PATH=/certs/live/maxocull.com/privkey.pem
-      #- GITLAB_REGISTRY_KEY_PATH=/certs/registry.key
-    volumes:
-      - /opt/flotilla/data/gitlab:/home/git/data:z
-      #- /home/git/.ssh/authorized_keys:/home/git/data/.ssh/authorized_keys:z
-      - /home/git/.ssh/authorized_keys_proxy:/home/git/data/.ssh/authorized_keys_proxy:z
-      - /opt/flotilla/data/letsencrypt/keys:/certs:z
-      #- /opt/flotilla/config/registry/certs:/certs:z
-    ports:
-      # Keep this as a string because I guess docker-compose (Python) has a bug?
-      - "127.0.0.1:4080:80"
-      - "127.0.0.1:9922:22"
-    #healthcheck:
-      #test: ["CMD", "/usr/local/sbin/healthcheck"]
-      #interval: 1m
-      #timeout: 5s
-      #retries: 5
-      #start_period: 2m
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
-    restart: unless-stopped
+  #gitlab:
+    #image: sameersbn/gitlab:16.7.0
+    #container_name: gitlab
+    #env_file:
+      #- /opt/flotilla/secrets.env
+    #depends_on:
+      #- redis
+      #- postgres
+      #- registry
+    #environment:
+      #- PUID=1000
+      #- PGID=1000
+      #- TZ=America/Indianapolis
+      #- DB_HOST=postgres
+      #- DB_NAME=gitlabhq_production
+      #- DB_USER=gitlab
+      #- DB_EXTENSION=pg_trgm
+      #- REDIS_HOST=redis
+      #- REDIS_PORT=6379
+      #- NGINX_MAX_UPLOAD_SIZE=250M
+      #- GITLAB_HOST=git.maxocull.com
+      #- GITLAB_NOTIFY_ON_BROKEN_BUILDS=true
+      #- SMTP_ENABLED=true # Flip on after the mail server is setup.
+      #- IMAP_ENABLED=false # Flip on after the mail server is setup.
+      #- "SMTP_USER=maxocull.com@gmail.com"
+      ##- "IMAP_USER=maxocull.com@gmail.com"
+      ##- "GITLAB_INCOMING_EMAIL_ADDRESS=maxocull.com+%{key}@gmail.com"
+      ##- IMAP_DOMAIN=www.maxocull.com
+      ##- IMAP_HOST=mail.maxocull.com
+      ##- IMAP_PORT=993
+      ##- PIWIK_URL=
+      ##- PIWIK_SITE_ID=
+      #- GITLAB_REGISTRY_ENABLED=true
+      #- GITLAB_REGISTRY_HOST=registry.maxocull.com
+      #- GITLAB_REGISTRY_PORT=443
+      #- GITLAB_REGISTRY_API_URL=http://registry:5000
+      #- GITLAB_REGISTRY_KEY_PATH=/certs/live/maxocull.com/privkey.pem
+      ##- GITLAB_REGISTRY_KEY_PATH=/certs/registry.key
+    #volumes:
+      #- /opt/flotilla/data/gitlab:/home/git/data:z
+      ##- /home/git/.ssh/authorized_keys:/home/git/data/.ssh/authorized_keys:z
+      #- /home/git/.ssh/authorized_keys_proxy:/home/git/data/.ssh/authorized_keys_proxy:z
+      #- /opt/flotilla/data/letsencrypt/keys:/certs:z
+      ##- /opt/flotilla/config/registry/certs:/certs:z
+    #ports:
+      ## Keep this as a string because I guess docker-compose (Python) has a bug?
+      #- "127.0.0.1:4080:80"
+      #- "127.0.0.1:9922:22"
+    ##healthcheck:
+      ##test: ["CMD", "/usr/local/sbin/healthcheck"]
+      ##interval: 1m
+      ##timeout: 5s
+      ##retries: 5
+      ##start_period: 2m
+    #labels:
+      #- "com.centurylinklabs.watchtower.enable=true"
+    #restart: unless-stopped
 
-  registry:
-    image: registry
-    container_name: registry
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Indianapolis
-      - REGISTRY_LOG_LEVEL=info
-      - REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/registry
-      - REGISTRY_AUTH_TOKEN_REALM=https://git.maxocull.com/jwt/auth
-      - REGISTRY_AUTH_TOKEN_SERVICE=container_registry
-      - REGISTRY_AUTH_TOKEN_ISSUER=gitlab-issuer
-      - REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE=/certs/live/maxocull.com/fullchain.pem
-      #- REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE=/certs/registry.crt
-      - REGISTRY_STORAGE_DELETE_ENABLED=true
-    volumes:
-      - /opt/flotilla/data/gitlab/shared/registry:/registry:z
-      - /opt/flotilla/data/letsencrypt/keys:/certs:z
-      #- /opt/flotilla/config/registry/certs:/certs:z
-    ports:
-      - "127.0.0.1:5000:5000"
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
-    restart: unless-stopped
+  #registry:
+    #image: registry
+    #container_name: registry
+    #environment:
+      #- PUID=1000
+      #- PGID=1000
+      #- TZ=America/Indianapolis
+      #- REGISTRY_LOG_LEVEL=info
+      #- REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/registry
+      #- REGISTRY_AUTH_TOKEN_REALM=https://git.maxocull.com/jwt/auth
+      #- REGISTRY_AUTH_TOKEN_SERVICE=container_registry
+      #- REGISTRY_AUTH_TOKEN_ISSUER=gitlab-issuer
+      #- REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE=/certs/live/maxocull.com/fullchain.pem
+      ##- REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE=/certs/registry.crt
+      #- REGISTRY_STORAGE_DELETE_ENABLED=true
+    #volumes:
+      #- /opt/flotilla/data/gitlab/shared/registry:/registry:z
+      #- /opt/flotilla/data/letsencrypt/keys:/certs:z
+      ##- /opt/flotilla/config/registry/certs:/certs:z
+    #ports:
+      #- "127.0.0.1:5000:5000"
+    #labels:
+      #- "com.centurylinklabs.watchtower.enable=true"
+    #restart: unless-stopped
 
-  gitlab-runner:
-    image: gitlab/gitlab-runner:v16.6.2
-    container_name: gitlab-runner
-    depends_on:
-      - gitlab
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Indianapolis
-      - CI_SERVER_URL=https://git.maxocull.com/
-      - REGISTRATION_TOKEN=_WkSofVsJEziYh-ngWar # Change this to whatever the current token is.
-    volumes:
-      - /opt/flotilla/config/gitlab-runner:/etc/gitlab-runner:z
-      - /var/run/docker.sock:/var/run/docker.sock # Behind a reverse proxy, it's okay.
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
-    restart: unless-stopped
+  #gitlab-runner:
+    #image: gitlab/gitlab-runner:v16.6.2
+    #container_name: gitlab-runner
+    #depends_on:
+      #- gitlab
+    #environment:
+      #- PUID=1000
+      #- PGID=1000
+      #- TZ=America/Indianapolis
+      #- CI_SERVER_URL=https://git.maxocull.com/
+      #- REGISTRATION_TOKEN=_WkSofVsJEziYh-ngWar # Change this to whatever the current token is.
+    #volumes:
+      #- /opt/flotilla/config/gitlab-runner:/etc/gitlab-runner:z
+      #- /var/run/docker.sock:/var/run/docker.sock # Behind a reverse proxy, it's okay.
+    #labels:
+      #- "com.centurylinklabs.watchtower.enable=true"
+    #restart: unless-stopped
 
   #jenkins:
     # TODO: Opt for Gitlab CI?
