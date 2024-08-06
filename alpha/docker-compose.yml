@@ -51,13 +51,18 @@ services:
       # apartment.maxocull.net,bbb.maxocull.net,irc.maxocull.net,meet.maxocull.net,
       - EXTRA_DOMAINS=git.alanocull.com,maxocull.net,analytics.maxocull.net,bazarr.maxocull.net,books.maxocull.net,ci.maxocull.net,cloud.maxocull.net,dash.maxocull.net,dns.maxocull.net,doc.maxocull.net,git.maxocull.net,grafana.maxocull.net,hashcat.maxocull.net,jackett.maxocull.net,kimai.maxocull.net,librarian.maxocull.net,lidarr.maxocull.net,map.maxocull.net,mastodon.maxocull.net,media.maxocull.net,office.maxocull.net,openvpn.maxocull.net,pgadmin.maxocull.net,portainer.maxocull.net,prometheus.maxocull.net,prowlarr.maxocull.net,radarr.maxocull.net,registry.maxocull.net,resolute.maxocull.net,rss.maxocull.net,search.maxocull.net,sonarr.maxocull.net,torrent.maxocull.net,whoami.maxocull.net,wireguard.maxocull.net,www.maxocull.net,znc.maxocull.net
       - STAGING=false # Enable when testing.
+      - DOCKER_MODS=linuxserver/mods:swag-dashboard
     volumes:
       - /opt/flotilla/data/letsencrypt/keys:/config/etc/letsencrypt:Z
       - /opt/flotilla/data/letsencrypt/www:/config/www:Z
       - /opt/flotilla/config/letsencrypt:/config:z
       - /opt/flotilla/data/all/logs/letsencrypt:/config/log:z
+    #volumes_from:
+      # used for FPM
+      #- nextcloud
     ports:
       - "80:80"
+      - "81:81" # used for dashboard mod
       - "443:443"
     #deploy:
       #resources:
@@ -654,8 +659,9 @@ services:
 
   redis:
     # TODO: Resolve some kernel settings to clear up the logs.
-    image: redis:5
+    image: redis:6
     container_name: redis
+    command: 'redis-server /usr/local/etc/redis/redis.conf'
     environment:
       - PUID=1000
       - PGID=1000
@@ -664,6 +670,7 @@ services:
       - "127.0.0.1:6379:6379"
     volumes:
       - /opt/flotilla/data/redis:/data:z # Remove this line if not persistent.
+      - /opt/flotilla/config/redis:/usr/local/etc/redis:Z
     #deploy:
       #resources:
         #limits:
@@ -673,9 +680,7 @@ services:
     restart: unless-stopped
 
   nextcloud:
-    # Switch to FPM after reverse proxy is set up.
-    # Or not because FPM requires hosting files on nginx (ick).
-    image: nextcloud:21-apache
+    image: nextcloud:29-apache
     container_name: nextcloud
     depends_on:
       - redis
@@ -697,11 +702,12 @@ services:
       - SMTP_PORT=587
       - SMTP_NAME=maxocull.com
       - MAIL_FROM_ADDRESS=maxocull.com@gmail.com
+      - PHP_MEMORY_LIMIT=2G
+      - PHP_UPLOAD_LIMIT=2G
       #- MAIL_DOMAIN=mail.maxocull.com
     volumes:
       - /opt/flotilla/config/nextcloud:/var/www/html/config:z
       - /opt/flotilla/data/nextcloud:/var/www/html:z # Share this folder with cron.
-      #- /opt/flotilla/data/all/books:/external/books:z
     ports:
       - "127.0.0.1:3080:80"
       #- "3090:9000" # for FPM
@@ -715,13 +721,31 @@ services:
 
   nextcloud-cron:
     # https://github.com/nextcloud/docker/issues/134
-    image: nextcloud:21-apache
+    image: nextcloud:29-apache
     container_name: nextcloud-cron
+    entrypoint: /cron.sh
+    depends_on:
+      - redis
+      - postgres
+    env_file:
+      - /opt/flotilla/secrets.env
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
-    entrypoint: /cron.sh
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+      - POSTGRES_HOST=postgres
+      - NEXTCLOUD_ADMIN_USER=entourage
+      - REDIS_HOST=redis
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_SECURE=tls
+      - SMTP_PORT=587
+      - SMTP_NAME=maxocull.com
+      - MAIL_FROM_ADDRESS=maxocull.com@gmail.com
+      - PHP_MEMORY_LIMIT=2G
+      - PHP_UPLOAD_LIMIT=2G
+      #- MAIL_DOMAIN=mail.maxocull.com
     volumes:
       - /opt/flotilla/config/nextcloud:/var/www/html/config:z
       - /opt/flotilla/data/nextcloud:/var/www/html:z # Share this folder with cron.
