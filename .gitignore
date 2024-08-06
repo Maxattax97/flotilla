@@ -13,6 +13,7 @@ config/*
 !config/prometheus/
 !config/suricata/
 !config/traefik/
+!config/redis/
 
 config/openvpn/*
 !config/openvpn/openvpn.conf
