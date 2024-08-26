@@ -1,0 +1,6 @@
+# https://man.archlinux.org/man/exports.5
+# (rw,async,insecure,no_subtree_check,all_squash,anonuid=1000,anongid=1000)
+/srv/flamenco 127.0.0.1(rw,async,insecure,no_subtree_check,all_squash,anonuid=1000,anongid=1000)
+/srv/flamenco 192.168.0.0/16(rw,async,insecure,no_subtree_check,all_squash,anonuid=1000,anongid=1000)
+/srv/flamenco 10.0.0.0/8(rw,async,insecure,no_subtree_check,all_squash,anonuid=1000,anongid=1000)
+/srv/flamenco 172.16.0.0/12(rw,async,insecure,no_subtree_check,all_squash,anonuid=1000,anongid=1000)

@@ -1583,6 +1583,57 @@ services:
       - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
+  nfs:
+    image: ghcr.io/obeone/nfs-server
+    container_name: nfs
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      #- NFS_VERSION=3
+      #- NFS_DISABLE_VERSION_3=1
+      - NFS_LOG_LEVEL=DEBUG
+    cap_add:
+      - SYS_ADMIN
+      - SYS_MODULE
+    volumes:
+      - /opt/flotilla/data/nfs/flamenco:/srv/flamenco:z
+      - /opt/flotilla/config/nfs/exports:/etc/exports:z
+      - /lib/modules:/lib/modules:ro
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    ports:
+      # For NFSv4:
+      - 2049:2049
+      # For NFSv3:
+      - 111:111
+      - 32765:32765
+      - 32767:32767
+    restart: unless-stopped
+
+  gitea-runner:
+    image: gitea/act_runner:latest
+    container_name: gitea-runner
+    env_file:
+      - /opt/flotilla/secrets.env
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - "CONFIG_FILE=/config/config.yaml"
+      - "GITEA_INSTANCE_URL=https://git.alanocull.com"
+      - "GITEA_RUNNER_NAME=entourage-alfa"
+    volumes:
+      - /opt/flotilla/config/gitea-runner:/config:z
+      - /opt/flotilla/data/gitea-runner:/data:z
+      # The docker socket allows it to spawn child containers.
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    restart: unless-stopped
+
   minetest:
     image: lscr.io/linuxserver/minetest
     container_name: minetest
