@@ -382,6 +382,28 @@ services:
     #labels:
       #- "com.centurylinklabs.watchtower.enable=true"
     #restart: unless-stopped
+  
+  #whisperasr:
+    #image: onerahmet/openai-whisper-asr-webservice:latest-gpu
+    #container_name: whisperasr
+    #environment:
+      #- PUID=1000
+      #- PGID=1000
+      #- TZ=America/Indianapolis
+      #- ASR_MODEL=medium
+      #- ASR_ENGINE=faster_whisper
+    #ports:
+      #- "127.0.0.1:9118:9118"
+    #deploy:
+      #resources:
+        #reservations:
+          #devices:
+            #- driver: nvidia
+              #count: 1
+              #capabilities: [gpu]
+    #labels:
+      #- "com.centurylinklabs.watchtower.enable=true"
+    #restart: unless-stopped
 
   jackett:
     image: linuxserver/jackett
@@ -1616,6 +1638,8 @@ services:
   gitea-runner:
     image: gitea/act_runner:latest
     container_name: gitea-runner
+    security_opt:
+      - seccomp:unconfined
     env_file:
       - /opt/flotilla/secrets.env
     environment:
