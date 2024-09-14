@@ -1,2 +1,3 @@
+---
 modify-conf: /etc/suricata/modify.conf
 disable-conf: /etc/suricata/disable.conf

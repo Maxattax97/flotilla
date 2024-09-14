@@ -1,3 +1,4 @@
+---
 # Example configuration file, it's safe to copy this as the default config file without any modification.
 
 # You don't have to copy this file to your instance,
@@ -35,9 +36,9 @@ runner:
   # If it's empty when registering, it will ask for inputting labels.
   # If it's empty when execute `daemon`, will use labels in `.runner` file.
   labels:
-    - "ubuntu-latest:docker://gitea/runner-images:ubuntu-latest"
-    - "ubuntu-22.04:docker://gitea/runner-images:ubuntu-22.04"
-    - "ubuntu-20.04:docker://gitea/runner-images:ubuntu-20.04"
+    - ubuntu-latest:docker://gitea/runner-images:ubuntu-latest
+    - ubuntu-22.04:docker://gitea/runner-images:ubuntu-22.04
+    - ubuntu-20.04:docker://gitea/runner-images:ubuntu-20.04
 
 cache:
   # Enable cache server to use actions/cache.
@@ -65,7 +66,7 @@ container:
   # Whether to use privileged mode or not when launching task containers (privileged mode is required for Docker-in-Docker).
   privileged: false
   # And other options to be used when the container is started (eg, --add-host=my.gitea.url:host-gateway).
-  options: "--security-opt seccomp=unconfined"
+  options: --security-opt seccomp=unconfined
   # The parent directory of a job's working directory.
   # NOTE: There is no need to add the first '/' of the path as act_runner will add it automatically.
   # If the path starts with '/', the '/' will be trimmed.
