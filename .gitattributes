@@ -34,8 +34,10 @@
 
 # Large data
 *.csv filter=lfs diff=lfs merge=lfs -text
-*.json filter=lfs diff=lfs merge=lfs -text
 *.xml filter=lfs diff=lfs merge=lfs -text
+
+# Disabled because these are often used for settings:
+# *.json filter=lfs diff=lfs merge=lfs -text
 
 # Executables and libraries
 *.exe filter=lfs diff=lfs merge=lfs -text

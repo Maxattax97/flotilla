@@ -41,7 +41,7 @@ services:
       - TZ=America/Indianapolis
       - URL=maxocull.com
       # apartment,bbb,irc,meet,
-      - SUBDOMAINS=analytics,bazarr,books,ci,cloud,dash,dns,doc,git,grafana,hashcat,jackett,kimai,librarian,lidarr,map,mastodon,media,office,openvpn,pgadmin,portainer,prometheus,prowlarr,radarr,registry,resolute,rss,search,sonarr,torrent,whoami,wireguard,www,znc
+      - SUBDOMAINS=analytics,bazarr,books,ci,cloud,dash,dns,doc,git,grafana,hashcat,jackett,kimai,librarian,lidarr,llm,map,mastodon,media,office,openvpn,pgadmin,portainer,prometheus,prowlarr,radarr,registry,resolute,rss,search,sonarr,torrent,whoami,wireguard,www,znc
       - VALIDATION=http # DNS? so can use wildcards
       #- DNSPLUGIN=cloudflare #optional
       #- DUCKDNSTOKEN=<token> #optional
@@ -49,7 +49,7 @@ services:
       #- DHLEVEL=2048 # No longer used?
       - ONLY_SUBDOMAINS=false
       # apartment.maxocull.net,bbb.maxocull.net,irc.maxocull.net,meet.maxocull.net,
-      - EXTRA_DOMAINS=git.alanocull.com,maxocull.net,analytics.maxocull.net,bazarr.maxocull.net,books.maxocull.net,ci.maxocull.net,cloud.maxocull.net,dash.maxocull.net,dns.maxocull.net,doc.maxocull.net,git.maxocull.net,grafana.maxocull.net,hashcat.maxocull.net,jackett.maxocull.net,kimai.maxocull.net,librarian.maxocull.net,lidarr.maxocull.net,map.maxocull.net,mastodon.maxocull.net,media.maxocull.net,office.maxocull.net,openvpn.maxocull.net,pgadmin.maxocull.net,portainer.maxocull.net,prometheus.maxocull.net,prowlarr.maxocull.net,radarr.maxocull.net,registry.maxocull.net,resolute.maxocull.net,rss.maxocull.net,search.maxocull.net,sonarr.maxocull.net,torrent.maxocull.net,whoami.maxocull.net,wireguard.maxocull.net,www.maxocull.net,znc.maxocull.net
+      - EXTRA_DOMAINS=git.alanocull.com,maxocull.net,analytics.maxocull.net,bazarr.maxocull.net,books.maxocull.net,ci.maxocull.net,cloud.maxocull.net,dash.maxocull.net,dns.maxocull.net,doc.maxocull.net,git.maxocull.net,grafana.maxocull.net,hashcat.maxocull.net,jackett.maxocull.net,kimai.maxocull.net,librarian.maxocull.net,lidarr.maxocull.net,llm.maxocull.net,map.maxocull.net,mastodon.maxocull.net,media.maxocull.net,office.maxocull.net,openvpn.maxocull.net,pgadmin.maxocull.net,portainer.maxocull.net,prometheus.maxocull.net,prowlarr.maxocull.net,radarr.maxocull.net,registry.maxocull.net,resolute.maxocull.net,rss.maxocull.net,search.maxocull.net,sonarr.maxocull.net,torrent.maxocull.net,whoami.maxocull.net,wireguard.maxocull.net,www.maxocull.net,znc.maxocull.net
       - STAGING=false # Enable when testing.
       - DOCKER_MODS=linuxserver/mods:swag-dashboard
     volumes:
@@ -382,7 +382,7 @@ services:
     #labels:
       #- "com.centurylinklabs.watchtower.enable=true"
     #restart: unless-stopped
-  
+
   #whisperasr:
     #image: onerahmet/openai-whisper-asr-webservice:latest-gpu
     #container_name: whisperasr
@@ -458,10 +458,10 @@ services:
       - "6881:6881/udp"
       - "127.0.0.1:8800:8800" # Change the WEBUI_PORT environment variable as well!
       - "127.0.0.1:8118:8118" # Change the proxy port for Jackett as well!
-    #deploy:
-      #resources:
-        #limits:
-          #memory: "4g"
+    deploy:
+      resources:
+        limits:
+          memory: "6g"
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
@@ -1657,6 +1657,36 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    env_file:
+      - /opt/flotilla/secrets.env
+    environment:
+      # https://docs.openwebui.com/getting-started/env-configuration
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      # This points to Leviathan for servicing the ollama API.
+      - "OLLAMA_BASE_URL=http://192.168.1.11:11434"
+      - WEBUI_AUTH=True
+      - WEBUI_URL=https://llm.maxocull.com
+      # TODO: Disable signups
+      - ENABLE_SIGNUP=True
+      # TODO: Change this to Postgres later:
+      #- DATABASE_URL=sqlite:///${DATA_DIR}/webui.db
+      # TODO: TTS and STT
+      # TODO: Image generation
+      - ENABLE_ADMIN_CHAT_ACCESS=False
+    volumes:
+      - /opt/flotilla/data/open-webui:/app/backend/data:Z
+    ports:
+      - "127.0.0.1:3081:8080"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    restart: unless-stopped
+
 
   minetest:
     image: lscr.io/linuxserver/minetest
