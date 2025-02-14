@@ -66,7 +66,7 @@ container:
   # Whether to use privileged mode or not when launching task containers (privileged mode is required for Docker-in-Docker).
   privileged: false
   # And other options to be used when the container is started (eg, --add-host=my.gitea.url:host-gateway).
-  options: --security-opt seccomp=unconfined
+  options: --security-opt seccomp=unconfined --cap-add=NET_ADMIN --device=/dev/net/tun
   # The parent directory of a job's working directory.
   # NOTE: There is no need to add the first '/' of the path as act_runner will add it automatically.
   # If the path starts with '/', the '/' will be trimmed.

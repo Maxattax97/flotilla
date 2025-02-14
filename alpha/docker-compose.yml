@@ -1,5 +1,4 @@
 ---
-version: "3.7"
 # Services:
 # Jenkins
 # Blog
@@ -34,6 +33,7 @@ volumes:
       type: nfs
       o: addr=127.0.0.1,nfsvers=3
       device: :/srv/flamenco
+
 services:
   letsencrypt:
     image: linuxserver/swag
@@ -46,14 +46,14 @@ services:
       - TZ=America/Indianapolis
       - URL=maxocull.com
       # apartment,bbb,irc,meet,prometheus,analytics,grafana,doc,portainer,resolute,
-      - SUBDOMAINS=bazarr,books,ci,cloud,dash,dns,flamenco,git,hashcat,kimai,librarian,lidarr,llm,map,mastodon,media,office,openvpn,pgadmin,prowlarr,radarr,registry,rss,search,sonarr,torrent,whoami,wireguard,www,znc
+      - SUBDOMAINS=bazarr,books,ci,cloud,dash,dns,flamenco,git,hashcat,kimai,librarian,lidarr,llm,map,mastodon,media,notes,nvr,office,openvpn,pgadmin,project,prowlarr,radarr,registry,rss,search,sonarr,torrent,whoami,wireguard,www,znc
       - VALIDATION=http # DNS? so can use wildcards
       #- DNSPLUGIN=cloudflare #optional
       #- DUCKDNSTOKEN=<token> #optional
       - EMAIL=max.ocull@protonmail.com
       #- DHLEVEL=2048 # No longer used?
       - ONLY_SUBDOMAINS=false
-      - EXTRA_DOMAINS=git.alanocull.com,maxocull.net,bazarr.maxocull.net,books.maxocull.net,ci.maxocull.net,cloud.maxocull.net,dash.maxocull.net,dns.maxocull.net,flamenco.maxocull.net,git.maxocull.net,hashcat.maxocull.net,kimai.maxocull.net,librarian.maxocull.net,lidarr.maxocull.net,llm.maxocull.net,map.maxocull.net,mastodon.maxocull.net,media.maxocull.net,office.maxocull.net,openvpn.maxocull.net,pgadmin.maxocull.net,prowlarr.maxocull.net,radarr.maxocull.net,registry.maxocull.net,rss.maxocull.net,search.maxocull.net,sonarr.maxocull.net,torrent.maxocull.net,whoami.maxocull.net,wireguard.maxocull.net,www.maxocull.net,znc.maxocull.net
+      - EXTRA_DOMAINS=git.alanocull.com,maxocull.net,bazarr.maxocull.net,books.maxocull.net,ci.maxocull.net,cloud.maxocull.net,dash.maxocull.net,dns.maxocull.net,flamenco.maxocull.net,git.maxocull.net,hashcat.maxocull.net,kimai.maxocull.net,librarian.maxocull.net,lidarr.maxocull.net,llm.maxocull.net,map.maxocull.net,mastodon.maxocull.net,media.maxocull.net,notes.maxocull.net,nvr.maxocull.net,office.maxocull.net,openvpn.maxocull.net,pgadmin.maxocull.net,project.maxocull.net,prowlarr.maxocull.net,radarr.maxocull.net,registry.maxocull.net,rss.maxocull.net,search.maxocull.net,sonarr.maxocull.net,torrent.maxocull.net,whoami.maxocull.net,wireguard.maxocull.net,www.maxocull.net,znc.maxocull.net
       - STAGING=false # Enable when testing.
       - DOCKER_MODS=linuxserver/mods:swag-dashboard
     volumes:
@@ -157,32 +157,32 @@ services:
       - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
-  whoami:
-    image: containous/whoami
-    container_name: whoami
-    # Use this to debug internet accessibility.
-    ports:
-      - "80:80"
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Indianapolis
-      ##- DOCKER_HOST=tcp://dockersocket
-    #deploy:
-    #resources:
-    #limits:
-    #memory: "40m"
-    restart: unless-stopped
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
-      - "traefik.enable=true"
-      - "traefik.http.routers.http-whoami.rule=Host(`whoami.maxocull.com`)"
-      - "traefik.http.routers.http-whoami.entryPoints=http"
-      - "traefik.http.routers.https-whoami.rule=Host(`whoami.maxocull.com`)"
-      - "traefik.http.routers.https-whoami.entryPoints=https"
-      - "traefik.http.routers.https-whoami.tls=true"
-      - "traefik.http.routers.https-whoami.tls.certResolver=le-main"
-      #- "traefik.http.routers.https-whoami.tls.domains[0].main=whoami.maxocull.com"
+  #whoami:
+  #image: containous/whoami
+  #container_name: whoami
+  ## Use this to debug internet accessibility.
+  #ports:
+  #- "80:80"
+  #environment:
+  #- PUID=1000
+  #- PGID=1000
+  #- TZ=America/Indianapolis
+  ###- DOCKER_HOST=tcp://dockersocket
+  ##deploy:
+  ##resources:
+  ##limits:
+  ##memory: "40m"
+  #restart: unless-stopped
+  #labels:
+  #- "com.centurylinklabs.watchtower.enable=true"
+  #- "traefik.enable=true"
+  #- "traefik.http.routers.http-whoami.rule=Host(`whoami.maxocull.com`)"
+  #- "traefik.http.routers.http-whoami.entryPoints=http"
+  #- "traefik.http.routers.https-whoami.rule=Host(`whoami.maxocull.com`)"
+  #- "traefik.http.routers.https-whoami.entryPoints=https"
+  #- "traefik.http.routers.https-whoami.tls=true"
+  #- "traefik.http.routers.https-whoami.tls.certResolver=le-main"
+  ##- "traefik.http.routers.https-whoami.tls.domains[0].main=whoami.maxocull.com"
 
   watchtower:
     # Not recommended by LinuxServer.io for general use. We will auto-upgrade sparingly.
@@ -401,40 +401,92 @@ services:
   #- "com.centurylinklabs.watchtower.enable=true"
   #restart: unless-stopped
 
-  cleanroom:
-    image: binhex/arch-qbittorrentvpn
-    container_name: cleanroom
-    privileged: true # Necessary for iptables killswitch.
+  gluetun:
+    image: qmcgaw/gluetun:v3
+    container_name: gluetun
     cap_add:
       - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    #networks:
+    #gluenet:
+    #ipv4_address: 172.18.0.100
+    #dns: 172.18.0.100
     env_file:
       - /opt/flotilla/secrets.env
     environment:
-      - WEBUI_PORT=8800
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
-      - UMASK=000
-      - DEBUG=false
-      - NAME_SERVERS=128.52.130.209,169.239.202.202,84.200.69.80,84.200.70.40,91.239.100.100,89.233.43.71,37.235.1.174,37.235.1.177,1.1.1.1,1.0.0.1
-      - LAN_NETWORK=192.168.0.0/16
-      - ENABLE_PRIVOXY=yes
-      - VPN_ENABLED=yes
-      - VPN_PROV=nordvpn # This is a custom VPN.
+      - VPN_SERVICE_PROVIDER=nordvpn
+      - VPN_TYPE=openvpn
+      - OPENVPN_PROTOCOL=udp
+      #- SERVER_COUNTRIES=Switzerland,Spain,Poland,Panama,Romania,Malaysia
+      - SERVER_COUNTRIES=Netherlands
+      - SERVER_CATEGORIES=P2P
+      - UPDATER_PERIOD=24h
+      # DNS over TLS
+      - DOT=off
+      - DOT_PROVIDERS=quad9
+      - DOT_CACHING=on
+      - DOT_IPV6=off
+      # Unblock DNS for local connections
+      - DNS_UPDATE_PERIOD=24h
+      - BLOCK_MALICIOUS=on
+      - BLOCK_SURVEILLANCE=on
+      - BLOCK_ADS=on
+      - UNBLOCK=maxocull.com,alanocull.com
+      # Fixed DNS server:
+      - DNS_ADDRESS=9.9.9.9
+      - DNS_KEEP_NAMESERVER=on
+      - "HEALTH_TARGET_ADDRESS=www.quad9.net:443"
+      # Super insecure, just disable HTTP proxy.
+      - HTTPPROXY=off
+      - SHADOWSOCKS=on
+      - SHADOWSOCKS_CIPHER=aes-256-gcm
     volumes:
-      - /opt/flotilla/config/cleanroom:/config:z
-      - /opt/flotilla/data/all/torrents:/torrents:z
-      - /opt/flotilla/data/cleanroom:/data:z
-      - /etc/localtime:/etc/localtime:ro
+      - /opt/flotilla/config/gluetun/base:/gluetun:Z
+      - /opt/flotilla/config/gluetun/include.conf:/etc/unbound/include.conf:Z:ro
     ports:
-      - "6881:6881"
-      - "6881:6881/udp"
-      - "127.0.0.1:8800:8800" # Change the WEBUI_PORT environment variable as well!
-      - "127.0.0.1:8118:8118" # Change the proxy port for Prowlarr as well!
-    deploy:
-      resources:
-        limits:
-          memory: "6g"
+      - 8888:8888/tcp # HTTP proxy
+      - 8388:8388/tcp # Shadowsocks (SOCKS5)
+      - 8388:8388/udp # Shadowsocks (SOCKS5)
+      # Forwarded ports
+      - 127.0.0.1:8080:8080 # Forward the WebUI port for qbitorrent.
+      - 6881:6881 # Forward the Bittorrent for qbitorrent.
+      - 6881:6881/udp # Forward the Bittorrent port for qbitorrent.
+      #- "127.0.0.1:8989:8989" # Sonarr
+      #- "127.0.0.1:7878:7878" # Radarr
+      #- "127.0.0.1:8686:8686" # Lidarr
+      - "127.0.0.1:9696:9696" # Prowlarr
+      - "127.0.0.1:5299:5299" # LazyLibrarian
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    restart: unless-stopped
+
+  qbittorrent:
+    image: linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    depends_on:
+      - gluetun
+    network_mode: service:gluetun
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - UMASK=000
+      - TZ=America/Indianapolis
+      - WEBUI_PORT=8080
+      - TORRENTING_PORT=6881
+    volumes:
+      - /opt/flotilla/config/qbittorrent:/config:z
+      # This is where torrent files are stored.
+      - /opt/flotilla/data/all/torrents:/torrents:z
+      # This is where the data pointed to by the torrent file is downloaded to and stored.
+      - /opt/flotilla/data/all/downloads:/downloads:z
+    #ports:
+    #- "127.0.0.1:8080:8080"
+    #- "6881:6881"
+    #- "6881:6881/udp"
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
@@ -443,7 +495,7 @@ services:
     image: linuxserver/sonarr
     container_name: sonarr
     depends_on:
-      - cleanroom
+      - qbittorrent
       - prowlarr
     environment:
       - PUID=1000
@@ -453,7 +505,7 @@ services:
     volumes:
       - /opt/flotilla/config/sonarr:/config:z
       - /opt/flotilla/data/all/tvshows:/tv:z
-      - /opt/flotilla/data/cleanroom:/data:z
+      - /opt/flotilla/data/all/downloads:/data:z
     ports:
       - "127.0.0.1:8989:8989"
     #deploy:
@@ -468,7 +520,7 @@ services:
     image: linuxserver/radarr
     container_name: radarr
     depends_on:
-      - cleanroom
+      - qbittorrent
       - prowlarr
     environment:
       - PUID=1000
@@ -478,7 +530,7 @@ services:
     volumes:
       - /opt/flotilla/config/radarr:/config:z
       - /opt/flotilla/data/all/movies:/movies:z
-      - /opt/flotilla/data/cleanroom:/data:z
+      - /opt/flotilla/data/all/downloads:/data:z
     ports:
       - "127.0.0.1:7878:7878"
     #deploy:
@@ -493,7 +545,7 @@ services:
     image: linuxserver/lidarr
     container_name: lidarr
     depends_on:
-      - cleanroom
+      - qbittorrent
       - prowlarr
     environment:
       - PUID=1000
@@ -503,7 +555,7 @@ services:
     volumes:
       - /opt/flotilla/config/lidarr:/config:z
       - /opt/flotilla/data/all/music:/music:z
-      - /opt/flotilla/data/cleanroom:/data:z
+      - /opt/flotilla/data/all/downloads:/data:z
     ports:
       - "127.0.0.1:8686:8686"
     #deploy:
@@ -540,7 +592,9 @@ services:
     image: linuxserver/prowlarr:latest
     container_name: prowlarr
     depends_on:
-      - cleanroom
+      - gluetun
+      - qbittorrent
+    network_mode: service:gluetun
     environment:
       - PUID=1000
       - PGID=1000
@@ -548,8 +602,8 @@ services:
       - UMASK=022
     volumes:
       - /opt/flotilla/config/prowlarr:/config:z
-    ports:
-      - "127.0.0.1:9696:9696"
+    #ports:
+    #- "127.0.0.1:9696:9696"
     #deploy:
     #resources:
     #limits:
@@ -901,8 +955,10 @@ services:
     image: linuxserver/lazylibrarian
     container_name: lazylibrarian
     depends_on:
-      - cleanroom
+      - gluetun
+      - qbittorrent
       - prowlarr
+    network_mode: service:gluetun
     environment:
       - PUID=1000
       - PGID=1000
@@ -910,10 +966,10 @@ services:
       - DOCKER_MODS=linuxserver/calibre-web:calibre # x86_64 only
     volumes:
       - /opt/flotilla/config/lazylibrarian:/config:Z
-      - /opt/flotilla/data/cleanroom:/downloads:z
+      - /opt/flotilla/data/all/downloads:/downloads:z
       - /opt/flotilla/data/all/books:/books:z
-    ports:
-      - "127.0.0.1:5299:5299"
+    #ports:
+    #- "127.0.0.1:5299:5299"
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
@@ -1109,6 +1165,10 @@ services:
     container_name: gitea-runner
     security_opt:
       - seccomp:unconfined
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
     env_file:
       - /opt/flotilla/secrets.env
     environment:
@@ -1152,6 +1212,51 @@ services:
       - /opt/flotilla/data/open-webui:/app/backend/data:Z
     ports:
       - "127.0.0.1:3081:8080"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    restart: unless-stopped
+
+  joplin:
+    image: joplin/server:3-beta
+    container_name: joplin
+    depends_on:
+      - postgres
+    env_file:
+      - /opt/flotilla/secrets.env
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - APP_PORT=22300
+      - "APP_BASE_URL=https://notes.maxocull.com"
+      - DB_CLIENT=pg
+      - POSTGRES_USER=joplin
+      - POSTGRES_DATABSE=joplin
+      - POSTGRES_PORT=5432
+      - POSTGRES_HOST=postgres
+    ports:
+      - "127.0.0.1:22300:22300"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    restart: unless-stopped
+
+  openproject:
+    image: openproject/openproject:14
+    container_name: openproject
+    env_file:
+      - /opt/flotilla/secrets.env
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Indianapolis
+      - OPENPROJECT_HOST__NAME=project.maxocull.com
+      - OPENPROJECT_HTTPS=true
+      - OPENPROJECT_DEFAULT__LANGUAGE=en
+    volumes:
+      - /opt/flotilla/data/openproject/pgdata:/var/openproject/pgdata
+      - /opt/flotilla/data/openproject/assets:/var/openproject/assets
+    ports:
+      - "127.0.0.1:8084:80"
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
