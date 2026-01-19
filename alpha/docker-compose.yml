@@ -1,4 +1,3 @@
----
 # Services:
 # Jenkins
 # Blog
@@ -33,7 +32,6 @@ volumes:
       type: nfs
       o: addr=127.0.0.1,nfsvers=3
       device: :/srv/flamenco
-
 services:
   letsencrypt:
     image: linuxserver/swag
@@ -46,14 +44,14 @@ services:
       - TZ=America/Indianapolis
       - URL=maxocull.com
       # apartment,bbb,irc,meet,prometheus,analytics,grafana,doc,portainer,resolute,
-      - SUBDOMAINS=bazarr,books,ci,cloud,dash,dns,flamenco,git,hashcat,kimai,librarian,lidarr,llm,map,mastodon,media,mesh,notes,nvr,office,openvpn,pgadmin,project,prowlarr,radarr,registry,rss,search,sonarr,torrent,whoami,wireguard,www,znc
+      - SUBDOMAINS=bazarr,books,ci,cloud,dash,dns,flamenco,git,groups.xmpp,hashcat,kimai,librarian,lidarr,llm,map,mastodon,media,mesh,notes,ntfy,nvr,office,openvpn,pgadmin,project,prowlarr,radarr,registry,rss,search,share.xmpp,sonarr,torrent,whoami,wireguard,www,xmpp,znc
       - VALIDATION=http # DNS? so can use wildcards
       #- DNSPLUGIN=cloudflare #optional
       #- DUCKDNSTOKEN=<token> #optional
       - EMAIL=max.ocull@protonmail.com
       #- DHLEVEL=2048 # No longer used?
       - ONLY_SUBDOMAINS=false
-      - EXTRA_DOMAINS=git.alanocull.com,maxocull.net,bazarr.maxocull.net,books.maxocull.net,ci.maxocull.net,cloud.maxocull.net,dash.maxocull.net,dns.maxocull.net,flamenco.maxocull.net,git.maxocull.net,hashcat.maxocull.net,kimai.maxocull.net,librarian.maxocull.net,lidarr.maxocull.net,llm.maxocull.net,map.maxocull.net,mastodon.maxocull.net,media.maxocull.net,mesh.maxocull.net,notes.maxocull.net,nvr.maxocull.net,office.maxocull.net,openvpn.maxocull.net,pgadmin.maxocull.net,project.maxocull.net,prowlarr.maxocull.net,radarr.maxocull.net,registry.maxocull.net,rss.maxocull.net,search.maxocull.net,sonarr.maxocull.net,torrent.maxocull.net,whoami.maxocull.net,wireguard.maxocull.net,www.maxocull.net,znc.maxocull.net
+      - EXTRA_DOMAINS=git.alanocull.com,maxocull.net,bazarr.maxocull.net,books.maxocull.net,ci.maxocull.net,cloud.maxocull.net,dash.maxocull.net,dns.maxocull.net,flamenco.maxocull.net,git.maxocull.net,groups.xmpp.maxocull.net,hashcat.maxocull.net,kimai.maxocull.net,librarian.maxocull.net,lidarr.maxocull.net,llm.maxocull.net,map.maxocull.net,mastodon.maxocull.net,media.maxocull.net,mesh.maxocull.net,notes.maxocull.net,ntfy.maxocull.net,nvr.maxocull.net,office.maxocull.net,openvpn.maxocull.net,pgadmin.maxocull.net,project.maxocull.net,prowlarr.maxocull.net,radarr.maxocull.net,registry.maxocull.net,rss.maxocull.net,search.maxocull.net,share.xmpp.maxocull.net,sonarr.maxocull.net,torrent.maxocull.net,whoami.maxocull.net,wireguard.maxocull.net,www.maxocull.net,xmpp.maxocull.net,znc.maxocull.net
       - STAGING=false # Enable when testing.
       - DOCKER_MODS=linuxserver/mods:swag-dashboard
     volumes:
@@ -75,9 +73,8 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   weblog:
-    image: node:lts
+    image: node:24-slim
     container_name: weblog
     environment:
       - PUID=1000
@@ -86,7 +83,7 @@ services:
       - NODE_ENV=production
     user: node
     working_dir: /home/node/weblog
-    command: npm run serve
+    command: npm run full_serve
     volumes:
       - /opt/flotilla/data/weblog:/home/node/weblog:z
     ports:
@@ -94,7 +91,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   #coursewatcher:
   #image: node:lts
   #container_name: coursewatcher
@@ -111,7 +107,6 @@ services:
   #labels:
   #- "com.centurylinklabs.watchtower.enable=true"
   #restart: unless-stopped
-
   dockersocket:
     # Limits access to the docker socket which is dangerous to expose to
     # containers which see the internet; compromise of these external facing
@@ -156,7 +151,6 @@ services:
       - traefik.enable=false
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   #whoami:
   #image: containous/whoami
   #container_name: whoami
@@ -183,7 +177,6 @@ services:
   #- "traefik.http.routers.https-whoami.tls=true"
   #- "traefik.http.routers.https-whoami.tls.certResolver=le-main"
   ##- "traefik.http.routers.https-whoami.tls.domains[0].main=whoami.maxocull.com"
-
   watchtower:
     # Not recommended by LinuxServer.io for general use. We will auto-upgrade sparingly.
     image: containrrr/watchtower
@@ -214,7 +207,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   #pihole:
   #image: pihole/pihole
   #container_name: pihole
@@ -275,38 +267,38 @@ services:
   #- "com.centurylinklabs.watchtower.enable=false"
   #restart: unless-stopped
 
-  netbox:
-    image: linuxserver/netbox:latest
-    container_name: netbox
-    depends_on:
-      - postgres
-      - redis
-    env_file:
-      - /opt/flotilla/secrets.env
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Indianapolis
-      - SECRET_KEY=secret
-      - DB_NAME=netbox
-      - DB_USER=netbox
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_DB_TASK=10
-      - REDIS_DB_CACHE=11
-      - EMAIL_SERVER=smtp.gmail.com
-      - EMAIL_PORT=587
-      - SUPERUSER_EMAIL=maxocull.com@gmail.com
-      - ALLOWED_HOSTS=netbox.maxocull.com
-    volumes:
-      - /opt/flotilla/config/netbox:/config:Z
-    #ports:
-    #- "127.0.0.1:8000:8000"
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-    restart: unless-stopped
+  #netbox:
+  #image: linuxserver/netbox:latest
+  #container_name: netbox
+  #depends_on:
+  #- postgres
+  #- redis
+  #env_file:
+  #- /opt/flotilla/secrets.env
+  #environment:
+  #- PUID=1000
+  #- PGID=1000
+  #- TZ=America/Indianapolis
+  #- SECRET_KEY=secret
+  #- DB_NAME=netbox
+  #- DB_USER=netbox
+  #- DB_HOST=postgres
+  #- DB_PORT=5432
+  #- REDIS_HOST=redis
+  #- REDIS_PORT=6379
+  #- REDIS_DB_TASK=10
+  #- REDIS_DB_CACHE=11
+  #- EMAIL_SERVER=smtp.gmail.com
+  #- EMAIL_PORT=587
+  #- SUPERUSER_EMAIL=maxocull.com@gmail.com
+  #- ALLOWED_HOSTS=netbox.maxocull.com
+  #volumes:
+  #- /opt/flotilla/config/netbox:/config:Z
+  ##ports:
+  ##- "127.0.0.1:8000:8000"
+  #labels:
+  #- com.centurylinklabs.watchtower.enable=true
+  #restart: unless-stopped
 
   #monerod:
   #image: rinocommunity/monero:most_recent_tag
@@ -373,7 +365,6 @@ services:
   #labels:
   #- "com.centurylinklabs.watchtower.enable=true"
   #restart: unless-stopped
-
   gluetun:
     image: qmcgaw/gluetun:v3
     container_name: gluetun
@@ -436,7 +427,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   qbittorrent:
     image: linuxserver/qbittorrent:latest
     container_name: qbittorrent
@@ -463,7 +453,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   sonarr:
     image: linuxserver/sonarr
     container_name: sonarr
@@ -488,7 +477,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   radarr:
     image: linuxserver/radarr
     container_name: radarr
@@ -513,7 +501,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   lidarr:
     image: linuxserver/lidarr
     container_name: lidarr
@@ -538,7 +525,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   bazarr:
     image: linuxserver/bazarr
     container_name: bazarr
@@ -560,7 +546,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   prowlarr:
     image: linuxserver/prowlarr:latest
     container_name: prowlarr
@@ -584,7 +569,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   jellyfin:
     image: linuxserver/jellyfin
     container_name: jellyfin
@@ -613,7 +597,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   postgres:
     image: postgres:16
     container_name: postgres
@@ -644,7 +627,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   pgadmin:
     # Permissions errors are likely caused by files not being owned by user ID 5050 (pgadmin).
     image: dpage/pgadmin4
@@ -676,7 +658,6 @@ services:
       - traefik.http.routers.pgadmin.entryPoints=http
       - traefik.http.middlewares.strip-pgadmin.stripPrefix.prefixes=pgadmin
       - traefik.http.routers.pgadmin.middlewares=strip-pgadmin
-
   redis:
     # TODO: Resolve some kernel settings to clear up the logs.
     image: redis:6
@@ -698,7 +679,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   nextcloud:
     image: nextcloud:30-apache
     container_name: nextcloud
@@ -738,7 +718,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   nextcloud-cron:
     # https://github.com/nextcloud/docker/issues/134
     image: nextcloud:30-apache
@@ -776,7 +755,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   #collabora:
   #image: collabora/code
   #container_name: collabora
@@ -825,7 +803,6 @@ services:
   #labels:
   #- "com.centurylinklabs.watchtower.enable=true"
   #restart: unless-stopped
-
   heimdall:
     image: linuxserver/heimdall
     container_name: heimdall
@@ -841,7 +818,6 @@ services:
     restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
-
   #morty:
   #image: dalf/morty
   #container_name: morty
@@ -906,7 +882,6 @@ services:
   #labels:
   #- "com.centurylinklabs.watchtower.enable=true"
   #restart: unless-stopped
-
   calibre:
     image: linuxserver/calibre-web
     container_name: calibre
@@ -924,7 +899,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   lazylibrarian:
     image: linuxserver/lazylibrarian
     container_name: lazylibrarian
@@ -947,7 +921,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   #mayan:
   #image: mayanedms/mayanedms
   #container_name: mayan
@@ -978,7 +951,6 @@ services:
   #labels:
   #- "com.centurylinklabs.watchtower.enable=true"
   #restart: unless-stopped
-
   rssbridge:
     image: rssbridge/rss-bridge
     container_name: rssbridge
@@ -994,7 +966,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   #kimai:
   #image: kimai/kimai2:apache-debian-master-prod
   #container_name: kimai
@@ -1070,7 +1041,6 @@ services:
   #labels:
   #- "com.centurylinklabs.watchtower.enable=true"
   #restart: unless-stopped
-
   znc:
     image: lscr.io/linuxserver/znc
     container_name: znc
@@ -1089,7 +1059,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   nfs:
     image: ghcr.io/obeone/nfs-server
     container_name: nfs
@@ -1119,7 +1088,91 @@ services:
       - 32765:32765
       - 32767:32767
     restart: unless-stopped
-
+  ntfy:
+    image: binwiederhier/ntfy
+    container_name: ntfy
+    command:
+      - serve
+    environment:
+      - TZ=UTC
+    user: "1000:1000"
+    volumes:
+      - /opt/flotilla/config/ntfy:/etc/ntfy:Z
+      - /opt/flotilla/data/ntfy:/var/cache/ntfy:Z
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --tries=1 https://ntfy.maxocull.com/v1/health -O - | grep -Eo '\"healthy\"\\s*:\\s*true' || exit 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+    restart: unless-stopped
+    init: true # needed, if healthcheck is used. Prevents zombie processes
+  # prosody:
+  #   image: ghcr.io/processone/prosody
+  #   container_name: prosody
+  #   env_file:
+  #     - /opt/flotilla/secrets.env
+  #   environment:
+  #     # TODO: Move this
+  #     - REGISTER_ADMIN_PASSWORD=somePassw0rd
+  #     - PROSODY_MACRO_HOST=xmpp.maxocull.com
+  #     - PROSODY_MACRO_ADMIN=admin@xmpp.maxocull.com
+  #     - CTL_ON_START=registered_users xmpp.maxocull.com ; status
+  #   ports:
+  #     # XMPP
+  #     - "5222:5222"
+  #     # XMPP Federation
+  #     - "5269:5269"
+  #     # Admin interfaces
+  #     - "127.0.0.1:5280:5280"
+  #     - "127.0.0.1:5443:5443"
+  #     # MQTT
+  #     # - "1883:1883"
+  #     # Erlang
+  #     # - "127.0.0.1:5210:5210"
+  #   volumes:
+  #     - /opt/flotilla/config/prosody:/opt/prosody/conf:Z
+  #     - /opt/flotilla/data/prosody/database:/opt/prosody/database:Z
+  #     - /opt/flotilla/data/prosody/logs:/opt/prosody/logs:Z
+  #     - /opt/flotilla/data/prosody/upload:/opt/prosody/upload:Z
+  #   labels:
+  #     - com.centurylinklabs.watchtower.enable=true
+  #   restart: unless-stopped
+  ejabberd:
+    image: ghcr.io/processone/ejabberd
+    container_name: ejabberd
+    user: 0:0
+    env_file:
+      - /opt/flotilla/secrets.env
+    environment:
+      - EJABBERD_MACRO_HOST=xmpp.maxocull.com
+      - EJABBERD_MACRO_ADMIN=admin@xmpp.maxocull.com
+      - CTL_ON_START=registered_users xmpp.maxocull.com ; status
+    ports:
+      # XMPP
+      - "5222:5222"
+      # XMPP Federation
+      - "5269:5269"
+      # Admin interfaces
+      - "127.0.0.1:5280:5280"
+      - "127.0.0.1:5443:5443"
+      # MQTT
+      # - "1883:1883"
+      # Erlang
+      # - "127.0.0.1:5210:5210"
+    volumes:
+      - /opt/flotilla/config/ejabberd:/opt/ejabberd/conf:z
+      # - /opt/flotilla/config/letsencrypt/etc/letsencrypt/live/maxocull.com/privkey.pem:/opt/ejabberd/conf/privkey.pem:ro
+      # - /opt/flotilla/config/letsencrypt/etc/letsencrypt/live/maxocull.com/fullchain.pem:/opt/ejabberd/conf/fullchain.pem:ro
+      - /opt/flotilla/config/letsencrypt/etc/letsencrypt/live/maxocull.com/priv-fullchain-bundle.pem:/config/privkey-fullchain-bundle.pem:ro
+      - /opt/flotilla/data/ejabberd/database:/opt/ejabberd/database:Z
+      - /opt/flotilla/data/ejabberd/logs:/opt/ejabberd/logs:Z
+      - /opt/flotilla/data/ejabberd/upload:/opt/ejabberd/upload:Z
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+    restart: unless-stopped
   flamenco-manager:
     image: maxattax/flamenco-manager:latest
     container_name: flamenco-manager
@@ -1134,7 +1187,6 @@ services:
       - /opt/flotilla/data/flamenco:/data:Z
       - /opt/flotilla/data/nfs/flamenco:/srv/flamenco:z
     restart: unless-stopped
-
   gitea-runner:
     image: gitea/act_runner:latest
     container_name: gitea-runner
@@ -1161,7 +1213,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   open-webui:
     image: ghcr.io/open-webui/open-webui:main
     container_name: open-webui
@@ -1190,7 +1241,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   joplin:
     image: joplin/server:amd64-3
     container_name: joplin
@@ -1214,7 +1264,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   openproject:
     image: openproject/openproject:14
     container_name: openproject
@@ -1235,7 +1284,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   minetest:
     # The name of this image has since changed to Luanti
     image: lscr.io/linuxserver/luanti
@@ -1252,7 +1300,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   minecraft:
     # docker exec minecraft rcon-cli stop
     # docker exec minecraft rcon-cli stop
@@ -1267,9 +1314,7 @@ services:
       #- CONSOLE=FALSE
       - GUI=FALSE
       - MEMORY=4G
-      - JVM_XX_OPTS=-XX:+UseG1GC -XX:G1HeapRegionSize=32M -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=50 -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50
-        -XX:G1MaxNewSizePercent=80 -XX:+ParallelRefProcEnabled -XX:CodeCacheExpansionSize=1M -XX:InitialCodeCacheSize=32M -XX:ReservedCodeCacheSize=64M -XX:-TieredCompilation
-        -XX:CompileThreshold=1000 -XX:CICompilerCount=16 -XX:CompilerThreadPriority=3 -XX:FreqInlineSize=325 -XX:InlineSmallCode=2000 -XX:MaxInlineSize=1024
+      - JVM_XX_OPTS=-XX:+UseG1GC -XX:G1HeapRegionSize=32M -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=50 -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:+ParallelRefProcEnabled -XX:CodeCacheExpansionSize=1M -XX:InitialCodeCacheSize=32M -XX:ReservedCodeCacheSize=64M -XX:-TieredCompilation -XX:CompileThreshold=1000 -XX:CICompilerCount=16 -XX:CompilerThreadPriority=3 -XX:FreqInlineSize=325 -XX:InlineSmallCode=2000 -XX:MaxInlineSize=1024
       # These below are only used if server.properties doesn't already exist.
       - SERVER_NAME=maxocull.com
       - MOTD=Welcome to maxocull.com!

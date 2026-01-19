@@ -22,7 +22,7 @@ repos:
       - id: forbid-submodules
 
   - repo: https://github.com/hadolint/hadolint
-    rev: v2.12.0
+    rev: v2.14.0
     hooks:
       - id: hadolint-docker
 
@@ -34,14 +34,14 @@ repos:
           - -w
 
   - repo: https://github.com/koalaman/shellcheck-precommit
-    rev: v0.9.0
+    rev: v0.11.0
     hooks:
       - id: shellcheck
 
   - repo: https://github.com/ansible/ansible-lint
     # put latest release tag from
     # https://github.com/ansible-community/ansible-lint/releases/
-    rev: v24.6.1
+    rev: v25.9.2
     hooks:
       - id: ansible-lint
         files: \.(yaml|yml)$
@@ -50,7 +50,7 @@ repos:
           - jmespath
 
   - repo: https://github.com/PyCQA/isort
-    rev: 5.13.2
+    rev: 6.1.0
     hooks:
       - id: isort
         # See
@@ -59,15 +59,15 @@ repos:
 
   # This mirror is about 2x faster because it is compiled with mypyc.
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 23.12.1
+    rev: 25.9.0
     hooks:
       - id: black
         args: [--line-length=88]
-        language_version: python3.12
+        # language_version: python3.13
 
   # To ignore these, use `# noqa: E123` at the end of the line.
   - repo: https://github.com/PyCQA/flake8
-    rev: 7.0.0
+    rev: 7.3.0
     hooks:
       - id: flake8
         # See https://github.com/PyCQA/pycodestyle/issues/373
@@ -81,7 +81,7 @@ repos:
 
   # To ignore these, use `# nosec` at the end of the line.
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.6
+    rev: 1.8.6
     hooks:
       - id: bandit
 
@@ -95,7 +95,7 @@ repos:
       - id: python-check-blanket-type-ignore
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.8.0
+    rev: v1.18.2
     hooks:
       - id: mypy
         additional_dependencies:
