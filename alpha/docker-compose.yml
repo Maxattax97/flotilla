@@ -680,7 +680,7 @@ services:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
   nextcloud:
-    image: nextcloud:30-apache
+    image: nextcloud:32-apache
     container_name: nextcloud
     depends_on:
       - redis
@@ -720,7 +720,7 @@ services:
     restart: unless-stopped
   nextcloud-cron:
     # https://github.com/nextcloud/docker/issues/134
-    image: nextcloud:30-apache
+    image: nextcloud:32-apache
     container_name: nextcloud-cron
     entrypoint: /cron.sh
     depends_on:
@@ -882,45 +882,45 @@ services:
   #labels:
   #- "com.centurylinklabs.watchtower.enable=true"
   #restart: unless-stopped
-  calibre:
-    image: linuxserver/calibre-web
-    container_name: calibre
-    environment:
-      - PUID=1000
-      - PGID=1000
-      # idk why but timezones break with this container
-      #- TZ=America/Indianapolis
-      - DOCKER_MODS=linuxserver/calibre-web:calibre # x86_64 only
-    volumes:
-      - /opt/flotilla/config/calibre:/config:Z
-      - /opt/flotilla/data/all/books:/books:z
-    ports:
-      - 127.0.0.1:8083:8083
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-    restart: unless-stopped
-  lazylibrarian:
-    image: linuxserver/lazylibrarian
-    container_name: lazylibrarian
-    depends_on:
-      - gluetun
-      - qbittorrent
-      - prowlarr
-    network_mode: service:gluetun
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Indianapolis
-      - DOCKER_MODS=linuxserver/calibre-web:calibre # x86_64 only
-    volumes:
-      - /opt/flotilla/config/lazylibrarian:/config:Z
-      - /opt/flotilla/data/all/downloads:/downloads:z
-      - /opt/flotilla/data/all/books:/books:z
-    #ports:
-    #- "127.0.0.1:5299:5299"
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-    restart: unless-stopped
+  # calibre:
+  #   image: linuxserver/calibre-web
+  #   container_name: calibre
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     # idk why but timezones break with this container
+  #     #- TZ=America/Indianapolis
+  #     - DOCKER_MODS=linuxserver/calibre-web:calibre # x86_64 only
+  #   volumes:
+  #     - /opt/flotilla/config/calibre:/config:Z
+  #     - /opt/flotilla/data/all/books:/books:z
+  #   ports:
+  #     - 127.0.0.1:8083:8083
+  #   labels:
+  #     - com.centurylinklabs.watchtower.enable=true
+  #   restart: unless-stopped
+  # lazylibrarian:
+  #   image: linuxserver/lazylibrarian
+  #   container_name: lazylibrarian
+  #   depends_on:
+  #     - gluetun
+  #     - qbittorrent
+  #     - prowlarr
+  #   network_mode: service:gluetun
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=America/Indianapolis
+  #     - DOCKER_MODS=linuxserver/calibre-web:calibre # x86_64 only
+  #   volumes:
+  #     - /opt/flotilla/config/lazylibrarian:/config:Z
+  #     - /opt/flotilla/data/all/downloads:/downloads:z
+  #     - /opt/flotilla/data/all/books:/books:z
+  #   #ports:
+  #   #- "127.0.0.1:5299:5299"
+  #   labels:
+  #     - com.centurylinklabs.watchtower.enable=true
+  #   restart: unless-stopped
   #mayan:
   #image: mayanedms/mayanedms
   #container_name: mayan
@@ -1088,27 +1088,27 @@ services:
       - 32765:32765
       - 32767:32767
     restart: unless-stopped
-  ntfy:
-    image: binwiederhier/ntfy
-    container_name: ntfy
-    command:
-      - serve
-    environment:
-      - TZ=UTC
-    user: "1000:1000"
-    volumes:
-      - /opt/flotilla/config/ntfy:/etc/ntfy:Z
-      - /opt/flotilla/data/ntfy:/var/cache/ntfy:Z
-    healthcheck:
-      test: ["CMD-SHELL", "wget -q --tries=1 https://ntfy.maxocull.com/v1/health -O - | grep -Eo '\"healthy\"\\s*:\\s*true' || exit 1"]
-      interval: 60s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-    restart: unless-stopped
-    init: true # needed, if healthcheck is used. Prevents zombie processes
+  # ntfy:
+  #   image: binwiederhier/ntfy
+  #   container_name: ntfy
+  #   command:
+  #     - serve
+  #   environment:
+  #     - TZ=UTC
+  #   user: "1000:1000"
+  #   volumes:
+  #     - /opt/flotilla/config/ntfy:/etc/ntfy:Z
+  #     - /opt/flotilla/data/ntfy:/var/cache/ntfy:Z
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "wget -q --tries=1 https://ntfy.maxocull.com/v1/health -O - | grep -Eo '\"healthy\"\\s*:\\s*true' || exit 1"]
+  #     interval: 60s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
+  #   labels:
+  #     - com.centurylinklabs.watchtower.enable=true
+  #   restart: unless-stopped
+  #   init: true # needed, if healthcheck is used. Prevents zombie processes
   # prosody:
   #   image: ghcr.io/processone/prosody
   #   container_name: prosody
@@ -1140,39 +1140,39 @@ services:
   #   labels:
   #     - com.centurylinklabs.watchtower.enable=true
   #   restart: unless-stopped
-  ejabberd:
-    image: ghcr.io/processone/ejabberd
-    container_name: ejabberd
-    user: 0:0
-    env_file:
-      - /opt/flotilla/secrets.env
-    environment:
-      - EJABBERD_MACRO_HOST=xmpp.maxocull.com
-      - EJABBERD_MACRO_ADMIN=admin@xmpp.maxocull.com
-      - CTL_ON_START=registered_users xmpp.maxocull.com ; status
-    ports:
-      # XMPP
-      - "5222:5222"
-      # XMPP Federation
-      - "5269:5269"
-      # Admin interfaces
-      - "127.0.0.1:5280:5280"
-      - "127.0.0.1:5443:5443"
-      # MQTT
-      # - "1883:1883"
-      # Erlang
-      # - "127.0.0.1:5210:5210"
-    volumes:
-      - /opt/flotilla/config/ejabberd:/opt/ejabberd/conf:z
-      # - /opt/flotilla/config/letsencrypt/etc/letsencrypt/live/maxocull.com/privkey.pem:/opt/ejabberd/conf/privkey.pem:ro
-      # - /opt/flotilla/config/letsencrypt/etc/letsencrypt/live/maxocull.com/fullchain.pem:/opt/ejabberd/conf/fullchain.pem:ro
-      - /opt/flotilla/config/letsencrypt/etc/letsencrypt/live/maxocull.com/priv-fullchain-bundle.pem:/config/privkey-fullchain-bundle.pem:ro
-      - /opt/flotilla/data/ejabberd/database:/opt/ejabberd/database:Z
-      - /opt/flotilla/data/ejabberd/logs:/opt/ejabberd/logs:Z
-      - /opt/flotilla/data/ejabberd/upload:/opt/ejabberd/upload:Z
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-    restart: unless-stopped
+  # ejabberd:
+  #   image: ghcr.io/processone/ejabberd
+  #   container_name: ejabberd
+  #   user: 0:0
+  #   env_file:
+  #     - /opt/flotilla/secrets.env
+  #   environment:
+  #     - EJABBERD_MACRO_HOST=xmpp.maxocull.com
+  #     - EJABBERD_MACRO_ADMIN=admin@xmpp.maxocull.com
+  #     - CTL_ON_START=registered_users xmpp.maxocull.com ; status
+  #   ports:
+  #     # XMPP
+  #     - "5222:5222"
+  #     # XMPP Federation
+  #     - "5269:5269"
+  #     # Admin interfaces
+  #     - "127.0.0.1:5280:5280"
+  #     - "127.0.0.1:5443:5443"
+  #     # MQTT
+  #     # - "1883:1883"
+  #     # Erlang
+  #     # - "127.0.0.1:5210:5210"
+  #   volumes:
+  #     - /opt/flotilla/config/ejabberd:/opt/ejabberd/conf:z
+  #     # - /opt/flotilla/config/letsencrypt/etc/letsencrypt/live/maxocull.com/privkey.pem:/opt/ejabberd/conf/privkey.pem:ro
+  #     # - /opt/flotilla/config/letsencrypt/etc/letsencrypt/live/maxocull.com/fullchain.pem:/opt/ejabberd/conf/fullchain.pem:ro
+  #     - /opt/flotilla/config/letsencrypt/etc/letsencrypt/live/maxocull.com/priv-fullchain-bundle.pem:/config/privkey-fullchain-bundle.pem:ro
+  #     - /opt/flotilla/data/ejabberd/database:/opt/ejabberd/database:Z
+  #     - /opt/flotilla/data/ejabberd/logs:/opt/ejabberd/logs:Z
+  #     - /opt/flotilla/data/ejabberd/upload:/opt/ejabberd/upload:Z
+  #   labels:
+  #     - com.centurylinklabs.watchtower.enable=true
+  #   restart: unless-stopped
   flamenco-manager:
     image: maxattax/flamenco-manager:latest
     container_name: flamenco-manager
@@ -1264,42 +1264,42 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-  openproject:
-    image: openproject/openproject:14
-    container_name: openproject
-    env_file:
-      - /opt/flotilla/secrets.env
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Indianapolis
-      - OPENPROJECT_HOST__NAME=project.maxocull.com
-      - OPENPROJECT_HTTPS=true
-      - OPENPROJECT_DEFAULT__LANGUAGE=en
-    volumes:
-      - /opt/flotilla/data/openproject/pgdata:/var/openproject/pgdata
-      - /opt/flotilla/data/openproject/assets:/var/openproject/assets
-    ports:
-      - 127.0.0.1:8084:80
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-    restart: unless-stopped
-  minetest:
-    # The name of this image has since changed to Luanti
-    image: lscr.io/linuxserver/luanti
-    container_name: minetest
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Indianapolis
-      #- CLI_ARGS="--gameid minetest"
-    volumes:
-      - /opt/flotilla/data/minetest:/config/.minetest:z
-    ports:
-      - 30000:30000/udp
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-    restart: unless-stopped
+  # openproject:
+  #   image: openproject/openproject:14
+  #   container_name: openproject
+  #   env_file:
+  #     - /opt/flotilla/secrets.env
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=America/Indianapolis
+  #     - OPENPROJECT_HOST__NAME=project.maxocull.com
+  #     - OPENPROJECT_HTTPS=true
+  #     - OPENPROJECT_DEFAULT__LANGUAGE=en
+  #   volumes:
+  #     - /opt/flotilla/data/openproject/pgdata:/var/openproject/pgdata
+  #     - /opt/flotilla/data/openproject/assets:/var/openproject/assets
+  #   ports:
+  #     - 127.0.0.1:8084:80
+  #   labels:
+  #     - com.centurylinklabs.watchtower.enable=true
+  #   restart: unless-stopped
+  # minetest:
+  #   # The name of this image has since changed to Luanti
+  #   image: lscr.io/linuxserver/luanti
+  #   container_name: minetest
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=America/Indianapolis
+  #     #- CLI_ARGS="--gameid minetest"
+  #   volumes:
+  #     - /opt/flotilla/data/minetest:/config/.minetest:z
+  #   ports:
+  #     - 30000:30000/udp
+  #   labels:
+  #     - com.centurylinklabs.watchtower.enable=true
+  #   restart: unless-stopped
   minecraft:
     # docker exec minecraft rcon-cli stop
     # docker exec minecraft rcon-cli stop
