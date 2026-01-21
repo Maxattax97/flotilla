@@ -10,6 +10,37 @@ volumes:
       type: nfs
       o: addr=127.0.0.1,nfsvers=3
       device: :/srv/flamenco
+secrets:
+  all_maxocull_com_at_gmail_com_password:
+    file: /opt/flotilla/secrets/all_maxocull_com_at_gmail_com_password
+  gluetun_openvpn_user:
+    file: /opt/flotilla/secrets/gluetun_openvpn_user
+  gluetun_openvpn_password:
+    file: /opt/flotilla/secrets/gluetun_openvpn_password
+  gluetun_shadowsocks_password:
+    file: /opt/flotilla/secrets/gluetun_shadowsocks_password
+  postgres_user:
+    file: /opt/flotilla/secrets/postgres_user
+  postgres_password:
+    file: /opt/flotilla/secrets/postgres_password
+  postgres_db:
+    file: /opt/flotilla/secrets/postgres_db
+  pgadmin_default_password:
+    file: /opt/flotilla/secrets/pgadmin_default_password
+  nextcloud_postgres_db:
+    file: /opt/flotilla/secrets/nextcloud_postgres_db
+  nextcloud_postgres_user:
+    file: /opt/flotilla/secrets/nextcloud_postgres_user
+  nextcloud_postgres_password:
+    file: /opt/flotilla/secrets/nextcloud_postgres_password
+  nextcloud_admin_user:
+    file: /opt/flotilla/secrets/nextcloud_admin_user
+  nextcloud_admin_password:
+    file: /opt/flotilla/secrets/nextcloud_admin_password
+  gitea_runner_registration_token:
+    file: /opt/flotilla/secrets/gitea_runner_registration_token
+  open_webui_brave_search_api_key:
+    file: /opt/flotilla/secrets/open_webui_brave_search_api_key
 services:
   letsencrypt:
     image: linuxserver/swag
@@ -110,12 +141,12 @@ services:
     restart: unless-stopped
   watchtower:
     # Not recommended by LinuxServer.io for general use. We will auto-upgrade sparingly.
-    image: containrrr/watchtower
+    image: nickfedor/watchtower
     container_name: watchtower
     command:
       - --label-enable # By default, containers DO NOT upgrade with this settings, must be explicitly enabled.
-    env_file:
-      - /opt/flotilla/secrets.env
+    secrets:
+      - all_maxocull_com_at_gmail_com_password
     environment:
       - PUID=1000
       - PGID=1000
@@ -131,6 +162,7 @@ services:
       - WATCHTOWER_NOTIFICATION_EMAIL_SERVER=smtp.gmail.com
       - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PORT=587
       - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_USER=maxocull.com@gmail.com
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PASSWORD=/run/secrets/all_maxocull_com_at_gmail_com_password
       - WATCHTOWER_NOTIFICATION_EMAIL_DELAY=2
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -149,8 +181,10 @@ services:
     #gluenet:
     #ipv4_address: 172.18.0.100
     #dns: 172.18.0.100
-    env_file:
-      - /opt/flotilla/secrets.env
+    secrets:
+      - gluetun_openvpn_user
+      - gluetun_openvpn_password
+      - gluetun_shadowsocks_password
     environment:
       - PUID=1000
       - PGID=1000
@@ -158,6 +192,8 @@ services:
       - VPN_SERVICE_PROVIDER=nordvpn
       - VPN_TYPE=openvpn
       - OPENVPN_PROTOCOL=udp
+      - OPENVPN_USER_SECRETFILE=/run/secrets/gluetun_openvpn_user
+      - OPENVPN_PASSWORD_SECRETFILE=/run/secrets/gluetun_openvpn_password
       #- SERVER_COUNTRIES=Switzerland,Spain,Poland,Panama,Romania,Malaysia
       - SERVER_COUNTRIES=Netherlands
       - SERVER_CATEGORIES=P2P
@@ -181,6 +217,7 @@ services:
       - HTTPPROXY=off
       - SHADOWSOCKS=on
       - SHADOWSOCKS_CIPHER=aes-256-gcm
+      - SHADOWSOCKS_PASSWORD_SECRETFILE=/run/secrets/gluetun_shadowsocks_password
     volumes:
       - /opt/flotilla/config/gluetun/base:/gluetun:Z
       - /opt/flotilla/config/gluetun/include.conf:/etc/unbound/include.conf:Z:ro
@@ -349,16 +386,19 @@ services:
   postgres:
     image: postgres:16
     container_name: postgres
-    env_file:
-      - /opt/flotilla/secrets.env
+    secrets:
+      - postgres_user
+      - postgres_password
+      - postgres_db
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
       # md5 was used by legacy postgres versions, so we are retaining it for now.
       - POSTGRES_HOST_AUTH_METHOD=md5
-      #- POSTGRES_USER=harbor # Use the default "postgres" user.
-      #
+      - POSTGRES_USER_FILE=/run/secrets/postgres_user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
+      - POSTGRES_DB_FILE=/run/secrets/postgres_db
     user: "1000" # We need this in order to share certs and make it public.
     ports:
       - 5432:5432
@@ -376,8 +416,8 @@ services:
     # Permissions errors are likely caused by files not being owned by user ID 5050 (pgadmin).
     image: dpage/pgadmin4
     container_name: pgadmin
-    env_file:
-      - /opt/flotilla/secrets.env
+    secrets:
+      - pgadmin_default_password
     depends_on:
       - postgres
     environment:
@@ -386,6 +426,7 @@ services:
       - TZ=America/Indianapolis
       # The email below _is_ the username.
       - PGADMIN_DEFAULT_EMAIL=postgres@maxocull.com
+      - PGADMIN_DEFAULT_PASSWORD_FILE=/run/secrets/pgadmin_default_password
     ports:
       - 127.0.0.1:5480:80
     volumes:
@@ -423,21 +464,30 @@ services:
       - redis
       - postgres
       - nextcloud-cron
-    env_file:
-      - /opt/flotilla/secrets.env
+    secrets:
+      - nextcloud_postgres_db
+      - nextcloud_postgres_user
+      - nextcloud_postgres_password
+      - nextcloud_admin_user
+      - nextcloud_admin_password
+      - all_maxocull_com_at_gmail_com_password
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
-      - POSTGRES_DB=nextcloud
-      - POSTGRES_USER=nextcloud
+      - POSTGRES_DB_FILE=/run/secrets/nextcloud_postgres_db
+      - POSTGRES_USER=/run/secrets/nextcloud_postgres_user
+      # NOTE: You may also have to update dbpassword in config.php!
+      - POSTGRES_PASSWORD_FILE=/run/secrets/nextcloud_postgres_password
       - POSTGRES_HOST=postgres
-      - NEXTCLOUD_ADMIN_USER=entourage
+      - NEXTCLOUD_ADMIN_USER=/run/secrets/nextcloud_admin_user
+      - NEXTCLOUD_ADMIN_PASSWORD_FILE=/run/secrets/nextcloud_admin_password
       - REDIS_HOST=redis
       - SMTP_HOST=smtp.gmail.com
       - SMTP_SECURE=tls
       - SMTP_PORT=587
       - SMTP_NAME=maxocull.com
+      - SMTP_PASSWORD_FILE=/run/secrets/all_maxocull_com_at_gmail_com_password
       - MAIL_FROM_ADDRESS=maxocull.com@gmail.com
       - PHP_MEMORY_LIMIT=2G
       - PHP_UPLOAD_LIMIT=2G
@@ -459,21 +509,29 @@ services:
     depends_on:
       - redis
       - postgres
-    env_file:
-      - /opt/flotilla/secrets.env
+    secrets:
+      - nextcloud_postgres_db
+      - nextcloud_postgres_user
+      - nextcloud_postgres_password
+      - nextcloud_admin_user
+      - nextcloud_admin_password
+      - all_maxocull_com_at_gmail_com_password
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
-      - POSTGRES_DB=nextcloud
-      - POSTGRES_USER=nextcloud
+      - POSTGRES_DB_FILE=/run/secrets/nextcloud_postgres_db
+      - POSTGRES_USER=/run/secrets/nextcloud_postgres_user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/nextcloud_postgres_password
       - POSTGRES_HOST=postgres
-      - NEXTCLOUD_ADMIN_USER=entourage
+      - NEXTCLOUD_ADMIN_USER=/run/secrets/nextcloud_admin_user
+      - NEXTCLOUD_ADMIN_PASSWORD_FILE=/run/secrets/nextcloud_admin_password
       - REDIS_HOST=redis
       - SMTP_HOST=smtp.gmail.com
       - SMTP_SECURE=tls
       - SMTP_PORT=587
       - SMTP_NAME=maxocull.com
+      - SMTP_PASSWORD_FILE=/run/secrets/all_maxocull_com_at_gmail_com_password
       - MAIL_FROM_ADDRESS=maxocull.com@gmail.com
       - PHP_MEMORY_LIMIT=2G
       - PHP_UPLOAD_LIMIT=2G
@@ -584,8 +642,8 @@ services:
       - NET_ADMIN
     devices:
       - /dev/net/tun
-    env_file:
-      - /opt/flotilla/secrets.env
+    secrets:
+      - gitea_runner_registration_token
     environment:
       - PUID=1000
       - PGID=1000
@@ -593,6 +651,7 @@ services:
       - CONFIG_FILE=/config/config.yaml
       - GITEA_INSTANCE_URL=https://git.alanocull.com
       - GITEA_RUNNER_NAME=entourage-alfa
+      - GITEA_RUNNER_REGISTRATION_TOKEN_FILE=/run/secrets/gitea_runner_registration_token
     volumes:
       - /opt/flotilla/config/gitea-runner:/config:z
       - /opt/flotilla/data/gitea-runner:/data:z
@@ -604,8 +663,8 @@ services:
   open-webui:
     image: ghcr.io/open-webui/open-webui:main
     container_name: open-webui
-    env_file:
-      - /opt/flotilla/secrets.env
+    secrets:
+      - open_webui_brave_search_api_key
     environment:
       # https://docs.openwebui.com/getting-started/env-configuration
       - PUID=1000
@@ -622,6 +681,7 @@ services:
       # TODO: TTS and STT
       # TODO: Image generation
       - ENABLE_ADMIN_CHAT_ACCESS=False
+      - BRAVE_SEARCH_API_KEY_FILE=/run/secrets/open_webui_brave_search_api_key
     volumes:
       - /opt/flotilla/data/open-webui:/app/backend/data:Z
     ports:
@@ -635,7 +695,9 @@ services:
     depends_on:
       - postgres
     env_file:
-      - /opt/flotilla/secrets.env
+      # Does not support secret files yet...
+      # https://github.com/laurent22/joplin/pull/6091
+      - /opt/flotilla/secrets/joplin.env
     environment:
       - PUID=1000
       - PGID=1000
@@ -643,8 +705,6 @@ services:
       - APP_PORT=22300
       - APP_BASE_URL=https://notes.maxocull.com
       - DB_CLIENT=pg
-      - POSTGRES_USER=joplin
-      - POSTGRES_DATABSE=joplin
       - POSTGRES_PORT=5432
       - POSTGRES_HOST=postgres
     ports:
