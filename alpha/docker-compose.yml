@@ -1,26 +1,4 @@
-# Services:
-# Jenkins
-# Blog
-# Mayan
-# Email server
-# Joplin
-# Searx https://github.com/linuxserver/Heimdall/issues/307
-# PrivateBin
-# Syncthing?
-# EteSync?
-# Bitwarden?
-# Mining operation?
-# Squid Proxy? Shadowsocks? Or other proxy
-# IRC
-# TOR Node, hidden service
-# i2p
-# KVM?
-# LDAP?
-# Matomo
-# Organization
-# TODO: Apply consistent port assignment scheme.
-# TODO: Segregate services into subnetworks.
-# Security
+# NOTES:
 # :Z is private Docker share (guarded by SELinux); these files are for that
 # container only.
 # :z is public Docker share (guarded by SELinux); these files are for several
@@ -43,9 +21,8 @@ services:
       - PGID=1000
       - TZ=America/Indianapolis
       - URL=maxocull.com
-      # apartment,bbb,irc,meet,prometheus,analytics,grafana,doc,portainer,resolute,
       - SUBDOMAINS=bazarr,books,ci,cloud,dash,dns,flamenco,git,groups.xmpp,hashcat,kimai,librarian,lidarr,llm,map,mastodon,media,mesh,notes,ntfy,nvr,office,openvpn,pgadmin,project,prowlarr,radarr,registry,rss,search,share.xmpp,sonarr,torrent,whoami,wireguard,www,xmpp,znc
-      - VALIDATION=http # DNS? so can use wildcards
+      - VALIDATION=http
       #- DNSPLUGIN=cloudflare #optional
       #- DUCKDNSTOKEN=<token> #optional
       - EMAIL=max.ocull@protonmail.com
@@ -66,10 +43,6 @@ services:
       - 80:80
       - 81:81 # used for dashboard mod
       - 443:443
-    #deploy:
-    #resources:
-    #limits:
-    #memory: "1g"
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
@@ -91,22 +64,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-  #coursewatcher:
-  #image: node:lts
-  #container_name: coursewatcher
-  #environment:
-  #- PUID=1000
-  #- PGID=1000
-  #- TZ=America/Indianapolis
-  #- NODE_ENV=production
-  #user: "node"
-  #working_dir: /home/node/coursewatcher
-  #command: "npm run serve"
-  #volumes:
-  #- /opt/flotilla/data/coursewatcher:/home/node/coursewatcher:z
-  #labels:
-  #- "com.centurylinklabs.watchtower.enable=true"
-  #restart: unless-stopped
   dockersocket:
     # Limits access to the docker socket which is dangerous to expose to
     # containers which see the internet; compromise of these external facing
@@ -151,32 +108,6 @@ services:
       - traefik.enable=false
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-  #whoami:
-  #image: containous/whoami
-  #container_name: whoami
-  ## Use this to debug internet accessibility.
-  #ports:
-  #- "80:80"
-  #environment:
-  #- PUID=1000
-  #- PGID=1000
-  #- TZ=America/Indianapolis
-  ###- DOCKER_HOST=tcp://dockersocket
-  ##deploy:
-  ##resources:
-  ##limits:
-  ##memory: "40m"
-  #restart: unless-stopped
-  #labels:
-  #- "com.centurylinklabs.watchtower.enable=true"
-  #- "traefik.enable=true"
-  #- "traefik.http.routers.http-whoami.rule=Host(`whoami.maxocull.com`)"
-  #- "traefik.http.routers.http-whoami.entryPoints=http"
-  #- "traefik.http.routers.https-whoami.rule=Host(`whoami.maxocull.com`)"
-  #- "traefik.http.routers.https-whoami.entryPoints=https"
-  #- "traefik.http.routers.https-whoami.tls=true"
-  #- "traefik.http.routers.https-whoami.tls.certResolver=le-main"
-  ##- "traefik.http.routers.https-whoami.tls.domains[0].main=whoami.maxocull.com"
   watchtower:
     # Not recommended by LinuxServer.io for general use. We will auto-upgrade sparingly.
     image: containrrr/watchtower
@@ -207,164 +138,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-  #pihole:
-  #image: pihole/pihole
-  #container_name: pihole
-  #ports:
-  #- "53:53/tcp"
-  #- "53:53/udp"
-  #- "67:67/udp"
-  #- "127.0.0.1:1188:80/tcp"
-  #- "127.0.0.1:2443:443/tcp"
-  #env_file:
-  #- /opt/flotilla/secrets.env
-  #environment:
-  #- PUID=1000
-  #- PGID=1000
-  #- TZ=America/Indianapolis
-  #- "DNS1=84.200.69.80"  # DNS.WATCH servers, with DNSSEC enabled.
-  #- "DNS2=84.200.70.40"
-  #- "DNSSEC=True"
-  ##- "ServerIP=107.217.95.124" # Only required for DHCP.
-  #volumes:
-  #- /opt/flotilla/config/pihole/pihole:/etc/pihole:z
-  #- /opt/flotilla/config/pihole/dnsmasq:/etc/dnsmasq.d:z
-  #dns:
-  #- 127.0.0.1
-  #- 84.200.69.80
-  ##cap_add: # DHCP only.
-  ##- NET_ADMIN
-  ##deploy:
-  ##resources:
-  ##limits:
-  ##memory: "1.6g"
-  #labels:
-  #- "com.centurylinklabs.watchtower.enable=true"
-  #restart: unless-stopped
-
-  #openvpn:
-  #image: kylemanna/openvpn
-  #container_name: openvpn
-  ##privileged: true # Necessary for sysctl net settings.
-  ## TODO: Test that these work.
-  #sysctls:
-  #- "net.ipv4.ip_forward=1"
-  #- "net.ipv6.conf.all.disable_ipv6=0"
-  #- "net.ipv6.conf.default.forwarding=1"
-  #- "net.ipv6.conf.all.forwarding=1"
-  ##cap_add:
-  ##- NET_ADMIN
-  #volumes:
-  #- /opt/flotilla/config/openvpn:/etc/openvpn:z
-  #environment:
-  #- EASYRSA_KEY_SIZE=4096
-  #- PUID=1000
-  #- PGID=1000
-  #- TZ=America/Indianapolis
-  #ports:
-  #- "1194:1194/udp"
-  #labels:
-  #- "com.centurylinklabs.watchtower.enable=false"
-  #restart: unless-stopped
-
-  #netbox:
-  #image: linuxserver/netbox:latest
-  #container_name: netbox
-  #depends_on:
-  #- postgres
-  #- redis
-  #env_file:
-  #- /opt/flotilla/secrets.env
-  #environment:
-  #- PUID=1000
-  #- PGID=1000
-  #- TZ=America/Indianapolis
-  #- SECRET_KEY=secret
-  #- DB_NAME=netbox
-  #- DB_USER=netbox
-  #- DB_HOST=postgres
-  #- DB_PORT=5432
-  #- REDIS_HOST=redis
-  #- REDIS_PORT=6379
-  #- REDIS_DB_TASK=10
-  #- REDIS_DB_CACHE=11
-  #- EMAIL_SERVER=smtp.gmail.com
-  #- EMAIL_PORT=587
-  #- SUPERUSER_EMAIL=maxocull.com@gmail.com
-  #- ALLOWED_HOSTS=netbox.maxocull.com
-  #volumes:
-  #- /opt/flotilla/config/netbox:/config:Z
-  ##ports:
-  ##- "127.0.0.1:8000:8000"
-  #labels:
-  #- com.centurylinklabs.watchtower.enable=true
-  #restart: unless-stopped
-
-  #monerod:
-  #image: rinocommunity/monero:most_recent_tag
-  #container_name: monerod
-  #volumes:
-  #- /opt/flotilla/data/monerod:/monero:z
-  #environment:
-  #- USER_ID=1000
-  #- P2P_BIND_PORT=18080
-  #- RPC_BIND_PORT=18081
-  #- TZ=America/Indianapolis
-  #ports:
-  #- "18080:18080"
-  #- "18081:18081"
-  #command: monerod --non-interactive --restricted-rpc --rpc-bind-ip=0.0.0.0 --confirm-external-bind --public-node --enable-dns-blocklist --enforce-dns-checkpointing --out-peers=8 --data-dir=/monero
-  #labels:
-  #- "com.centurylinklabs.watchtower.enable=true"
-  #restart: unless-stopped
-
-  #hashcat:
-  #image: maxattax/hashcat-wpa-server-lite:latest
-  #container_name: hashcat
-  #privileged: true # Necessary for GPU access
-  #env_file:
-  #- /opt/flotilla/secrets.env
-  #environment:
-  #- PUID=1000
-  #- PGID=1000
-  #- TZ=America/Indianapolis
-  #volumes:
-  #- /opt/flotilla/data/hashcat:/root/.hashcat/wpa-server:z
-  #ports:
-  #- "127.0.0.1:9111:8000"
-  ##- "127.0.0.1:9111:80"
-  #deploy:
-  #resources:
-  #reservations:
-  #devices:
-  #- driver: nvidia
-  #count: 1
-  #capabilities: [gpu]
-  #labels:
-  #- "com.centurylinklabs.watchtower.enable=true"
-  #restart: unless-stopped
-
-  #whisperasr:
-  #image: onerahmet/openai-whisper-asr-webservice:latest-gpu
-  #container_name: whisperasr
-  #environment:
-  #- PUID=1000
-  #- PGID=1000
-  #- TZ=America/Indianapolis
-  #- ASR_MODEL=medium
-  #- ASR_ENGINE=faster_whisper
-  #ports:
-  #- "127.0.0.1:9118:9118"
-  #deploy:
-  #resources:
-  #reservations:
-  #devices:
-  #- driver: nvidia
-  #count: 1
-  #capabilities: [gpu]
-  #labels:
-  #- "com.centurylinklabs.watchtower.enable=true"
-  #restart: unless-stopped
   gluetun:
     image: qmcgaw/gluetun:v3
     container_name: gluetun
@@ -470,10 +243,6 @@ services:
       - /opt/flotilla/data/all/downloads:/data:z
     ports:
       - 127.0.0.1:8989:8989
-    #deploy:
-    #resources:
-    #limits:
-    #memory: "4g"
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
@@ -494,10 +263,6 @@ services:
       - /opt/flotilla/data/all/downloads:/data:z
     ports:
       - 127.0.0.1:7878:7878
-    #deploy:
-    #resources:
-    #limits:
-    #memory: "4g"
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
@@ -518,10 +283,6 @@ services:
       - /opt/flotilla/data/all/downloads:/data:z
     ports:
       - 127.0.0.1:8686:8686
-    #deploy:
-    #resources:
-    #limits:
-    #memory: "4g"
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
@@ -539,10 +300,6 @@ services:
       - /opt/flotilla/data/all/movies:/movies:z
     ports:
       - 127.0.0.1:6767:6767
-    #deploy:
-    #resources:
-    #limits:
-    #memory: "4g"
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
@@ -562,10 +319,6 @@ services:
       - /opt/flotilla/config/prowlarr:/config:z
     #ports:
     #- "127.0.0.1:9696:9696"
-    #deploy:
-    #resources:
-    #limits:
-    #memory: "4g"
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
@@ -590,10 +343,6 @@ services:
       #- "8920:8920" #optional, https
     devices:
       - /dev/dri:/dev/dri #optional, for video HW acceleration
-    #deploy:
-    #resources:
-    #limits:
-    #memory: "6g"
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
@@ -619,10 +368,6 @@ services:
       - /opt/flotilla/config/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:z
       - /opt/flotilla/data/postgres.16:/var/lib/postgresql/data:z
       - /opt/flotilla/config/letsencrypt/etc:/certs:ro
-    #deploy:
-    #resources:
-    #limits:
-    #memory: "4g"
     command: postgres -c config_file=/etc/postgresql/postgresql.conf
     labels:
       - com.centurylinklabs.watchtower.enable=true
@@ -646,10 +391,6 @@ services:
     volumes:
       #- /opt/flotilla/config/pgadmin:/pgadmin4:z
       - /opt/flotilla/data/pgadmin:/var/lib/pgadmin:z
-    #deploy:
-    #resources:
-    #limits:
-    #memory: "1.2g"
     restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
@@ -672,10 +413,6 @@ services:
     volumes:
       - /opt/flotilla/data/redis:/data:z # Remove this line if not persistent.
       - /opt/flotilla/config/redis:/usr/local/etc/redis:Z
-    #deploy:
-    #resources:
-    #limits:
-    #memory: "4g"
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
@@ -711,10 +448,6 @@ services:
     ports:
       - 127.0.0.1:3080:80
       #- "3090:9000" # for FPM
-    #deploy:
-    #resources:
-    #limits:
-    #memory: "2.4g"
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
@@ -748,61 +481,9 @@ services:
     volumes:
       - /opt/flotilla/config/nextcloud:/var/www/html/config:z
       - /opt/flotilla/data/nextcloud:/var/www/html:z # Share this folder with cron.
-    #deploy:
-    #resources:
-    #limits:
-    #memory: "40m"
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-  #collabora:
-  #image: collabora/code
-  #container_name: collabora
-  #environment:
-  #- PUID=1000
-  #- PGID=1000
-  #- TZ=America/Indianapolis
-  #- "domain=cloud\\.maxocull\\.com|cloud\\.maxocull\\.net"
-  #- "dictionaries=en"
-  #volumes:
-  #- /opt/flotilla/config/nextcloud:/var/www/html/config:z
-  #- /opt/flotilla/data/nextcloud:/var/www/html:z
-  #ports:
-  #- "127.0.0.1:9980:9980"
-  #cap_add:
-  #- MKNOD
-  ##deploy:
-  ##resources:
-  ##limits:
-  ##memory: "4g"
-  #labels:
-  #- "com.centurylinklabs.watchtower.enable=true"
-  #restart: unless-stopped
-
-  #registry:
-  #image: registry
-  #container_name: registry
-  #environment:
-  #- PUID=1000
-  #- PGID=1000
-  #- TZ=America/Indianapolis
-  #- REGISTRY_LOG_LEVEL=info
-  #- REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/registry
-  #- REGISTRY_AUTH_TOKEN_REALM=https://git.maxocull.com/jwt/auth
-  #- REGISTRY_AUTH_TOKEN_SERVICE=container_registry
-  #- REGISTRY_AUTH_TOKEN_ISSUER=gitlab-issuer
-  #- REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE=/certs/live/maxocull.com/fullchain.pem
-  ##- REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE=/certs/registry.crt
-  #- REGISTRY_STORAGE_DELETE_ENABLED=true
-  #volumes:
-  #- /opt/flotilla/data/gitlab/shared/registry:/registry:z
-  #- /opt/flotilla/config/letsencrypt/keys:/certs:z
-  ##- /opt/flotilla/config/registry/certs:/certs:z
-  #ports:
-  #- "127.0.0.1:5000:5000"
-  #labels:
-  #- "com.centurylinklabs.watchtower.enable=true"
-  #restart: unless-stopped
   heimdall:
     image: linuxserver/heimdall
     container_name: heimdall
@@ -818,139 +499,6 @@ services:
     restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
-  #morty:
-  #image: dalf/morty
-  #container_name: morty
-  #cap_drop:
-  #- ALL
-  #env_file:
-  #- /opt/flotilla/secrets.env
-  #environment:
-  #- PUID=1000
-  #- PGID=1000
-  #- TZ=America/Indianapolis
-  #ports:
-  #- "127.0.0.1:4040:3000"
-  #labels:
-  #- "com.centurylinklabs.watchtower.enable=true"
-  #restart: unless-stopped
-
-  #searx:
-  #image: searx/searx
-  #container_name: searx
-  #privileged: true # Necessary for docker access.
-  #cap_drop:
-  #- ALL
-  #cap_drop:
-  #- CHOWN
-  #- SETGID
-  #- SETUID
-  #- DAC_OVERRIDE
-  #depends_on:
-  #- morty
-  #env_file:
-  #- /opt/flotilla/secrets.env
-  #environment:
-  #- PUID=1000
-  #- PGID=1000
-  #- TZ=America/Indianapolis
-  #- BASE_URL=https://search.maxocull.com/
-  #- MORTY_URL=http://morty/
-  #volumes:
-  #- /opt/flotilla/config/searx:/etc/searx:z
-  #ports:
-  #- "127.0.0.1:4050:8080"
-  #labels:
-  #- "com.centurylinklabs.watchtower.enable=true"
-  #restart: unless-stopped
-
-  #graphhopper:
-  #image: graphhopper/graphhopper
-  #container_name: graphhopper
-  #environment:
-  #- PUID=1000
-  #- PGID=1000
-  #- TZ=America/Indianapolis
-  #volumes:
-  #- /opt/flotilla/data/graphhopper:/data:z
-  #ports:
-  #- "127.0.0.1:8999:8989"
-  ##deploy:
-  ##resources:
-  ##limits:
-  ##memory: "1.2g"
-  #labels:
-  #- "com.centurylinklabs.watchtower.enable=true"
-  #restart: unless-stopped
-  # calibre:
-  #   image: linuxserver/calibre-web
-  #   container_name: calibre
-  #   environment:
-  #     - PUID=1000
-  #     - PGID=1000
-  #     # idk why but timezones break with this container
-  #     #- TZ=America/Indianapolis
-  #     - DOCKER_MODS=linuxserver/calibre-web:calibre # x86_64 only
-  #   volumes:
-  #     - /opt/flotilla/config/calibre:/config:Z
-  #     - /opt/flotilla/data/all/books:/books:z
-  #   ports:
-  #     - 127.0.0.1:8083:8083
-  #   labels:
-  #     - com.centurylinklabs.watchtower.enable=true
-  #   restart: unless-stopped
-  # lazylibrarian:
-  #   image: linuxserver/lazylibrarian
-  #   container_name: lazylibrarian
-  #   depends_on:
-  #     - gluetun
-  #     - qbittorrent
-  #     - prowlarr
-  #   network_mode: service:gluetun
-  #   environment:
-  #     - PUID=1000
-  #     - PGID=1000
-  #     - TZ=America/Indianapolis
-  #     - DOCKER_MODS=linuxserver/calibre-web:calibre # x86_64 only
-  #   volumes:
-  #     - /opt/flotilla/config/lazylibrarian:/config:Z
-  #     - /opt/flotilla/data/all/downloads:/downloads:z
-  #     - /opt/flotilla/data/all/books:/books:z
-  #   #ports:
-  #   #- "127.0.0.1:5299:5299"
-  #   labels:
-  #     - com.centurylinklabs.watchtower.enable=true
-  #   restart: unless-stopped
-  #mayan:
-  #image: mayanedms/mayanedms
-  #container_name: mayan
-  #depends_on:
-  #- postgres
-  #- redis
-  #env_file:
-  #- /opt/flotilla/secrets.env
-  #environment:
-  #- MAYAN_USER_UID=1000
-  #- MAYAN_USER_GID=1000
-  #- TZ=America/Indianapolis
-  #- MAYAN_DATABASE_ENGINE=django.db.backends.postgresql
-  #- MAYAN_DATABASE_HOST=postgres
-  #- MAYAN_DATABASE_NAME=mayan
-  #- MAYAN_DATABASE_USER=mayan
-  #- MAYAN_CELERY_BROKER_URL=redis://redis:6379
-  #- MAYAN_CELERY_RESULT_BACKEND=redis://redis:6379
-  #- MAYAN_WORKER_FAST_CONCURRENCY=0 # Use all threads, defaults to 1.
-  #- MAYAN_WORKER_MEDIUM_CONCURRENCY=0 # Use all threads, defaults to 1.
-  #- MAYAN_WORKER_SLOW_CONCURRENCY=0 # Use all threads, defaults to 1.
-  ##- MAYAN_APT_INSTALLS="tesseract-ocr-deu tesseract-ocr-spa"
-  ##- MAYAN_PIP_INSTALLS="" # redis is already installed
-  #volumes:
-  #- /opt/flotilla/data/mayan:/var/lib/mayan:z
-  #ports:
-  #- "127.0.0.1:7980:8000"
-  #labels:
-  #- "com.centurylinklabs.watchtower.enable=true"
-  #restart: unless-stopped
   rssbridge:
     image: rssbridge/rss-bridge
     container_name: rssbridge
@@ -966,81 +514,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-  #kimai:
-  #image: kimai/kimai2:apache-debian-master-prod
-  #container_name: kimai
-  #env_file:
-  #- /opt/flotilla/secrets.env
-  #environment:
-  #- TZ=America/Indianapolis
-  #- APP_ENV=prod
-  #- TRUSTED_HOSTS=127.0.0.1,letsencrypt,localhost,nginx,${HOSTNAME},maxocull.com,maxocull.net,kimai.maxocull.com,kimai.maxocull.net
-  #- ADMINMAIL=kimai@maxocull.com
-  #volumes:
-  #- /opt/flotilla/config/kimai/local.yaml:/opt/kimai/config/packages/local.yaml:z
-  #- /opt/flotilla/data/kimai:/opt/kimai/var/data:z
-  #- kimai_public:/opt/kimai/public # Named volume required: https://tobybatch.github.io/kimai2/docker-compose.html#docker-compose
-  #ports:
-  #- "127.0.0.1:11080:8001"
-  #labels:
-  #- "com.centurylinklabs.watchtower.enable=true"
-  #restart: unless-stopped
-
-  #inspircd:
-  #image: inspircd/inspircd-docker
-  #container_name: inspircd
-  #depends_on:
-  #- atheme
-  #env_file:
-  #- /opt/flotilla/secrets.env
-  #user: "10000:10000"
-  #environment:
-  #- PUID=10000
-  #- PGID=10000
-  #- TZ=America/Indianapolis
-  #- INSP_NET_SUFFIX=.maxocull.com
-  #- INSP_NET_NAME=Entourage
-  #- INSP_SERVER_NAME=irc.maxocull.com
-  #- INSP_ADMIN_NAME=Max OCull
-  #- INSP_ADMIN_NICK=Maxattax
-  #- INSP_ENABLE_DNSBL=yes
-  #- INSP_OPER_FINGERPRINT=553de3f801cd432be5a0fb4d2a1baa8db60cb326a26bd6253cfe93d82a9f32f5
-  #- INSP_OPER_NAME=Maxattax
-  #- INSP_SERVICES_NAME=atheme.maxocull.com
-  #- INSP_SERVICES_IPADDR=atheme
-  #- INSP_SERVICES_PASSWORD=2fc28a4d34471e34c6ab2e3067aabb548c930fe583546a6c2b550a9c18cc1e07
-  #- INSP_SERVICES_TLS_ON=yes
-  ##- INSP_SERVICE_OPTIONS=
-  ## TODO: Fill in TLS certs.
-  #volumes:
-  #- /opt/flotilla/config/inspircd/conf:/inspircd/conf:z
-  #- /opt/flotilla/config/inspircd/conf.d:/inspircd/conf.d:z
-  ##- /opt/flotilla/config/letsencrypt/keys/archive/maxocull.com/cert1.pem:/inspircd/conf/cert.pem:ro
-  ##- /opt/flotilla/config/letsencrypt/keys/archive/maxocull.com/privkey1.pem:/inspircd/conf/key.pem:ro
-  #ports:
-  #- "6667:6667"
-  #- "6697:6697"
-  ##- "7000:7000"
-  ##- "7001:7001"
-  #labels:
-  #- "com.centurylinklabs.watchtower.enable=true"
-  #restart: unless-stopped
-
-  #atheme:
-  #image: ovdnet/atheme
-  #container_name: atheme
-  #env_file:
-  #- /opt/flotilla/secrets.env
-  #user: "10000:10000"
-  #environment:
-  #- PUID=10000
-  #- PGID=10000
-  #- TZ=America/Indianapolis
-  #volumes:
-  #- /opt/flotilla/config/atheme:/atheme/etc:z
-  #labels:
-  #- "com.centurylinklabs.watchtower.enable=true"
-  #restart: unless-stopped
   znc:
     image: lscr.io/linuxserver/znc
     container_name: znc
@@ -1088,91 +561,6 @@ services:
       - 32765:32765
       - 32767:32767
     restart: unless-stopped
-  # ntfy:
-  #   image: binwiederhier/ntfy
-  #   container_name: ntfy
-  #   command:
-  #     - serve
-  #   environment:
-  #     - TZ=UTC
-  #   user: "1000:1000"
-  #   volumes:
-  #     - /opt/flotilla/config/ntfy:/etc/ntfy:Z
-  #     - /opt/flotilla/data/ntfy:/var/cache/ntfy:Z
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "wget -q --tries=1 https://ntfy.maxocull.com/v1/health -O - | grep -Eo '\"healthy\"\\s*:\\s*true' || exit 1"]
-  #     interval: 60s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 40s
-  #   labels:
-  #     - com.centurylinklabs.watchtower.enable=true
-  #   restart: unless-stopped
-  #   init: true # needed, if healthcheck is used. Prevents zombie processes
-  # prosody:
-  #   image: ghcr.io/processone/prosody
-  #   container_name: prosody
-  #   env_file:
-  #     - /opt/flotilla/secrets.env
-  #   environment:
-  #     # TODO: Move this
-  #     - REGISTER_ADMIN_PASSWORD=somePassw0rd
-  #     - PROSODY_MACRO_HOST=xmpp.maxocull.com
-  #     - PROSODY_MACRO_ADMIN=admin@xmpp.maxocull.com
-  #     - CTL_ON_START=registered_users xmpp.maxocull.com ; status
-  #   ports:
-  #     # XMPP
-  #     - "5222:5222"
-  #     # XMPP Federation
-  #     - "5269:5269"
-  #     # Admin interfaces
-  #     - "127.0.0.1:5280:5280"
-  #     - "127.0.0.1:5443:5443"
-  #     # MQTT
-  #     # - "1883:1883"
-  #     # Erlang
-  #     # - "127.0.0.1:5210:5210"
-  #   volumes:
-  #     - /opt/flotilla/config/prosody:/opt/prosody/conf:Z
-  #     - /opt/flotilla/data/prosody/database:/opt/prosody/database:Z
-  #     - /opt/flotilla/data/prosody/logs:/opt/prosody/logs:Z
-  #     - /opt/flotilla/data/prosody/upload:/opt/prosody/upload:Z
-  #   labels:
-  #     - com.centurylinklabs.watchtower.enable=true
-  #   restart: unless-stopped
-  # ejabberd:
-  #   image: ghcr.io/processone/ejabberd
-  #   container_name: ejabberd
-  #   user: 0:0
-  #   env_file:
-  #     - /opt/flotilla/secrets.env
-  #   environment:
-  #     - EJABBERD_MACRO_HOST=xmpp.maxocull.com
-  #     - EJABBERD_MACRO_ADMIN=admin@xmpp.maxocull.com
-  #     - CTL_ON_START=registered_users xmpp.maxocull.com ; status
-  #   ports:
-  #     # XMPP
-  #     - "5222:5222"
-  #     # XMPP Federation
-  #     - "5269:5269"
-  #     # Admin interfaces
-  #     - "127.0.0.1:5280:5280"
-  #     - "127.0.0.1:5443:5443"
-  #     # MQTT
-  #     # - "1883:1883"
-  #     # Erlang
-  #     # - "127.0.0.1:5210:5210"
-  #   volumes:
-  #     - /opt/flotilla/config/ejabberd:/opt/ejabberd/conf:z
-  #     # - /opt/flotilla/config/letsencrypt/etc/letsencrypt/live/maxocull.com/privkey.pem:/opt/ejabberd/conf/privkey.pem:ro
-  #     # - /opt/flotilla/config/letsencrypt/etc/letsencrypt/live/maxocull.com/fullchain.pem:/opt/ejabberd/conf/fullchain.pem:ro
-  #     - /opt/flotilla/config/letsencrypt/etc/letsencrypt/live/maxocull.com/priv-fullchain-bundle.pem:/config/privkey-fullchain-bundle.pem:ro
-  #     - /opt/flotilla/data/ejabberd/database:/opt/ejabberd/database:Z
-  #     - /opt/flotilla/data/ejabberd/logs:/opt/ejabberd/logs:Z
-  #     - /opt/flotilla/data/ejabberd/upload:/opt/ejabberd/upload:Z
-  #   labels:
-  #     - com.centurylinklabs.watchtower.enable=true
-  #   restart: unless-stopped
   flamenco-manager:
     image: maxattax/flamenco-manager:latest
     container_name: flamenco-manager
@@ -1264,42 +652,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-  # openproject:
-  #   image: openproject/openproject:14
-  #   container_name: openproject
-  #   env_file:
-  #     - /opt/flotilla/secrets.env
-  #   environment:
-  #     - PUID=1000
-  #     - PGID=1000
-  #     - TZ=America/Indianapolis
-  #     - OPENPROJECT_HOST__NAME=project.maxocull.com
-  #     - OPENPROJECT_HTTPS=true
-  #     - OPENPROJECT_DEFAULT__LANGUAGE=en
-  #   volumes:
-  #     - /opt/flotilla/data/openproject/pgdata:/var/openproject/pgdata
-  #     - /opt/flotilla/data/openproject/assets:/var/openproject/assets
-  #   ports:
-  #     - 127.0.0.1:8084:80
-  #   labels:
-  #     - com.centurylinklabs.watchtower.enable=true
-  #   restart: unless-stopped
-  # minetest:
-  #   # The name of this image has since changed to Luanti
-  #   image: lscr.io/linuxserver/luanti
-  #   container_name: minetest
-  #   environment:
-  #     - PUID=1000
-  #     - PGID=1000
-  #     - TZ=America/Indianapolis
-  #     #- CLI_ARGS="--gameid minetest"
-  #   volumes:
-  #     - /opt/flotilla/data/minetest:/config/.minetest:z
-  #   ports:
-  #     - 30000:30000/udp
-  #   labels:
-  #     - com.centurylinklabs.watchtower.enable=true
-  #   restart: unless-stopped
   minecraft:
     # docker exec minecraft rcon-cli stop
     # docker exec minecraft rcon-cli stop
