@@ -52,14 +52,14 @@ services:
       - PGID=1000
       - TZ=America/Indianapolis
       - URL=maxocull.com
-      - SUBDOMAINS=bazarr,books,ci,cloud,dash,dns,flamenco,git,groups.xmpp,hashcat,kimai,librarian,lidarr,llm,map,mastodon,media,mesh,notes,ntfy,nvr,office,openvpn,pgadmin,project,prowlarr,radarr,registry,rss,search,share.xmpp,sonarr,torrent,whoami,wireguard,www,xmpp,znc
+      - SUBDOMAINS=bazarr,books,ci,cloud,dash,dns,flamenco,git,groups.xmpp,hashcat,kimai,librarian,lidarr,llm,mastodon,media,mesh,notes,ntfy,nvr,office,openvpn,pgadmin,project,prowlarr,radarr,registry,rss,share.xmpp,sonarr,torrent,whoami,wireguard,www,xmpp,znc
       - VALIDATION=http
       #- DNSPLUGIN=cloudflare #optional
       #- DUCKDNSTOKEN=<token> #optional
       - EMAIL=max.ocull@protonmail.com
       #- DHLEVEL=2048 # No longer used?
       - ONLY_SUBDOMAINS=false
-      - EXTRA_DOMAINS=git.alanocull.com,maxocull.net,bazarr.maxocull.net,books.maxocull.net,ci.maxocull.net,cloud.maxocull.net,dash.maxocull.net,dns.maxocull.net,flamenco.maxocull.net,git.maxocull.net,groups.xmpp.maxocull.net,hashcat.maxocull.net,kimai.maxocull.net,librarian.maxocull.net,lidarr.maxocull.net,llm.maxocull.net,map.maxocull.net,mastodon.maxocull.net,media.maxocull.net,mesh.maxocull.net,notes.maxocull.net,ntfy.maxocull.net,nvr.maxocull.net,office.maxocull.net,openvpn.maxocull.net,pgadmin.maxocull.net,project.maxocull.net,prowlarr.maxocull.net,radarr.maxocull.net,registry.maxocull.net,rss.maxocull.net,search.maxocull.net,share.xmpp.maxocull.net,sonarr.maxocull.net,torrent.maxocull.net,whoami.maxocull.net,wireguard.maxocull.net,www.maxocull.net,xmpp.maxocull.net,znc.maxocull.net
+      # - EXTRA_DOMAINS=maxocull.net,bazarr.maxocull.net,books.maxocull.net,ci.maxocull.net,cloud.maxocull.net,dash.maxocull.net,dns.maxocull.net,flamenco.maxocull.net,git.maxocull.net,groups.xmpp.maxocull.net,hashcat.maxocull.net,kimai.maxocull.net,librarian.maxocull.net,lidarr.maxocull.net,llm.maxocull.net,mastodon.maxocull.net,media.maxocull.net,mesh.maxocull.net,notes.maxocull.net,ntfy.maxocull.net,nvr.maxocull.net,office.maxocull.net,openvpn.maxocull.net,pgadmin.maxocull.net,project.maxocull.net,prowlarr.maxocull.net,radarr.maxocull.net,registry.maxocull.net,rss.maxocull.net,share.xmpp.maxocull.net,sonarr.maxocull.net,torrent.maxocull.net,whoami.maxocull.net,wireguard.maxocull.net,www.maxocull.net,xmpp.maxocull.net,znc.maxocull.net
       - STAGING=false # Enable when testing.
       - DOCKER_MODS=linuxserver/mods:swag-dashboard
     volumes:
