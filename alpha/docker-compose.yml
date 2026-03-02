@@ -1,3 +1,4 @@
+---
 # NOTES:
 # :Z is private Docker share (guarded by SELinux); these files are for that
 # container only.
@@ -63,8 +64,8 @@ services:
       - STAGING=false # Enable when testing.
       - DOCKER_MODS=linuxserver/mods:swag-dashboard
     volumes:
-      #- /opt/flotilla/data/letsencrypt/keys:/config/etc/letsencrypt:Z
-      #- /opt/flotilla/data/letsencrypt/www:/config/www:Z
+      # - /opt/flotilla/data/letsencrypt/keys:/config/etc/letsencrypt:Z
+      # - /opt/flotilla/data/letsencrypt/www:/config/www:Z
       - /opt/flotilla/config/letsencrypt:/config:z
       #- /opt/flotilla/data/all/logs/letsencrypt:/config/log:z
     #volumes_from:
@@ -366,7 +367,7 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
-      - UMASK_SET=<022> #optional
+      - UMASK_SET=<022> # optional
     volumes:
       - /opt/flotilla/config/jellyfin:/config:z
       - /opt/flotilla/data/all/tvshows:/data/tvshows:z
@@ -374,12 +375,12 @@ services:
       - /opt/flotilla/data/all/music:/data/music:z
       - /opt/flotilla/data/all/books:/data/books:z # Intended for audio books.
       - /opt/flotilla/data/all/photos:/data/photos:z
-      - /opt/flotilla/data/jellyfin/transcode:/transcode:z #optional
+      - /opt/flotilla/data/jellyfin/transcode:/transcode:z # optional
     ports:
       - 127.0.0.1:8096:8096
       #- "8920:8920" #optional, https
     devices:
-      - /dev/dri:/dev/dri #optional, for video HW acceleration
+      - /dev/dri:/dev/dri # optional, for video HW acceleration
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
@@ -430,7 +431,7 @@ services:
     ports:
       - 127.0.0.1:5480:80
     volumes:
-      #- /opt/flotilla/config/pgadmin:/pgadmin4:z
+      # - /opt/flotilla/config/pgadmin:/pgadmin4:z
       - /opt/flotilla/data/pgadmin:/var/lib/pgadmin:z
     restart: unless-stopped
     labels:
@@ -726,7 +727,10 @@ services:
       #- CONSOLE=FALSE
       - GUI=FALSE
       - MEMORY=4G
-      - JVM_XX_OPTS=-XX:+UseG1GC -XX:G1HeapRegionSize=32M -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=50 -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:+ParallelRefProcEnabled -XX:CodeCacheExpansionSize=1M -XX:InitialCodeCacheSize=32M -XX:ReservedCodeCacheSize=64M -XX:-TieredCompilation -XX:CompileThreshold=1000 -XX:CICompilerCount=16 -XX:CompilerThreadPriority=3 -XX:FreqInlineSize=325 -XX:InlineSmallCode=2000 -XX:MaxInlineSize=1024
+      - JVM_XX_OPTS=-XX:+UseG1GC -XX:G1HeapRegionSize=32M -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=50 -XX:TargetSurvivorRatio=90
+        -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:+ParallelRefProcEnabled -XX:CodeCacheExpansionSize=1M -XX:InitialCodeCacheSize=32M
+        -XX:ReservedCodeCacheSize=64M -XX:-TieredCompilation -XX:CompileThreshold=1000 -XX:CICompilerCount=16 -XX:CompilerThreadPriority=3
+        -XX:FreqInlineSize=325 -XX:InlineSmallCode=2000 -XX:MaxInlineSize=1024
       # These below are only used if server.properties doesn't already exist.
       - SERVER_NAME=maxocull.com
       - MOTD=Welcome to maxocull.com!

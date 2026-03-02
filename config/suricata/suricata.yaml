@@ -4,9 +4,9 @@
 # options in this file, full documentation can be found at:
 # https://suricata.readthedocs.io/en/latest/configuration/suricata-yaml.html
 
-##
-## Step 1: inform Suricata about your network
-##
+# #
+# # Step 1: inform Suricata about your network
+# #
 
 vars:
   # more specific is better for alert accuracy and performance
@@ -79,7 +79,7 @@ outputs:
   # Extensible Event Format (nicknamed EVE) event log in JSON format
   - eve-log:
       enabled: false # TODO: re-enable when eve logging is setup.
-      filetype: regular #regular|syslog|unix_dgram|unix_stream|redis
+      filetype: regular # regular|syslog|unix_dgram|unix_stream|redis
       filename: eve.json
       #prefix: "@cee: " # prefix to prepend to each log entry
       # the following are valid when type: syslog above
@@ -206,19 +206,19 @@ outputs:
         #    flows: all       # start or all: 'start' logs only a single drop
         #                     # per flow direction. All logs each dropped pkt.
         - smtp:
-        #extended: yes # enable this for extended logging information
+        # extended: yes # enable this for extended logging information
         # this includes: bcc, message-id, subject, x_mailer, user-agent
         # custom fields logging from the list:
         #  reply-to, bcc, message-id, subject, x-mailer, user-agent, received,
         #  x-originating-ip, in-reply-to, references, importance, priority,
         #  sensitivity, organization, content-md5, date
-        #custom: [received, x-mailer, x-originating-ip, relays, reply-to, bcc]
+        # custom: [received, x-mailer, x-originating-ip, relays, reply-to, bcc]
         # output md5 of fields: body, subject
         # for the body you need to set app-layer.protocols.smtp.mime.body-md5
         # to yes
-        #md5: [body, subject]
+        # md5: [body, subject]
 
-        #- dnp3
+        # - dnp3
         - nfs
         - smb
         - tftp
@@ -384,7 +384,7 @@ outputs:
       #dir: /nsm_data/
 
       #ts-format: usec # sec or usec second format (default) is filename.sec usec is filename.sec.usec
-      use-stream-depth: false #If set to "yes" packets seen after reaching stream inspection depth are ignored. "no" logs all packets
+      use-stream-depth: false # If set to "yes" packets seen after reaching stream inspection depth are ignored. "no" logs all packets
       honor-pass-rules: false # If set to "yes", flows in which a pass rule matched will stopped being logged.
 
   # a full alerts log containing much information for signature writers
@@ -851,12 +851,12 @@ app-layer:
       enabled: true
     dns:
       # memcaps. Globally and per flow/state.
-      #global-memcap: 16mb
-      #state-memcap: 512kb
+      # global-memcap: 16mb
+      # state-memcap: 512kb
 
       # How many unreplied DNS requests are considered a flood.
       # If the limit is reached, app-layer-event:dns.flooded; will match.
-      #request-flood: 500
+      # request-flood: 500
 
       tcp:
         enabled: true
@@ -962,7 +962,7 @@ app-layer:
 
         server-config:
     # TODO: Configure to use Traefik.
-    #- apache:
+    # - apache:
     #    address: [192.168.1.0/24, 127.0.0.0/8, "::1"]
     #    personality: Apache_2
     #    # Can be specified in kb, mb, gb.  Just a number indicates
@@ -972,7 +972,7 @@ app-layer:
     #    double-decode-path: no
     #    double-decode-query: no
 
-    #- iis7:
+    # - iis7:
     #    address:
     #      - 192.168.0.0/24
     #      - 192.168.10.0/24
@@ -992,7 +992,7 @@ app-layer:
     modbus:
       # How many unreplied Modbus requests are considered a flood.
       # If the limit is reached, app-layer-event:modbus.flooded; will match.
-      #request-flood: 500
+      # request-flood: 500
 
       enabled: false
       detection-ports:
@@ -1437,15 +1437,15 @@ detect:
   # Very common ports will benefit, as well as ports with many expensive
   # rules.
   grouping:
-  #tcp-whitelist: 53, 80, 139, 443, 445, 1433, 3306, 3389, 6666, 6667, 8080
-  #udp-whitelist: 53, 135, 1194, 5060
+  # tcp-whitelist: 53, 80, 139, 443, 445, 1433, 3306, 3389, 6666, 6667, 8080
+  # udp-whitelist: 53, 135, 1194, 5060
 
   profiling:
     # Log the rules that made it past the prefilter stage, per packet
     # default is off. The threshold setting determines how many rules
     # must have made it past pre-filter for that rule to trigger the
     # logging.
-    #inspect-logging-threshold: 200
+    # inspect-logging-threshold: 200
     grouping:
       dump-to-disk: false
       include-rules: false # very verbose
@@ -1542,7 +1542,7 @@ profiling:
   # Run profiling for every xth packet. The default is 1, which means we
   # profile every packet. If set to 1000, one packet is profiled for every
   # 1000 received.
-  #sample-rate: 1000
+  # sample-rate: 1000
 
   # rule profiling
   rules:
@@ -1664,11 +1664,11 @@ nflog:
 capture:
 # disable NIC offloading. It's restored when Suricata exits.
 # Enabled by default.
-#disable-offloading: false
+# disable-offloading: false
 #
 # disable checksum validation. Same as setting '-k none' on the
 # commandline.
-#checksum-validation: none
+# checksum-validation: none
 
 # Netmap support
 #
@@ -1786,7 +1786,7 @@ ipfw:
 # and IPFW rule processing continues.  No check is done to verify
 # this will rule makes sense so care must be taken to avoid loops in ipfw.
 #
-## The following example tells the engine to reinject packets
+# # The following example tells the engine to reinject packets
 # back into the ipfw firewall AT rule number 5500:
 #
 # ipfw-reinjection-rule-number: 5500

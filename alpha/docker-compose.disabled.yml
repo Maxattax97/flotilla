@@ -1,3 +1,4 @@
+---
 volumes:
   kimai_public:
   nfs-flamenco:
@@ -143,7 +144,8 @@ services:
     ports:
       - "18080:18080"
       - "18081:18081"
-    command: monerod --non-interactive --restricted-rpc --rpc-bind-ip=0.0.0.0 --confirm-external-bind --public-node --enable-dns-blocklist --enforce-dns-checkpointing --out-peers=8 --data-dir=/monero
+    command: monerod --non-interactive --restricted-rpc --rpc-bind-ip=0.0.0.0 --confirm-external-bind --public-node --enable-dns-blocklist
+      --enforce-dns-checkpointing --out-peers=8 --data-dir=/monero
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
