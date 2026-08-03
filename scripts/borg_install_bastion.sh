@@ -41,12 +41,15 @@ fi
 elevate chown -R borg:borg "$(dirname "${REPO_PATH}")"
 elevate chmod 0750 "$(dirname "${REPO_PATH}")"
 
-if [[ ! -d "${REPO_PATH}" ]]; then
-    if ! elevate test -r "${PASSPHRASE_FILE}"; then
-        echo "Missing Borg passphrase file: ${PASSPHRASE_FILE}" >&2
-        exit 1
-    fi
-    passphrase="$(elevate cat "${PASSPHRASE_FILE}")"
+if ! elevate test -r "${PASSPHRASE_FILE}"; then
+    echo "Missing Borg passphrase file: ${PASSPHRASE_FILE}" >&2
+    exit 1
+fi
+passphrase="$(elevate cat "${PASSPHRASE_FILE}")"
+
+if elevate test -f "${REPO_PATH}/config"; then
+    echo "Borg repository already exists at ${REPO_PATH}."
+else
     elevate runuser -u borg -- env BORG_PASSPHRASE="${passphrase}" borg init --encryption=repokey-blake2 "${REPO_PATH}"
 fi
 
