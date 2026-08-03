@@ -1,5 +1,5 @@
 Host bastion
-    HostName 129.168.1.26
+    HostName 192.168.1.26
     User borg
     IdentityFile /opt/flotilla/secrets/entourage_borg_ssh
     IdentitiesOnly yes
