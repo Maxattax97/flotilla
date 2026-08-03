@@ -26,7 +26,7 @@ elif [[ "$(probe apt)" -eq 1 ]]; then
     elevate apt install -y borgbackup openssh-server
 fi
 
-elevate mkdir -p /usr/local/lib/flotilla/scripts
+elevate mkdir -p /usr/local/lib/flotilla/borg
 if ! id -u borg > /dev/null 2>&1; then
     elevate useradd --system --create-home --home-dir /var/lib/borg --shell /usr/sbin/nologin borg
 fi
@@ -65,7 +65,7 @@ fi
 
 elevate systemctl enable --now ssh || elevate systemctl enable --now sshd
 for script in borg_repo_check.sh borg_repo_prune_compact.sh; do
-    install_flotilla_script "${GITROOT}/scripts/${script}"
+    elevate install -m 0755 "${GITROOT}/scripts/${script}" "/usr/local/lib/flotilla/borg/${script}"
 done
 
 for unit in flotilla-borg-repo-check.service flotilla-borg-repo-check.timer flotilla-borg-repo-prune-compact.service flotilla-borg-repo-prune-compact.timer; do
@@ -73,5 +73,6 @@ for unit in flotilla-borg-repo-check.service flotilla-borg-repo-check.timer flot
 done
 
 elevate systemctl daemon-reload
+elevate systemctl reset-failed flotilla-borg-repo-check.service flotilla-borg-repo-check.timer flotilla-borg-repo-prune-compact.service flotilla-borg-repo-prune-compact.timer || true
 elevate systemctl enable --now flotilla-borg-repo-check.timer
 elevate systemctl enable --now flotilla-borg-repo-prune-compact.timer

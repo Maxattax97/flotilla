@@ -5,4 +5,4 @@ RequiresMountsFor=/mnt/backup/repos/entourage
 [Service]
 Type=oneshot
 TimeoutStartSec=infinity
-ExecStart=/usr/bin/env bash /usr/local/lib/flotilla/scripts/borg_repo_prune_compact.sh
+ExecStart=/usr/bin/env bash /usr/local/lib/flotilla/borg/borg_repo_prune_compact.sh

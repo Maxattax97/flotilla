@@ -24,7 +24,7 @@ elif [[ "$(probe apt)" -eq 1 ]]; then
     elevate apt install -y borgbackup openssh-client
 fi
 
-elevate mkdir -p /usr/local/lib/flotilla/scripts
+elevate mkdir -p /usr/local/lib/flotilla/borg
 elevate mkdir -p "${BASE}/config/borg" "${BASE}/secrets"
 elevate chmod 0700 "${BASE}/secrets"
 elevated_link_source "${GITROOT}/config/borg/nextcloud.exclude" "${BASE}/config/borg/nextcloud.exclude"
@@ -40,13 +40,14 @@ if [[ ! -e "${BASE}/config/borg/entourage.env" ]]; then
     echo "Created ${BASE}/config/borg/entourage.env; edit it before enabling backups."
 fi
 
-install_flotilla_script "${GITROOT}/scripts/borg_nextcloud_backup.sh"
+elevate install -m 0755 "${GITROOT}/scripts/borg_nextcloud_backup.sh" "/usr/local/lib/flotilla/borg/borg_nextcloud_backup.sh"
 
 for unit in flotilla-borg-nextcloud-backup.service flotilla-borg-nextcloud-backup.timer; do
     elevate cp -f "${GITROOT}/systemd/borg/${unit}" "/etc/systemd/system/${unit}"
 done
 
 elevate systemctl daemon-reload
+elevate systemctl reset-failed flotilla-borg-nextcloud-backup.service flotilla-borg-nextcloud-backup.timer || true
 
 if [[ -r "${BASE}/secrets/borg_passphrase" && -r "${BASE}/secrets/entourage_borg_ssh" ]]; then
     elevate systemctl enable --now flotilla-borg-nextcloud-backup.timer
