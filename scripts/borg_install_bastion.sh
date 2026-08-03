@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPTPATH="$(cd "$(dirname "$0")" || exit; pwd -P)"
+SCRIPTPATH="$(
+    cd "$(dirname "$0")" || exit
+    pwd -P
+)"
 GITROOT="$(dirname "${SCRIPTPATH}")"
 BASE=/opt/flotilla
 REPO_PATH="${BORG_REPO_PATH:-/mnt/backup/repos/entourage}"
@@ -41,7 +44,7 @@ if [[ ! -d "${REPO_PATH}" ]]; then
         echo "Missing Borg passphrase file: ${PASSPHRASE_FILE}" >&2
         exit 1
     fi
-    elevate runuser -u borg -- env BORG_PASSPHRASE="$(<"${PASSPHRASE_FILE}")" borg init --encryption=repokey-blake2 "${REPO_PATH}"
+    elevate runuser -u borg -- env BORG_PASSPHRASE="$(< "${PASSPHRASE_FILE}")" borg init --encryption=repokey-blake2 "${REPO_PATH}"
 fi
 
 elevate install -d -m 0700 -o borg -g borg /var/lib/borg/.ssh
@@ -50,7 +53,7 @@ elevate chown borg:borg /var/lib/borg/.ssh/authorized_keys
 elevate chmod 0600 /var/lib/borg/.ssh/authorized_keys
 
 if [[ -r "${PUBLIC_KEY_FILE}" ]]; then
-    key="$(<"${PUBLIC_KEY_FILE}")"
+    key="$(< "${PUBLIC_KEY_FILE}")"
     restricted="command=\"borg serve --append-only --restrict-to-repository ${REPO_PATH}\",restrict ${key}"
     if ! elevate grep -Fxq "${restricted}" /var/lib/borg/.ssh/authorized_keys; then
         printf '%s\n' "${restricted}" | elevate tee -a /var/lib/borg/.ssh/authorized_keys > /dev/null
@@ -62,7 +65,7 @@ fi
 
 elevate systemctl enable --now ssh || elevate systemctl enable --now sshd
 for script in borg_repo_check.sh borg_repo_prune_compact.sh; do
-    elevate install -m 0755 "${GITROOT}/scripts/${script}" "/usr/local/lib/flotilla/scripts/${script}"
+    install_flotilla_script "${GITROOT}/scripts/${script}"
 done
 
 for unit in flotilla-borg-repo-check.service flotilla-borg-repo-check.timer flotilla-borg-repo-prune-compact.service flotilla-borg-repo-prune-compact.timer; do

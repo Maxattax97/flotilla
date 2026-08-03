@@ -59,3 +59,15 @@ link_source() {
 elevated_link_source() {
     link_source "${1}" "${2}" "1"
 }
+
+install_flotilla_script() {
+    src="${1}"
+    dest="/usr/local/lib/flotilla/scripts/$(basename "${src}")"
+
+    if [[ -e "${dest}" && "$(readlink -f "${src}")" == "$(readlink -f "${dest}")" ]]; then
+        echo "Skipping ${dest} because it already points to ${src} ..."
+        elevate chmod 0755 "${dest}"
+    else
+        elevate install -m 0755 "${src}" "${dest}"
+    fi
+}
