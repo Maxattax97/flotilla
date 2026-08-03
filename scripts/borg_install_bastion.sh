@@ -40,11 +40,12 @@ elevate chown -R borg:borg "$(dirname "${REPO_PATH}")"
 elevate chmod 0750 "$(dirname "${REPO_PATH}")"
 
 if [[ ! -d "${REPO_PATH}" ]]; then
-    if [[ ! -r "${PASSPHRASE_FILE}" ]]; then
+    if ! elevate test -r "${PASSPHRASE_FILE}"; then
         echo "Missing Borg passphrase file: ${PASSPHRASE_FILE}" >&2
         exit 1
     fi
-    elevate runuser -u borg -- env BORG_PASSPHRASE="$(< "${PASSPHRASE_FILE}")" borg init --encryption=repokey-blake2 "${REPO_PATH}"
+    passphrase="$(elevate cat "${PASSPHRASE_FILE}")"
+    elevate runuser -u borg -- env BORG_PASSPHRASE="${passphrase}" borg init --encryption=repokey-blake2 "${REPO_PATH}"
 fi
 
 elevate install -d -m 0700 -o borg -g borg /var/lib/borg/.ssh
