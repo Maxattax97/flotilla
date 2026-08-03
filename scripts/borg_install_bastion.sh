@@ -55,15 +55,16 @@ elevate touch /var/lib/borg/.ssh/authorized_keys
 elevate chown borg:borg /var/lib/borg/.ssh/authorized_keys
 elevate chmod 0600 /var/lib/borg/.ssh/authorized_keys
 
-if [[ -r "${PUBLIC_KEY_FILE}" ]]; then
-    key="$(< "${PUBLIC_KEY_FILE}")"
+if elevate test -r "${PUBLIC_KEY_FILE}"; then
+    key="$(elevate cat "${PUBLIC_KEY_FILE}")"
     restricted="command=\"borg serve --append-only --restrict-to-repository ${REPO_PATH}\",restrict ${key}"
     if ! elevate grep -Fxq "${restricted}" /var/lib/borg/.ssh/authorized_keys; then
         printf '%s\n' "${restricted}" | elevate tee -a /var/lib/borg/.ssh/authorized_keys > /dev/null
     fi
 else
-    echo "Public key not installed yet: ${PUBLIC_KEY_FILE}"
-    echo "Add it, then rerun this installer to update authorized_keys."
+    echo "Missing Entourage Borg public key: ${PUBLIC_KEY_FILE}" >&2
+    echo "Copy /opt/flotilla/secrets/entourage_borg_ssh.pub from Entourage to this path, then rerun this installer." >&2
+    exit 1
 fi
 
 elevate systemctl enable --now ssh || elevate systemctl enable --now sshd
