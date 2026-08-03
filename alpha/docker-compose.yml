@@ -1,4 +1,3 @@
----
 # NOTES:
 # :Z is private Docker share (guarded by SELinux); these files are for that
 # container only.
@@ -727,10 +726,7 @@ services:
       #- CONSOLE=FALSE
       - GUI=FALSE
       - MEMORY=4G
-      - JVM_XX_OPTS=-XX:+UseG1GC -XX:G1HeapRegionSize=32M -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=50 -XX:TargetSurvivorRatio=90
-        -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:+ParallelRefProcEnabled -XX:CodeCacheExpansionSize=1M -XX:InitialCodeCacheSize=32M
-        -XX:ReservedCodeCacheSize=64M -XX:-TieredCompilation -XX:CompileThreshold=1000 -XX:CICompilerCount=16 -XX:CompilerThreadPriority=3
-        -XX:FreqInlineSize=325 -XX:InlineSmallCode=2000 -XX:MaxInlineSize=1024
+      - JVM_XX_OPTS=-XX:+UseG1GC -XX:G1HeapRegionSize=32M -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=50 -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:+ParallelRefProcEnabled -XX:CodeCacheExpansionSize=1M -XX:InitialCodeCacheSize=32M -XX:ReservedCodeCacheSize=64M -XX:-TieredCompilation -XX:CompileThreshold=1000 -XX:CICompilerCount=16 -XX:CompilerThreadPriority=3 -XX:FreqInlineSize=325 -XX:InlineSmallCode=2000 -XX:MaxInlineSize=1024
       # These below are only used if server.properties doesn't already exist.
       - SERVER_NAME=maxocull.com
       - MOTD=Welcome to maxocull.com!
