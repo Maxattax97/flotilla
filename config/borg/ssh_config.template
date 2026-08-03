@@ -1,5 +1,9 @@
 Host bastion
     HostName 192.168.1.26
     User borg
+    HostKeyAlias bastion
     IdentityFile /opt/flotilla/secrets/entourage_borg_ssh
     IdentitiesOnly yes
+    UserKnownHostsFile /opt/flotilla/config/borg/known_hosts
+    StrictHostKeyChecking yes
+    BatchMode yes

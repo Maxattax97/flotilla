@@ -397,7 +397,9 @@ configuration directly, then restarts the stopped Nextcloud containers.
 The backup runs from systemd as root, so it does not use a normal user's
 `~/.ssh/config`. Put SSH routing details for `bastion` in
 `/opt/flotilla/config/borg/ssh_config`; for example, set `HostName` to a local
-DNS name, a private FQDN, or an IP address reachable from Entourage.
+DNS name, a private FQDN, or an IP address reachable from Entourage. The
+Entourage installer runs `ssh-keyscan` against that `HostName` and stores the
+result for the `bastion` alias in `/opt/flotilla/config/borg/known_hosts`.
 
 Installed systemd units:
 

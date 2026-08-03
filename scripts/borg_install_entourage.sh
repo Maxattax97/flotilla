@@ -8,6 +8,8 @@ SCRIPTPATH="$(
 GITROOT="$(dirname "${SCRIPTPATH}")"
 BASE=/opt/flotilla
 BORG_SSH_KEY="${BORG_SSH_KEY:-${BASE}/secrets/entourage_borg_ssh}"
+BORG_SSH_CONFIG="${BORG_SSH_CONFIG:-${BASE}/config/borg/ssh_config}"
+BORG_KNOWN_HOSTS="${BORG_KNOWN_HOSTS:-${BASE}/config/borg/known_hosts}"
 
 if [[ -s "${SCRIPTPATH}/sys_lib.sh" ]]; then
     # shellcheck disable=SC1091
@@ -29,10 +31,36 @@ elevate mkdir -p "${BASE}/config/borg" "${BASE}/secrets"
 elevate chmod 0700 "${BASE}/secrets"
 elevated_link_source "${GITROOT}/config/borg/nextcloud.exclude" "${BASE}/config/borg/nextcloud.exclude"
 
-if [[ ! -e "${BASE}/config/borg/ssh_config" ]]; then
-    elevate cp "${GITROOT}/config/borg/ssh_config.template" "${BASE}/config/borg/ssh_config"
-    elevate chmod 0600 "${BASE}/config/borg/ssh_config"
-    echo "Created ${BASE}/config/borg/ssh_config; edit HostName if bastion is not resolvable."
+if [[ ! -e "${BORG_SSH_CONFIG}" ]]; then
+    elevate cp "${GITROOT}/config/borg/ssh_config.template" "${BORG_SSH_CONFIG}"
+    elevate chmod 0600 "${BORG_SSH_CONFIG}"
+    echo "Created ${BORG_SSH_CONFIG}; edit HostName if bastion is not resolvable."
+fi
+elevate touch "${BORG_KNOWN_HOSTS}"
+elevate chmod 0644 "${BORG_KNOWN_HOSTS}"
+if ! elevate grep -q '^    HostKeyAlias bastion$' "${BORG_SSH_CONFIG}"; then
+    elevate tee -a "${BORG_SSH_CONFIG}" > /dev/null << EOF
+    HostKeyAlias bastion
+EOF
+fi
+if ! elevate grep -q '^    UserKnownHostsFile /opt/flotilla/config/borg/known_hosts$' "${BORG_SSH_CONFIG}"; then
+    elevate tee -a "${BORG_SSH_CONFIG}" > /dev/null << EOF
+    UserKnownHostsFile /opt/flotilla/config/borg/known_hosts
+    StrictHostKeyChecking yes
+    BatchMode yes
+EOF
+fi
+
+bastion_hostname="$(ssh -F "${BORG_SSH_CONFIG}" -G bastion | while read -r key value; do
+    if [[ "${key}" == "hostname" ]]; then
+        printf '%s\n' "${value}"
+        break
+    fi
+done)"
+if [[ -n "${bastion_hostname}" ]] && ! elevate grep -q '^bastion ' "${BORG_KNOWN_HOSTS}"; then
+    ssh-keyscan "${bastion_hostname}" 2> /dev/null | while read -r _ key_type key_value; do
+        printf 'bastion %s %s\n' "${key_type}" "${key_value}"
+    done | elevate tee -a "${BORG_KNOWN_HOSTS}" > /dev/null
 fi
 
 if [[ ! -e "${BORG_SSH_KEY}" ]]; then
