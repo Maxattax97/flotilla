@@ -30,9 +30,9 @@ elevate chmod 0700 "${BASE}/secrets"
 elevated_link_source "${GITROOT}/config/borg/nextcloud.exclude" "${BASE}/config/borg/nextcloud.exclude"
 
 if [[ ! -e "${BASE}/config/borg/ssh_config" ]]; then
-	elevate cp "${GITROOT}/config/borg/ssh_config.template" "${BASE}/config/borg/ssh_config"
-	elevate chmod 0600 "${BASE}/config/borg/ssh_config"
-	echo "Created ${BASE}/config/borg/ssh_config; edit HostName if bastion is not resolvable."
+    elevate cp "${GITROOT}/config/borg/ssh_config.template" "${BASE}/config/borg/ssh_config"
+    elevate chmod 0600 "${BASE}/config/borg/ssh_config"
+    echo "Created ${BASE}/config/borg/ssh_config; edit HostName if bastion is not resolvable."
 fi
 
 if [[ ! -e "${BORG_SSH_KEY}" ]]; then
@@ -44,6 +44,10 @@ fi
 if [[ ! -e "${BASE}/config/borg/entourage.env" ]]; then
     elevate cp "${GITROOT}/config/borg/entourage.env.template" "${BASE}/config/borg/entourage.env"
     echo "Created ${BASE}/config/borg/entourage.env; edit it before enabling backups."
+elif ! elevate grep -q '^BORG_RSH="ssh -F /opt/flotilla/config/borg/ssh_config"$' "${BASE}/config/borg/entourage.env"; then
+    elevate cp "${BASE}/config/borg/entourage.env" "${BASE}/config/borg/entourage.env.bak"
+    elevate sed -i 's|^BORG_RSH=.*|BORG_RSH="ssh -F /opt/flotilla/config/borg/ssh_config"|' "${BASE}/config/borg/entourage.env"
+    echo "Updated BORG_RSH in ${BASE}/config/borg/entourage.env; backup saved as entourage.env.bak."
 fi
 
 elevate install -m 0755 "${GITROOT}/scripts/borg_nextcloud_backup.sh" "/usr/local/lib/flotilla/borg/borg_nextcloud_backup.sh"
