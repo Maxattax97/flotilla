@@ -16,6 +16,7 @@ config/*
 !config/redis/
 !config/nfs/
 !config/gitea-runner/
+!config/borg/
 
 config/openvpn/*
 !config/openvpn/openvpn.conf

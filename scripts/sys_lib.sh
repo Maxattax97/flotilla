@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 silence() {
-    eval "$@" > /dev/null 2>&1
+    "$@" > /dev/null 2>&1
 }
 
 probe() {
@@ -29,6 +29,8 @@ elevate() {
             echo "This operation cannot be performed on a system without sudo. Please either execute this script as root or setup sudo."
             exit 1
         fi
+    else
+        "$@"
     fi
 }
 

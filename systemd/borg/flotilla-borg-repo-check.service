@@ -1,0 +1,8 @@
+[Unit]
+Description=Check local Flotilla Borg repository
+RequiresMountsFor=/mnt/backup/repos/entourage
+
+[Service]
+Type=oneshot
+TimeoutStartSec=infinity
+ExecStart=/usr/local/lib/flotilla/scripts/borg_repo_check.sh

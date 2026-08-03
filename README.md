@@ -353,6 +353,78 @@ Then run `sudo modprobe wireguard` to load it without rebooting.
 
 **TODO**: Document config process.
 
+### Borg Off-site Backups
+
+Flotilla can back up host workloads to an off-site Debian host named `bastion`
+over SSH. `bastion` stores the Borg repository at
+`/mnt/backup/repos/entourage`; the source host does not stage
+tarballs, SQL dumps, or local archives. Today the first workload is Entourage's
+Docker Compose Nextcloud installation, but the repository setup is intentionally
+separate from that workload so more backup jobs can be added later.
+
+Required non-committed secrets:
+
+- `/opt/flotilla/secrets/borg_passphrase`
+- `/opt/flotilla/secrets/entourage_borg_ssh` on Entourage
+- `/opt/flotilla/secrets/entourage_borg_ssh.pub` on `bastion`
+
+Provision `bastion` after installing Debian:
+
+```sh
+./flotilla borg install-bastion
+```
+
+The bastion installer installs Borg and OpenSSH; creates the `borg` user;
+initializes the encrypted repository with `repokey-blake2`; installs a restricted
+append-only `authorized_keys` entry for Entourage; and enables local monthly
+`borg check`, `borg prune`, and `borg compact` timers.
+
+Provision Entourage:
+
+```sh
+./flotilla borg install-entourage
+```
+
+Then edit `/opt/flotilla/config/borg/entourage.env` if `BORG_BACKUP_HOST=bastion`
+is not the right SSH hostname or IP address. If secrets were not present during
+install, enable the timer after adding them with
+`systemctl enable --now flotilla-borg-nextcloud-backup.timer`. The weekly backup
+timer stops only the `nextcloud` container, leaves PostgreSQL running, streams
+`pg_dump` directly into Borg as `postgres/nextcloud.dump`, backs up the
+Nextcloud bind mounts and compose configuration directly, then restarts
+Nextcloud.
+
+Installed systemd units:
+
+- `flotilla-borg-nextcloud-backup.timer`: runs the Entourage Nextcloud backup weekly.
+- `flotilla-borg-nextcloud-backup.service`: one-shot service invoked by the backup timer; it runs on Entourage and creates a Borg archive on the repository server using zstd compression.
+- `flotilla-borg-repo-check.timer`: runs repository integrity checks monthly on `bastion`.
+- `flotilla-borg-repo-check.service`: one-shot service invoked by the check timer; it runs `borg check` against the local repository.
+- `flotilla-borg-repo-prune-compact.timer`: runs retention cleanup monthly on `bastion`.
+- `flotilla-borg-repo-prune-compact.service`: one-shot service invoked by the prune/compact timer; it runs `borg prune` with the configured retention policy and then `borg compact`.
+
+Run the same job for the initial local seed and future off-site incrementals:
+
+```sh
+flotilla borg backup
+```
+
+Useful restore commands from Entourage:
+
+```sh
+source /opt/flotilla/config/borg/entourage.env
+export BORG_PASSPHRASE="$(<"${BORG_PASSPHRASE_FILE}")"
+export BORG_RSH
+borg list "${BORG_BACKUP_USER}@${BORG_BACKUP_HOST}:${BORG_REPO_PATH}"
+borg mount "${BORG_BACKUP_USER}@${BORG_BACKUP_HOST}:${BORG_REPO_PATH}::ARCHIVE" /mnt/borg
+```
+
+Restore single files by copying them out of the mounted archive. For a full
+Nextcloud restore, stop Nextcloud, restore `/opt/flotilla/config/nextcloud`,
+`/opt/flotilla/data/nextcloud`, and `/opt/flotilla/docker-compose.yml`, then
+restore the database dump with `pg_restore` into the Nextcloud PostgreSQL
+database before starting Nextcloud again.
+
 ## TODO List
 
 - [NordVPN router](https://hub.docker.com/r/bubuntux/nordvpn)

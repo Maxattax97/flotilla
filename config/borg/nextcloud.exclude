@@ -1,0 +1,6 @@
+# Conservative excludes for transient local files only.
+/opt/flotilla/data/nextcloud/data/*/files_trashbin/versions
+/opt/flotilla/data/nextcloud/data/*/files_trashbin/files
+/opt/flotilla/data/nextcloud/data/*/cache
+/opt/flotilla/data/nextcloud/data/appdata_*/preview
+/opt/flotilla/data/nextcloud/data/nextcloud.log
