@@ -57,6 +57,10 @@ elevate chmod 0600 /var/lib/borg/.ssh/authorized_keys
 
 if elevate test -r "${PUBLIC_KEY_FILE}"; then
     key="$(elevate cat "${PUBLIC_KEY_FILE}")"
+    if ! printf '%s\n' "${key}" | ssh-keygen -l -f - > /dev/null; then
+        echo "Invalid SSH public key: ${PUBLIC_KEY_FILE}" >&2
+        exit 1
+    fi
     restricted="command=\"borg serve --append-only --restrict-to-repository ${REPO_PATH}\",restrict ${key}"
     if ! elevate grep -Fxq "${restricted}" /var/lib/borg/.ssh/authorized_keys; then
         printf '%s\n' "${restricted}" | elevate tee -a /var/lib/borg/.ssh/authorized_keys > /dev/null
@@ -66,6 +70,13 @@ else
     echo "Copy /opt/flotilla/secrets/entourage_borg_ssh.pub from Entourage to this path, then rerun this installer." >&2
     exit 1
 fi
+
+if ! elevate test -s /var/lib/borg/.ssh/authorized_keys; then
+    echo "Borg authorized_keys is empty after installation." >&2
+    exit 1
+fi
+echo "Installed Borg SSH key:"
+elevate ssh-keygen -lf /var/lib/borg/.ssh/authorized_keys
 
 elevate systemctl enable --now ssh || elevate systemctl enable --now sshd
 for script in borg_repo_check.sh borg_repo_prune_compact.sh; do
