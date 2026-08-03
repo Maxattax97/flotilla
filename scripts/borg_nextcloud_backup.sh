@@ -10,7 +10,7 @@ fi
 
 FLOTILLA_BASE="${FLOTILLA_BASE:-/opt/flotilla}"
 COMPOSE_FILE="${COMPOSE_FILE:-${FLOTILLA_BASE}/docker-compose.yml}"
-NEXTCLOUD_CONTAINER="${NEXTCLOUD_CONTAINER:-nextcloud}"
+NEXTCLOUD_CONTAINERS="${NEXTCLOUD_CONTAINERS:-nextcloud nextcloud-cron}"
 POSTGRES_CONTAINER="${POSTGRES_CONTAINER:-postgres}"
 BORG_BACKUP_HOST="${BORG_BACKUP_HOST:?Set BORG_BACKUP_HOST in ${CONFIG_FILE}}"
 BORG_BACKUP_USER="${BORG_BACKUP_USER:-borg}"
@@ -28,7 +28,7 @@ if [[ ! -r "${BORG_PASSPHRASE_FILE}" ]]; then
 fi
 
 export BORG_PASSPHRASE
-BORG_PASSPHRASE="$(<"${BORG_PASSPHRASE_FILE}")"
+BORG_PASSPHRASE="$(< "${BORG_PASSPHRASE_FILE}")"
 export BORG_RELOCATED_REPO_ACCESS_IS_OK=yes
 export BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=no
 export BORG_RSH="${BORG_RSH:-ssh}"
@@ -44,9 +44,9 @@ fi
 
 repo="${BORG_BACKUP_USER}@${BORG_BACKUP_HOST}:${BORG_REPO_PATH}"
 archive="${BORG_ARCHIVE_PREFIX}-{now:%Y-%m-%dT%H:%M:%S}"
-db_name="$(<"${NEXTCLOUD_DB_FILE}")"
-db_user="$(<"${NEXTCLOUD_DB_USER_FILE}")"
-db_password="$(<"${NEXTCLOUD_DB_PASSWORD_FILE}")"
+db_name="$(< "${NEXTCLOUD_DB_FILE}")"
+db_user="$(< "${NEXTCLOUD_DB_USER_FILE}")"
+db_password="$(< "${NEXTCLOUD_DB_PASSWORD_FILE}")"
 
 backup_paths=(
     "${FLOTILLA_BASE}/docker-compose.yml"
@@ -70,11 +70,13 @@ if [[ "${#existing_paths[@]}" -eq 0 ]]; then
 fi
 
 restart_nextcloud() {
-    "${compose[@]}" start "${NEXTCLOUD_CONTAINER}" > /dev/null
+    read -r -a nextcloud_containers <<< "${NEXTCLOUD_CONTAINERS}"
+    "${compose[@]}" start "${nextcloud_containers[@]}" > /dev/null
 }
 trap restart_nextcloud EXIT
 
-"${compose[@]}" stop "${NEXTCLOUD_CONTAINER}"
+read -r -a nextcloud_containers <<< "${NEXTCLOUD_CONTAINERS}"
+"${compose[@]}" stop "${nextcloud_containers[@]}"
 
 "${compose[@]}" exec -T \
     -e "PGPASSWORD=${db_password}" \

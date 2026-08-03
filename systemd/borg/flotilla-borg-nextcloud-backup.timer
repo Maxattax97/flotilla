@@ -2,9 +2,8 @@
 Description=Weekly Flotilla Nextcloud Borg backup
 
 [Timer]
-OnCalendar=weekly
+OnCalendar=Thu *-*-* 00:30:00 America/Indiana/Indianapolis
 Persistent=true
-RandomizedDelaySec=30m
 
 [Install]
 WantedBy=timers.target

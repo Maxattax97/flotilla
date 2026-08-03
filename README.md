@@ -389,14 +389,14 @@ Then edit `/opt/flotilla/config/borg/entourage.env` if `BORG_BACKUP_HOST=bastion
 is not the right SSH hostname or IP address. If secrets were not present during
 install, enable the timer after adding them with
 `systemctl enable --now flotilla-borg-nextcloud-backup.timer`. The weekly backup
-timer stops only the `nextcloud` container, leaves PostgreSQL running, streams
-`pg_dump` directly into Borg as `postgres/nextcloud.dump`, backs up the
-Nextcloud bind mounts and compose configuration directly, then restarts
-Nextcloud.
+timer stops the configured Nextcloud containers, defaults to `nextcloud` and
+`nextcloud-cron`, leaves PostgreSQL running, streams `pg_dump` directly into Borg
+as `postgres/nextcloud.dump`, backs up the Nextcloud bind mounts and compose
+configuration directly, then restarts the stopped Nextcloud containers.
 
 Installed systemd units:
 
-- `flotilla-borg-nextcloud-backup.timer`: runs the Entourage Nextcloud backup weekly.
+- `flotilla-borg-nextcloud-backup.timer`: runs the Entourage Nextcloud backup weekly on Thursday at 00:30 America/Indiana/Indianapolis time.
 - `flotilla-borg-nextcloud-backup.service`: one-shot service invoked by the backup timer; it runs on Entourage and creates a Borg archive on the repository server using zstd compression.
 - `flotilla-borg-repo-check.timer`: runs repository integrity checks monthly on `bastion`.
 - `flotilla-borg-repo-check.service`: one-shot service invoked by the check timer; it runs `borg check` against the local repository.
