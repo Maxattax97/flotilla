@@ -6,4 +6,4 @@ After=network-online.target docker.service
 [Service]
 Type=oneshot
 TimeoutStartSec=infinity
-ExecStart=/usr/local/lib/flotilla/scripts/borg_nextcloud_backup.sh
+ExecStart=/usr/bin/env bash /usr/local/lib/flotilla/scripts/borg_nextcloud_backup.sh

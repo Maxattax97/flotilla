@@ -5,4 +5,4 @@ RequiresMountsFor=/mnt/backup/repos/entourage
 [Service]
 Type=oneshot
 TimeoutStartSec=infinity
-ExecStart=/usr/local/lib/flotilla/scripts/borg_repo_check.sh
+ExecStart=/usr/bin/env bash /usr/local/lib/flotilla/scripts/borg_repo_check.sh
