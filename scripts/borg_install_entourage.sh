@@ -33,9 +33,9 @@ elevated_link_source "${GITROOT}/config/borg/nextcloud.exclude" "${BASE}/config/
 
 if [[ ! -e "${BORG_SSH_CONFIG}" ]]; then
     elevate cp "${GITROOT}/config/borg/ssh_config.template" "${BORG_SSH_CONFIG}"
-    elevate chmod 0600 "${BORG_SSH_CONFIG}"
     echo "Created ${BORG_SSH_CONFIG}; edit HostName if bastion is not resolvable."
 fi
+elevate chmod 0644 "${BORG_SSH_CONFIG}"
 elevate touch "${BORG_KNOWN_HOSTS}"
 elevate chmod 0644 "${BORG_KNOWN_HOSTS}"
 if ! elevate grep -q '^    HostKeyAlias bastion$' "${BORG_SSH_CONFIG}"; then
