@@ -392,7 +392,9 @@ install, enable the timer after adding them with
 timer stops the configured Nextcloud containers, defaults to `nextcloud` and
 `nextcloud-cron`, leaves PostgreSQL running, streams `pg_dump` directly into Borg
 as `postgres/nextcloud.dump`, backs up the Nextcloud bind mounts and compose
-configuration directly, then restarts the stopped Nextcloud containers.
+configuration directly, then restarts the stopped Nextcloud containers. Archive
+creation uses `zstd,1` compression and prints Borg progress in the systemd
+journal.
 
 The backup runs from systemd as root, so it does not use a normal user's
 `~/.ssh/config`. Put SSH routing details for `bastion` in
@@ -404,7 +406,7 @@ result for the `bastion` alias in `/opt/flotilla/config/borg/known_hosts`.
 Installed systemd units:
 
 - `flotilla-borg-nextcloud-backup.timer`: runs the Entourage Nextcloud backup weekly on Thursday at 00:30 America/Indiana/Indianapolis time.
-- `flotilla-borg-nextcloud-backup.service`: one-shot service invoked by the backup timer; it runs on Entourage and creates a Borg archive on the repository server using zstd compression.
+- `flotilla-borg-nextcloud-backup.service`: one-shot service invoked by the backup timer; it runs on Entourage and creates a Borg archive on the repository server using `zstd,1` compression.
 - `flotilla-borg-repo-check.timer`: runs repository integrity checks monthly on `bastion`.
 - `flotilla-borg-repo-check.service`: one-shot service invoked by the check timer; it runs `borg check` against the local repository.
 - `flotilla-borg-repo-prune-compact.timer`: runs retention cleanup monthly on `bastion`.

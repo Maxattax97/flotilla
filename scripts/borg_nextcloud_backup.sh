@@ -82,12 +82,12 @@ read -r -a nextcloud_containers <<< "${NEXTCLOUD_CONTAINERS}"
     -e "PGPASSWORD=${db_password}" \
     "${POSTGRES_CONTAINER}" \
     pg_dump --format=custom --username "${db_user}" "${db_name}" \
-    | borg create \
-        --verbose \
-        --filter AME \
-        --list \
-        --stats \
-        --compression zstd \
+	| borg create \
+		--verbose \
+		--filter AME \
+		--progress \
+		--stats \
+		--compression zstd,1 \
         --exclude-from "${EXCLUDE_FILE}" \
         --stdin-name postgres/nextcloud.dump \
         "${repo}::${archive}" \
