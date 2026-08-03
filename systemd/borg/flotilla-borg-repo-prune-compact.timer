@@ -1,0 +1,10 @@
+[Unit]
+Description=Monthly local Flotilla Borg prune and compact
+
+[Timer]
+OnCalendar=monthly
+Persistent=true
+RandomizedDelaySec=2h
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,9 @@
+[Unit]
+Description=Back up Flotilla Nextcloud to off-site Borg repository
+Wants=network-online.target docker.service
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+TimeoutStartSec=infinity
+ExecStart=/usr/local/lib/flotilla/scripts/borg_nextcloud_backup.sh

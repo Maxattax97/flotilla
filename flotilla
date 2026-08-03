@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+SCRIPTPATH="$(cd "$(dirname "$0")" || exit; pwd -P)"
 GITROOT="${SCRIPTPATH}"
 COMPOSE_FILE=/opt/flotilla/docker-compose.yml
 
@@ -10,6 +10,7 @@ else
     SCRIPTS="/usr/local/lib/flotilla/scripts"
 fi
 
+# shellcheck disable=SC1091
 source "${SCRIPTS}/sys_lib.sh"
 
 #flotilla_firewall="firewalld"
@@ -18,7 +19,23 @@ flotilla_inet_iface="$(route | grep '^default' | grep -o '[^ ]*$')"
 
 case "$1" in
     "install" | "in" | "i")
-        "${SCRIPTS}/sys_install.sh"
+        "${SCRIPTS}/sys_install.sh" "$2"
+        ;;
+    "borg")
+        case "$2" in
+            "install-entourage")
+                "${SCRIPTS}/borg_install_entourage.sh"
+                ;;
+            "install-bastion")
+                "${SCRIPTS}/borg_install_bastion.sh"
+                ;;
+            "backup")
+                "${SCRIPTS}/borg_nextcloud_backup.sh"
+                ;;
+            *)
+                echo "Usage: flotilla borg <install-entourage | install-bastion | backup>"
+                ;;
+        esac
         ;;
     "update" | "up" | "u")
         "${SCRIPTS}/sys_update.sh"
@@ -45,7 +62,7 @@ case "$1" in
         # NOTE: OpenVPN must be running?
         case "$2" in
             "generate")
-                docker-compose --file "${COMPOSE_FILE}" run --rm openvpn easyrsa build-client-full $3 nopass
+                docker-compose --file "${COMPOSE_FILE}" run --rm openvpn easyrsa build-client-full "$3" nopass
                 docker-compose --file "${COMPOSE_FILE}" run --rm openvpn ovpn_getclient "$3" > "$3.ovpn"
                 ;;
             "get")
@@ -71,8 +88,7 @@ case "$1" in
     "ips")
         case "$2" in
             "test")
-                elevate suricata -T -c /etc/suricata/suricata.yaml
-                if [[ "$?" -ne 0 ]]; then
+                if ! elevate suricata -T -c /etc/suricata/suricata.yaml; then
                     exit 1
                 fi
                 ;;
@@ -248,6 +264,6 @@ case "$1" in
         esac
         ;;
     *)
-        echo "Usage: flotilla <install | update | start | stop | restart | status | follow | ovpn | ips | fw>"
+        echo "Usage: flotilla <install | update | start | stop | restart | status | follow | ovpn | ips | fw | borg>"
         ;;
 esac
