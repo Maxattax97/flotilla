@@ -29,6 +29,12 @@ elevate mkdir -p "${BASE}/config/borg" "${BASE}/secrets"
 elevate chmod 0700 "${BASE}/secrets"
 elevated_link_source "${GITROOT}/config/borg/nextcloud.exclude" "${BASE}/config/borg/nextcloud.exclude"
 
+if [[ ! -e "${BASE}/config/borg/ssh_config" ]]; then
+	elevate cp "${GITROOT}/config/borg/ssh_config.template" "${BASE}/config/borg/ssh_config"
+	elevate chmod 0600 "${BASE}/config/borg/ssh_config"
+	echo "Created ${BASE}/config/borg/ssh_config; edit HostName if bastion is not resolvable."
+fi
+
 if [[ ! -e "${BORG_SSH_KEY}" ]]; then
     elevate ssh-keygen -t ed25519 -f "${BORG_SSH_KEY}" -N "" -C "entourage borg backup"
     elevate chmod 0600 "${BORG_SSH_KEY}"

@@ -394,6 +394,11 @@ timer stops the configured Nextcloud containers, defaults to `nextcloud` and
 as `postgres/nextcloud.dump`, backs up the Nextcloud bind mounts and compose
 configuration directly, then restarts the stopped Nextcloud containers.
 
+The backup runs from systemd as root, so it does not use a normal user's
+`~/.ssh/config`. Put SSH routing details for `bastion` in
+`/opt/flotilla/config/borg/ssh_config`; for example, set `HostName` to a local
+DNS name, a private FQDN, or an IP address reachable from Entourage.
+
 Installed systemd units:
 
 - `flotilla-borg-nextcloud-backup.timer`: runs the Entourage Nextcloud backup weekly on Thursday at 00:30 America/Indiana/Indianapolis time.
