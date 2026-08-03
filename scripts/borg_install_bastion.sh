@@ -28,7 +28,9 @@ fi
 
 elevate mkdir -p /usr/local/lib/flotilla/borg
 if ! id -u borg > /dev/null 2>&1; then
-    elevate useradd --system --create-home --home-dir /var/lib/borg --shell /usr/sbin/nologin borg
+    elevate useradd --system --create-home --home-dir /var/lib/borg --shell /bin/sh borg
+else
+    elevate usermod --home /var/lib/borg --shell /bin/sh borg
 fi
 
 elevate mkdir -p "$(dirname "${REPO_PATH}")" "${BASE}/secrets"

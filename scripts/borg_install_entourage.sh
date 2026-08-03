@@ -58,7 +58,10 @@ bastion_hostname="$(ssh -F "${BORG_SSH_CONFIG}" -G bastion | while read -r key v
     fi
 done)"
 if [[ -n "${bastion_hostname}" ]] && ! elevate grep -q '^bastion ' "${BORG_KNOWN_HOSTS}"; then
-    ssh-keyscan "${bastion_hostname}" 2> /dev/null | while read -r _ key_type key_value; do
+    ssh-keyscan "${bastion_hostname}" 2> /dev/null | while read -r host key_type key_value; do
+        if [[ "${host}" == \#* || -z "${key_value}" ]]; then
+            continue
+        fi
         printf 'bastion %s %s\n' "${key_type}" "${key_value}"
     done | elevate tee -a "${BORG_KNOWN_HOSTS}" > /dev/null
 fi
