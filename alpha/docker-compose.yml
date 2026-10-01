@@ -52,7 +52,7 @@ services:
       - PGID=1000
       - TZ=America/Indianapolis
       - URL=maxocull.com
-      - SUBDOMAINS=bazarr,books,ci,cloud,dash,dns,flamenco,git,groups.xmpp,hashcat,kimai,librarian,lidarr,llm,mastodon,media,mesh,notes,ntfy,nvr,office,openvpn,pgadmin,project,prowlarr,radarr,registry,rss,share.xmpp,sonarr,torrent,whoami,wireguard,www,xmpp,znc
+      - SUBDOMAINS=actual,bazarr,books,ci,cloud,dash,dns,flamenco,git,groups.xmpp,hashcat,kimai,librarian,lidarr,llm,mastodon,media,mesh,notes,ntfy,nvr,office,openvpn,pgadmin,project,prowlarr,radarr,registry,rss,share.xmpp,sonarr,torrent,whoami,wireguard,www,xmpp,znc
       - VALIDATION=http
       #- DNSPLUGIN=cloudflare #optional
       #- DUCKDNSTOKEN=<token> #optional
@@ -76,6 +76,29 @@ services:
       - 443:443
     labels:
       - com.centurylinklabs.watchtower.enable=true
+    restart: unless-stopped
+  actual:
+    # Keep server/API upgrades deliberate; back up /data before changing this tag.
+    image: actualbudget/actual-server:26.9.0
+    container_name: actual
+    environment:
+      - TZ=America/Indiana/Indianapolis
+    volumes:
+      - /opt/flotilla/data/actual:/data:Z
+    ports:
+      - 127.0.0.1:5006:5006
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:5006/').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+    labels:
+      - com.centurylinklabs.watchtower.enable=false
     restart: unless-stopped
   weblog:
     image: node:24-slim

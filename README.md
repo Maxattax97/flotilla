@@ -48,6 +48,55 @@ sudo setenforce 1
 Some special manual actions are currently are necessary to get a handful of
 services running.
 
+### Actual Budget
+
+The `alpha` fleet includes [Actual Budget](https://actualbudget.org/) at
+`https://actual.maxocull.com`. SWAG terminates HTTPS and proxies to the `actual`
+container on port 5006. The proxy provides the cross-origin isolation headers
+required by Actual's browser database and inherits SWAG's WebSocket forwarding.
+The host port is bound only to `127.0.0.1`, not exposed directly to the network.
+
+Actual stores its server configuration, budget files, and bank-sync tokens in
+`/opt/flotilla/data/actual`, mounted at `/data` with a private SELinux label.
+Protect this directory and its backups as sensitive financial data. Actual uses
+its own server password; no new plaintext password belongs in Compose or Git.
+
+For an existing installation, copy the updated `alpha/docker-compose.yml` to
+`/opt/flotilla/docker-compose.yml` and copy
+`config/letsencrypt/nginx/proxy-confs/actual.subdomain.conf` into the matching
+`/opt/flotilla/config/letsencrypt/nginx/proxy-confs/` directory. Start Actual:
+
+```sh
+docker compose -f /opt/flotilla/docker-compose.yml up -d actual
+# From your workstation, replace fleet-host with your SSH host:
+ssh -L 5006:127.0.0.1:5006 fleet-host
+```
+
+Open `http://localhost:5006` through that tunnel and set the Actual server
+password before publishing its hostname. Then add DNS for `actual.maxocull.com`
+pointing to this fleet host. The SWAG certificate subdomain list includes
+`actual`; recreate SWAG to request the updated certificate and load the proxy:
+
+```sh
+docker compose -f /opt/flotilla/docker-compose.yml up -d letsencrypt
+docker compose -f /opt/flotilla/docker-compose.yml exec letsencrypt nginx -t
+```
+
+Connect the finance CLI with `ACTUAL_SERVER_URL=https://actual.maxocull.com`,
+the server password in `ACTUAL_PASSWORD`, and the budget's advanced-settings
+sync ID in `ACTUAL_SYNC_ID`. If budget encryption is enabled, configure
+`ACTUAL_ENCRYPTION_PASSWORD` separately. Keep these values in the finance
+project's private `.env`, outside Git. Actual remains responsible for bank sync;
+SimpleFIN setup and reauthentication happen in Actual's UI.
+
+The image is pinned to `actualbudget/actual-server:26.9.0` and excluded from
+Watchtower updates. Back up the entire data directory with the service stopped
+before changing its version; update the finance project's `@actual-app/api` to
+a compatible version as part of the same upgrade. Restore the directory to
+recover server settings and budgets. The existing `flotilla borg backup`
+command backs up Nextcloud only and does **not** cover Actual automatically.
+Generated finance workbooks are not a substitute for an Actual server backup.
+
 ### Suricata
 
 The entire swarm is defended by Suricata, an Intrusion Prevention System (IPS)
