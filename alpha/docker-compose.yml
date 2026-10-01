@@ -372,6 +372,7 @@ services:
       - /opt/flotilla/data/all/tvshows:/data/tvshows:z
       - /opt/flotilla/data/all/movies:/data/movies:z
       - /opt/flotilla/data/all/music:/data/music:z
+      - /opt/foltilla/data/all/music-alan:/data/music-alan:z
       - /opt/flotilla/data/all/books:/data/books:z # Intended for audio books.
       - /opt/flotilla/data/all/photos:/data/photos:z
       - /opt/flotilla/data/jellyfin/transcode:/transcode:z # optional
@@ -634,10 +635,10 @@ services:
       - /opt/flotilla/data/nfs/flamenco:/srv/flamenco:z
     restart: unless-stopped
   gitea-runner:
-    image: gitea/act_runner:latest
+    image: gitea/runner:3
     container_name: gitea-runner
-    security_opt:
-      - seccomp:unconfined
+    #security_opt:
+    #  - seccomp:unconfined
     cap_add:
       - NET_ADMIN
     devices:

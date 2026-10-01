@@ -1,13 +1,10 @@
----
 # Example configuration file, it's safe to copy this as the default config file without any modification.
 
 # You don't have to copy this file to your instance,
 # just run `./act_runner generate-config > config.yaml` to generate a config file.
-
 log:
   # The level of logging, can be trace, debug, info, warn, error, fatal
   level: info
-
 runner:
   # Where to store the registration result.
   file: /data/.runner
@@ -36,10 +33,10 @@ runner:
   # If it's empty when registering, it will ask for inputting labels.
   # If it's empty when execute `daemon`, will use labels in `.runner` file.
   labels:
+    - entourage:docker://gitea/runner-images:ubuntu-latest
     - ubuntu-latest:docker://gitea/runner-images:ubuntu-latest
     - ubuntu-22.04:docker://gitea/runner-images:ubuntu-22.04
     - ubuntu-20.04:docker://gitea/runner-images:ubuntu-20.04
-
 cache:
   # Enable cache server to use actions/cache.
   enabled: true
@@ -57,7 +54,6 @@ cache:
   # If it's specified, act_runner will use this URL as the ACTIONS_CACHE_URL rather than start a server by itself.
   # The URL should generally end with "/".
   external_server: ""
-
 container:
   # Specifies the network to which the container will connect.
   # Could be host, bridge or the name of a custom network.
@@ -92,7 +88,6 @@ container:
   force_pull: true
   # Rebuild docker image(s) even if already present
   force_rebuild: false
-
 host:
   # The parent directory of a job's working directory.
   # If it's empty, $HOME/.cache/act/ will be used.
