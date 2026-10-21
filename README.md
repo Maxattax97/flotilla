@@ -492,3 +492,9 @@ database before starting Nextcloud again.
 - Matomo/Piwik for analytics
 - A TOR node, then hosting an onion site
 - An IRC server
+
+### Spark, Delta Lake, RustFS, and JupyterLab
+
+The alpha fleet includes Spark, Delta Lake, RustFS, and JupyterLab using published
+images. See the [lakehouse setup guide](config/lakehouse/README.md) for secrets,
+storage preparation, DNS records, SWAG proxies, and verification.
