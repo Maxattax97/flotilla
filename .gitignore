@@ -17,6 +17,7 @@ config/*
 !config/nfs/
 !config/gitea-runner/
 !config/borg/
+!config/lakehouse/
 
 config/openvpn/*
 !config/openvpn/openvpn.conf

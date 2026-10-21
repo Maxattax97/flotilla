@@ -52,7 +52,7 @@ services:
       - PGID=1000
       - TZ=America/Indianapolis
       - URL=maxocull.com
-      - SUBDOMAINS=actual,bazarr,books,ci,cloud,dash,dns,flamenco,git,groups.xmpp,hashcat,kimai,librarian,lidarr,llm,mastodon,media,mesh,notes,ntfy,nvr,office,openvpn,pgadmin,project,prowlarr,radarr,registry,rss,share.xmpp,sonarr,torrent,whoami,wireguard,www,xmpp,znc
+      - SUBDOMAINS=jupyter,rustfs,s3,spark,actual,bazarr,books,ci,cloud,dash,dns,flamenco,git,groups.xmpp,hashcat,kimai,librarian,lidarr,llm,mastodon,media,mesh,notes,ntfy,nvr,office,openvpn,pgadmin,project,prowlarr,radarr,registry,rss,share.xmpp,sonarr,torrent,whoami,wireguard,www,xmpp,znc
       - VALIDATION=http
       #- DNSPLUGIN=cloudflare #optional
       #- DUCKDNSTOKEN=<token> #optional
@@ -780,4 +780,85 @@ services:
       - 25565:25565
     labels:
       - com.centurylinklabs.watchtower.enable=true
+    restart: unless-stopped
+
+  # Use the same published image everywhere to match Spark, Java, and Python.
+  spark-master:
+    image: quay.io/jupyter/pyspark-notebook:spark-3.5.3
+    command: /usr/local/spark/bin/spark-class org.apache.spark.deploy.master.Master --host spark-master --port 7077 --webui-port 8080
+    restart: unless-stopped
+  spark-worker:
+    image: quay.io/jupyter/pyspark-notebook:spark-3.5.3
+    command: /usr/local/spark/bin/spark-class org.apache.spark.deploy.worker.Worker --cores 2 --memory 2g spark://spark-master:7077
+    env_file:
+      - /opt/flotilla/secrets/lakehouse.env
+    depends_on:
+      - spark-master
+    restart: unless-stopped
+  rustfs:
+    image: rustfs/rustfs:1.0.2
+    env_file:
+      - /opt/flotilla/secrets/lakehouse.env
+    entrypoint: /bin/sh
+    command:
+      - -ec
+      - |
+        export RUSTFS_ACCESS_KEY="$${AWS_ACCESS_KEY_ID:?Set AWS_ACCESS_KEY_ID}"
+        export RUSTFS_SECRET_KEY="$${AWS_SECRET_ACCESS_KEY:?Set AWS_SECRET_ACCESS_KEY}"
+        exec /entrypoint.sh rustfs
+    environment:
+      - RUSTFS_VOLUMES=/data
+      - RUSTFS_ADDRESS=0.0.0.0:9000
+      - RUSTFS_CONSOLE_ADDRESS=0.0.0.0:9001
+      - RUSTFS_CONSOLE_ENABLE=true
+      - RUSTFS_CONSOLE_CORS_ALLOWED_ORIGINS=https://rustfs.maxocull.com
+      - RUSTFS_CORS_ALLOWED_ORIGINS=https://rustfs.maxocull.com
+    volumes:
+      - /opt/flotilla/data/rustfs:/data:Z
+      - /opt/flotilla/data/rustfs-logs:/logs:Z
+    healthcheck:
+      test: [CMD, curl, -fsS, http://127.0.0.1:9000/health]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    restart: unless-stopped
+  lakehouse-init:
+    image: amazon/aws-cli:2.31.0
+    env_file:
+      - /opt/flotilla/secrets/lakehouse.env
+    environment:
+      - AWS_EC2_METADATA_DISABLED=true
+    depends_on:
+      rustfs:
+        condition: service_healthy
+    entrypoint: /bin/sh
+    command:
+      - -ec
+      - |
+        aws --endpoint-url http://rustfs:9000 s3api head-bucket --bucket lakehouse 2>/dev/null || \
+          aws --endpoint-url http://rustfs:9000 s3api create-bucket --bucket lakehouse
+    restart: on-failure
+  jupyterlab:
+    image: quay.io/jupyter/pyspark-notebook:spark-3.5.3
+    env_file:
+      - /opt/flotilla/secrets/lakehouse.env
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - PYSPARK_PYTHON=python3
+      - PYSPARK_DRIVER_PYTHON=python3
+    command:
+      - start-notebook.py
+      - --ServerApp.trust_xheaders=True
+      - --ServerApp.allow_remote_access=True
+    volumes:
+      - /opt/flotilla/data/jupyterlab:/home/jovyan/work:Z
+      - /opt/flotilla/data/spark-ivy:/home/jovyan/.ivy2:Z
+      - /opt/flotilla/config/lakehouse/spark-defaults.conf:/usr/local/spark/conf/spark-defaults.conf:ro,z
+      - /opt/flotilla/config/lakehouse/smoke.py:/opt/lakehouse/smoke.py:ro,z
+    depends_on:
+      spark-worker:
+        condition: service_started
+      lakehouse-init:
+        condition: service_completed_successfully
     restart: unless-stopped
