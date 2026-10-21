@@ -786,14 +786,30 @@ services:
   spark-master:
     image: quay.io/jupyter/pyspark-notebook:spark-3.5.3
     command: /usr/local/spark/bin/spark-class org.apache.spark.deploy.master.Master --host spark-master --port 7077 --webui-port 8080
+    environment:
+      - SPARK_MASTER_OPTS=-Dspark.ui.reverseProxy=true -Dspark.ui.reverseProxyUrl=https://spark.maxocull.com
+    healthcheck:
+      test: [CMD, curl, -fsS, http://127.0.0.1:8080/]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
     restart: unless-stopped
   spark-worker:
     image: quay.io/jupyter/pyspark-notebook:spark-3.5.3
-    command: /usr/local/spark/bin/spark-class org.apache.spark.deploy.worker.Worker --cores 2 --memory 2g spark://spark-master:7077
+    command: /usr/local/spark/bin/spark-class org.apache.spark.deploy.worker.Worker --work-dir /tmp/spark-work --cores 2 --memory 2g spark://spark-master:7077
     env_file:
       - /opt/flotilla/secrets/lakehouse.env
+    environment:
+      - SPARK_WORKER_OPTS=-Dspark.ui.reverseProxy=true -Dspark.ui.reverseProxyUrl=https://spark.maxocull.com
     depends_on:
       - spark-master
+    healthcheck:
+      test: [CMD, curl, -fsS, http://127.0.0.1:8081/]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
     restart: unless-stopped
   rustfs:
     image: rustfs/rustfs:1.0.2

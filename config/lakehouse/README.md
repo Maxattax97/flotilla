@@ -71,7 +71,7 @@ SWAG host (A/AAAA records, or CNAMEs to an existing hostname):
 | Hostname | Destination | Authentication |
 | --- | --- | --- |
 | `jupyter.maxocull.com` | JupyterLab, port 8888 | `JUPYTER_TOKEN` |
-| `rustfs.maxocull.com` | RustFS console, port 9001 | AWS key and secret |
+| `rustfs.maxocull.com/rustfs/console/` | RustFS console, port 9001 | AWS key and secret |
 | `s3.maxocull.com` | RustFS S3 API, port 9000 | S3 signed requests |
 | `spark.maxocull.com` | Spark master UI, port 8080 | SWAG basic auth |
 
@@ -118,7 +118,7 @@ spark.sql("SELECT * FROM demo WHERE id < 10").explain(True)
 Stop notebook Spark sessions before running the integration check:
 
 ```sh
-docker compose -f /opt/flotilla/docker-compose.yml exec jupyterlab python /opt/lakehouse/smoke.py
+docker compose -f /opt/flotilla/docker-compose.yml exec jupyterlab spark-submit /opt/lakehouse/smoke.py
 ```
 
 It verifies distributed DataFrames, SQL, Delta schema evolution, time travel,
