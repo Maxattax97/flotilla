@@ -482,7 +482,7 @@ services:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
   nextcloud:
-    image: nextcloud:33-apache
+    image: nextcloud:34-apache
     container_name: nextcloud
     depends_on:
       - redis
@@ -528,7 +528,7 @@ services:
     restart: unless-stopped
   nextcloud-cron:
     # https://github.com/nextcloud/docker/issues/134
-    image: nextcloud:33-apache
+    image: nextcloud:34-apache
     container_name: nextcloud-cron
     entrypoint: /cron.sh
     depends_on:
