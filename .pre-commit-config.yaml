@@ -56,3 +56,52 @@ repos:
         args: [--fix, --format, pep8]
         additional_dependencies:
           - jmespath
+  - repo: https://github.com/PyCQA/isort
+    rev: 6.1.0
+    hooks:
+      - id: isort
+        # See
+        # https://pycqa.github.io/isort/docs/configuration/black_compatibility.html
+        args: [--profile, black, --filter-files]
+  # This mirror is about 2x faster because it is compiled with mypyc.
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 25.9.0
+    hooks:
+      - id: black
+        args: [--line-length=88]
+        # language_version: python3.13
+  # To ignore these, use `# noqa: E123` at the end of the line.
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.3.0
+    hooks:
+      - id: flake8
+        # See https://github.com/PyCQA/pycodestyle/issues/373
+        #
+        # We are ignoring E501 because black already takes care of line length,
+        # and Flake8 is trigger happy.
+        args:
+          - --max-line-length=88
+          - --extend-ignore=E203
+          - --extend-ignore=E501
+  # To ignore these, use `# nosec` at the end of the line.
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.8.6
+    hooks:
+      - id: bandit
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+      - id: python-check-blanket-noqa
+      - id: python-check-mock-methods
+      - id: python-no-eval
+      - id: python-no-log-warn
+      - id: python-check-blanket-type-ignore
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.18.2
+    hooks:
+      - id: mypy
+        additional_dependencies:
+          - types-requests
+          - types-setuptools
+          - types-paramiko
+          - types-toml

@@ -482,7 +482,7 @@ services:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
   nextcloud:
-    image: nextcloud:32-apache
+    image: nextcloud:33-apache
     container_name: nextcloud
     depends_on:
       - redis
@@ -496,6 +496,7 @@ services:
       - nextcloud_admin_password
       - all_maxocull_com_at_gmail_com_password
     environment:
+      - HOME=/var/www/html
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
@@ -527,7 +528,7 @@ services:
     restart: unless-stopped
   nextcloud-cron:
     # https://github.com/nextcloud/docker/issues/134
-    image: nextcloud:32-apache
+    image: nextcloud:33-apache
     container_name: nextcloud-cron
     entrypoint: /cron.sh
     depends_on:
@@ -541,6 +542,7 @@ services:
       - nextcloud_admin_password
       - all_maxocull_com_at_gmail_com_password
     environment:
+      - HOME=/var/www/html
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
@@ -781,7 +783,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
-
   # Use the same published image everywhere to match Spark, Java, and Python.
   spark-master:
     image: quay.io/jupyter/pyspark-notebook:spark-3.5.3
@@ -789,7 +790,7 @@ services:
     environment:
       - SPARK_MASTER_OPTS=-Dspark.ui.reverseProxy=true -Dspark.ui.reverseProxyUrl=https://spark.maxocull.com
     healthcheck:
-      test: [CMD, curl, -fsS, http://127.0.0.1:8080/]
+      test: [CMD, curl, -fsS, 'http://127.0.0.1:8080/']
       interval: 10s
       timeout: 5s
       retries: 6
@@ -805,7 +806,7 @@ services:
     depends_on:
       - spark-master
     healthcheck:
-      test: [CMD, curl, -fsS, http://127.0.0.1:8081/]
+      test: [CMD, curl, -fsS, 'http://127.0.0.1:8081/']
       interval: 10s
       timeout: 5s
       retries: 6
@@ -833,7 +834,7 @@ services:
       - /opt/flotilla/data/rustfs:/data:Z
       - /opt/flotilla/data/rustfs-logs:/logs:Z
     healthcheck:
-      test: [CMD, curl, -fsS, http://127.0.0.1:9000/health]
+      test: [CMD, curl, -fsS, 'http://127.0.0.1:9000/health']
       interval: 10s
       timeout: 5s
       retries: 12
