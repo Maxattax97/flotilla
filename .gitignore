@@ -1,3 +1,7 @@
+# Local operational records and generated trust material
+/.local/
+/config/security-trust/
+
 secrets.env
 !config/
 
@@ -18,6 +22,9 @@ config/*
 !config/gitea-runner/
 !config/borg/
 !config/lakehouse/
+!config/php/
+config/php/*
+!config/php/security.ini
 
 config/openvpn/*
 !config/openvpn/openvpn.conf

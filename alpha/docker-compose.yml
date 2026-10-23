@@ -72,7 +72,7 @@ services:
     #- nextcloud
     ports:
       - 80:80
-      - 81:81 # used for dashboard mod
+      - 127.0.0.1:81:81 # dashboard: access through SSH tunnel
       - 443:443
     labels:
       - com.centurylinklabs.watchtower.enable=true
@@ -82,8 +82,14 @@ services:
     image: actualbudget/actual-server:26.9.0
     container_name: actual
     environment:
+      - SSL_CERT_FILE=/run/flotilla-trust/ca-bundle.crt
+      - SSL_CERT_DIR=/run/flotilla-trust/empty
+      - REQUESTS_CA_BUNDLE=/run/flotilla-trust/ca-bundle.crt
+      - CURL_CA_BUNDLE=/run/flotilla-trust/ca-bundle.crt
+      - NODE_OPTIONS=--use-openssl-ca
       - TZ=America/Indiana/Indianapolis
     volumes:
+      - /opt/flotilla/config/security-trust:/run/flotilla-trust:ro,z
       - /opt/flotilla/data/actual:/data:Z
     ports:
       - 127.0.0.1:5006:5006
@@ -267,6 +273,10 @@ services:
       - gluetun
     network_mode: service:gluetun
     environment:
+      - SSL_CERT_FILE=/run/flotilla-trust/ca-bundle.crt
+      - SSL_CERT_DIR=/run/flotilla-trust/empty
+      - REQUESTS_CA_BUNDLE=/run/flotilla-trust/ca-bundle.crt
+      - CURL_CA_BUNDLE=/run/flotilla-trust/ca-bundle.crt
       - PUID=1000
       - PGID=1000
       - UMASK=000
@@ -274,6 +284,7 @@ services:
       - WEBUI_PORT=8080
       - TORRENTING_PORT=6881
     volumes:
+      - /opt/flotilla/config/security-trust:/run/flotilla-trust:ro,z
       - /opt/flotilla/config/qbittorrent:/config:z
       # This is where torrent files are stored.
       - /opt/flotilla/data/all/torrents:/torrents:z
@@ -350,11 +361,16 @@ services:
     image: linuxserver/bazarr
     container_name: bazarr
     environment:
+      - SSL_CERT_FILE=/run/flotilla-trust/ca-bundle.crt
+      - SSL_CERT_DIR=/run/flotilla-trust/empty
+      - REQUESTS_CA_BUNDLE=/run/flotilla-trust/ca-bundle.crt
+      - CURL_CA_BUNDLE=/run/flotilla-trust/ca-bundle.crt
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
       - UMASK=022
     volumes:
+      - /opt/flotilla/config/security-trust:/run/flotilla-trust:ro,z
       - /opt/flotilla/config/bazarr:/config:z
       - /opt/flotilla/data/all/tvshows:/tv:z
       - /opt/flotilla/data/all/movies:/movies:z
@@ -445,6 +461,10 @@ services:
     depends_on:
       - postgres
     environment:
+      - SSL_CERT_FILE=/run/flotilla-trust/ca-bundle.crt
+      - SSL_CERT_DIR=/run/flotilla-trust/empty
+      - REQUESTS_CA_BUNDLE=/run/flotilla-trust/ca-bundle.crt
+      - CURL_CA_BUNDLE=/run/flotilla-trust/ca-bundle.crt
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
@@ -454,6 +474,7 @@ services:
     ports:
       - 127.0.0.1:5480:80
     volumes:
+      - /opt/flotilla/config/security-trust:/run/flotilla-trust:ro,z
       # - /opt/flotilla/config/pgadmin:/pgadmin4:z
       - /opt/flotilla/data/pgadmin:/var/lib/pgadmin:z
     restart: unless-stopped
@@ -518,6 +539,7 @@ services:
       - PHP_UPLOAD_LIMIT=2G
       #- MAIL_DOMAIN=mail.maxocull.com
     volumes:
+      - /opt/flotilla/config/php/security.ini:/usr/local/etc/php/conf.d/zz-flotilla-security.ini:ro,z
       - /opt/flotilla/config/nextcloud:/var/www/html/config:z
       - /opt/flotilla/data/nextcloud:/var/www/html:z # Share this folder with cron.
     ports:
@@ -563,6 +585,7 @@ services:
       - PHP_UPLOAD_LIMIT=2G
       #- MAIL_DOMAIN=mail.maxocull.com
     volumes:
+      - /opt/flotilla/config/php/security.ini:/usr/local/etc/php/conf.d/zz-flotilla-security.ini:ro,z
       - /opt/flotilla/config/nextcloud:/var/www/html/config:z
       - /opt/flotilla/data/nextcloud:/var/www/html:z # Share this folder with cron.
     labels:
@@ -591,6 +614,9 @@ services:
       - PGID=1000
       - TZ=America/Indianapolis
     volumes:
+      # Debian PHP 8.2 paths in the upstream RSS-Bridge image; recheck on upgrades.
+      - /opt/flotilla/config/php/security.ini:/etc/php/8.2/fpm/conf.d/99-flotilla-security.ini:ro,z
+      - /opt/flotilla/config/php/security.ini:/etc/php/8.2/cli/conf.d/99-flotilla-security.ini:ro,z
       - /opt/flotilla/config/rssbridge/whitelist.txt:/app/whitelist.txt:z
       - /opt/flotilla/config/rssbridge/config.ini.php:/app/config.ini.php:z
     ports:
@@ -620,6 +646,10 @@ services:
     image: ghcr.io/obeone/nfs-server
     container_name: nfs
     environment:
+      - SSL_CERT_FILE=/run/flotilla-trust/ca-bundle.crt
+      - SSL_CERT_DIR=/run/flotilla-trust/empty
+      - REQUESTS_CA_BUNDLE=/run/flotilla-trust/ca-bundle.crt
+      - CURL_CA_BUNDLE=/run/flotilla-trust/ca-bundle.crt
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
@@ -630,6 +660,7 @@ services:
       - SYS_ADMIN
       - SYS_MODULE
     volumes:
+      - /opt/flotilla/config/security-trust:/run/flotilla-trust:ro,z
       - /opt/flotilla/data/nfs/flamenco:/srv/flamenco:z
       - /opt/flotilla/config/nfs/exports:/etc/exports:z
       - /lib/modules:/lib/modules:ro
@@ -649,12 +680,17 @@ services:
     image: maxattax/flamenco-manager:latest
     container_name: flamenco-manager
     environment:
+      - SSL_CERT_FILE=/run/flotilla-trust/ca-bundle.crt
+      - SSL_CERT_DIR=/run/flotilla-trust/empty
+      - REQUESTS_CA_BUNDLE=/run/flotilla-trust/ca-bundle.crt
+      - CURL_CA_BUNDLE=/run/flotilla-trust/ca-bundle.crt
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
     ports:
       - 127.0.0.1:8082:80
     volumes:
+      - /opt/flotilla/config/security-trust:/run/flotilla-trust:ro,z
       - /opt/flotilla/config/flamenco:/config:Z
       - /opt/flotilla/data/flamenco:/data:Z
       - /opt/flotilla/data/nfs/flamenco:/srv/flamenco:z
@@ -692,6 +728,10 @@ services:
     secrets:
       - open_webui_brave_search_api_key
     environment:
+      - SSL_CERT_FILE=/run/flotilla-trust/ca-bundle.crt
+      - SSL_CERT_DIR=/run/flotilla-trust/empty
+      - REQUESTS_CA_BUNDLE=/run/flotilla-trust/ca-bundle.crt
+      - CURL_CA_BUNDLE=/run/flotilla-trust/ca-bundle.crt
       # https://docs.openwebui.com/getting-started/env-configuration
       - PUID=1000
       - PGID=1000
@@ -709,6 +749,8 @@ services:
       - ENABLE_ADMIN_CHAT_ACCESS=False
       - BRAVE_SEARCH_API_KEY_FILE=/run/secrets/open_webui_brave_search_api_key
     volumes:
+      - /opt/flotilla/config/security-trust:/run/flotilla-trust:ro,z
+      - /opt/flotilla/config/security-trust/ca-bundle.crt:/usr/local/lib/python3.11/site-packages/certifi/cacert.pem:ro,z
       - /opt/flotilla/data/open-webui:/app/backend/data:Z
     ports:
       - 127.0.0.1:3081:8080
@@ -725,6 +767,11 @@ services:
       # https://github.com/laurent22/joplin/pull/6091
       - /opt/flotilla/secrets/joplin.env
     environment:
+      - SSL_CERT_FILE=/run/flotilla-trust/ca-bundle.crt
+      - SSL_CERT_DIR=/run/flotilla-trust/empty
+      - REQUESTS_CA_BUNDLE=/run/flotilla-trust/ca-bundle.crt
+      - CURL_CA_BUNDLE=/run/flotilla-trust/ca-bundle.crt
+      - NODE_OPTIONS=--use-openssl-ca
       - PUID=1000
       - PGID=1000
       - TZ=America/Indianapolis
@@ -738,12 +785,19 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
+    volumes:
+      - /opt/flotilla/config/security-trust:/run/flotilla-trust:ro,z
   minecraft:
     # docker exec minecraft rcon-cli stop
     # docker exec minecraft rcon-cli stop
     image: itzg/minecraft-server
     container_name: minecraft
     environment:
+      - SSL_CERT_FILE=/run/flotilla-trust/ca-bundle.crt
+      - SSL_CERT_DIR=/run/flotilla-trust/empty
+      - REQUESTS_CA_BUNDLE=/run/flotilla-trust/ca-bundle.crt
+      - CURL_CA_BUNDLE=/run/flotilla-trust/ca-bundle.crt
+      - JAVA_TOOL_OPTIONS=-Djavax.net.ssl.trustStore=/run/flotilla-trust/cacerts
       - UID=1000
       - GID=1000
       - TZ=America/Indianapolis
@@ -777,6 +831,7 @@ services:
       - LEVEL=world
       - ALLOW_FLIGHT=false
     volumes:
+      - /opt/flotilla/config/security-trust:/run/flotilla-trust:ro,z
       - /opt/flotilla/data/minecraft:/data:Z
     ports:
       - 25565:25565
@@ -788,6 +843,12 @@ services:
     image: quay.io/jupyter/pyspark-notebook:spark-3.5.3
     command: /usr/local/spark/bin/spark-class org.apache.spark.deploy.master.Master --host spark-master --port 7077 --webui-port 8080
     environment:
+      - SSL_CERT_FILE=/run/flotilla-trust/ca-bundle.crt
+      - SSL_CERT_DIR=/run/flotilla-trust/empty
+      - REQUESTS_CA_BUNDLE=/run/flotilla-trust/ca-bundle.crt
+      - CURL_CA_BUNDLE=/run/flotilla-trust/ca-bundle.crt
+      - NODE_OPTIONS=--use-openssl-ca
+      - JAVA_TOOL_OPTIONS=-Djavax.net.ssl.trustStore=/run/flotilla-trust/cacerts
       - SPARK_MASTER_OPTS=-Dspark.ui.reverseProxy=true -Dspark.ui.reverseProxyUrl=https://spark.maxocull.com
     healthcheck:
       test: [CMD, curl, -fsS, 'http://127.0.0.1:8080/']
@@ -796,12 +857,21 @@ services:
       retries: 6
       start_period: 10s
     restart: unless-stopped
+    volumes:
+      - /opt/flotilla/config/security-trust:/run/flotilla-trust:ro,z
+      - /opt/flotilla/config/security-trust/ca-bundle.crt:/opt/conda/lib/python3.11/site-packages/certifi/cacert.pem:ro,z
   spark-worker:
     image: quay.io/jupyter/pyspark-notebook:spark-3.5.3
     command: /usr/local/spark/bin/spark-class org.apache.spark.deploy.worker.Worker --work-dir /tmp/spark-work --cores 2 --memory 2g spark://spark-master:7077
     env_file:
       - /opt/flotilla/secrets/lakehouse.env
     environment:
+      - SSL_CERT_FILE=/run/flotilla-trust/ca-bundle.crt
+      - SSL_CERT_DIR=/run/flotilla-trust/empty
+      - REQUESTS_CA_BUNDLE=/run/flotilla-trust/ca-bundle.crt
+      - CURL_CA_BUNDLE=/run/flotilla-trust/ca-bundle.crt
+      - NODE_OPTIONS=--use-openssl-ca
+      - JAVA_TOOL_OPTIONS=-Djavax.net.ssl.trustStore=/run/flotilla-trust/cacerts
       - SPARK_WORKER_OPTS=-Dspark.ui.reverseProxy=true -Dspark.ui.reverseProxyUrl=https://spark.maxocull.com
     depends_on:
       - spark-master
@@ -812,6 +882,9 @@ services:
       retries: 6
       start_period: 10s
     restart: unless-stopped
+    volumes:
+      - /opt/flotilla/config/security-trust:/run/flotilla-trust:ro,z
+      - /opt/flotilla/config/security-trust/ca-bundle.crt:/opt/conda/lib/python3.11/site-packages/certifi/cacert.pem:ro,z
   rustfs:
     image: rustfs/rustfs:1.0.2
     env_file:
@@ -861,6 +934,12 @@ services:
     env_file:
       - /opt/flotilla/secrets/lakehouse.env
     environment:
+      - SSL_CERT_FILE=/run/flotilla-trust/ca-bundle.crt
+      - SSL_CERT_DIR=/run/flotilla-trust/empty
+      - REQUESTS_CA_BUNDLE=/run/flotilla-trust/ca-bundle.crt
+      - CURL_CA_BUNDLE=/run/flotilla-trust/ca-bundle.crt
+      - NODE_OPTIONS=--use-openssl-ca
+      - JAVA_TOOL_OPTIONS=-Djavax.net.ssl.trustStore=/run/flotilla-trust/cacerts
       - JUPYTER_ENABLE_LAB=yes
       - PYSPARK_PYTHON=python3
       - PYSPARK_DRIVER_PYTHON=python3
@@ -869,6 +948,8 @@ services:
       - --ServerApp.trust_xheaders=True
       - --ServerApp.allow_remote_access=True
     volumes:
+      - /opt/flotilla/config/security-trust:/run/flotilla-trust:ro,z
+      - /opt/flotilla/config/security-trust/ca-bundle.crt:/opt/conda/lib/python3.11/site-packages/certifi/cacert.pem:ro,z
       - /opt/flotilla/data/jupyterlab:/home/jovyan/work:Z
       - /opt/flotilla/data/spark-ivy:/home/jovyan/.ivy2:Z
       - /opt/flotilla/config/lakehouse/spark-defaults.conf:/usr/local/spark/conf/spark-defaults.conf:ro,z

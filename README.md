@@ -43,6 +43,12 @@ sudo chcon -t device_t /dev/dma_heap
 sudo setenforce 1
 ```
 
+## Security maintenance
+
+See [Security maintenance](docs/security-maintenance.md) for PHP settings,
+container inventory, TLS checks, and refreshing the managed CA snapshots used
+by Compose. Keep live audit reports and configuration backups private.
+
 ## Services
 
 Some special manual actions are currently are necessary to get a handful of
